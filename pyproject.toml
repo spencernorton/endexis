@@ -10,10 +10,11 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
 authors = [{name = "Endexis Contributors"}]
-dependencies = []
+dependencies = ["pydantic>=2.0"]
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
+dev = ["pytest>=8.0"]
 
 [project.scripts]
 endexis = "discern_intelligence.cli:main"
