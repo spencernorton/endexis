@@ -1,0 +1,58 @@
+{
+  "official_source": "Oracle Health Multi-Tenant Domains (Doc ID G11840-01) + V500 DA_* Metadata",
+  "environments": [
+    {
+      "id": "communityworks",
+      "name": "CommunityWorks",
+      "tenancy_model": "Multi-Tenant Shared Millennium Domain (parent domain shared across community & critical-access hospitals)",
+      "target_care_settings": "Community hospitals, Critical Access Hospitals (CAHs), rural health clinics, acute inpatient, ED (FirstNet), surgery (SurgiNet)",
+      "da2_domain_prefixes": [
+        "CWC Encounter",
+        "CWC Person",
+        "CWF GS Revenue",
+        "CWF GS Adjustments",
+        "CWF GS Payments",
+        "CWF GS GL"
+      ],
+      "custom_ccl_access": "Restricted / Prohibited for tenants (shared RDBMS governance prevents tenant-authored CCL scripts from degrading peer hospitals)",
+      "primary_authoring_surface": "Discern Analytics 2.0 (DA2) Domain Query Builder + BIRT 4.4.2 Designer (.rptdesign XML)",
+      "cross_domain_join_strategy": "Multi-dataset BIRT Join Data Set on Enc Id (ENCNTR_ID) or FIN (Enc Encounter Number)",
+      "data_isolation_mechanism": "LOGICAL_DOMAIN_ID + ORGANIZATION_ID (DA_DOCUMENT_ORG_RELTN) + OWNER_GROUP_CD"
+    },
+    {
+      "id": "continuum",
+      "name": "Continuum",
+      "tenancy_model": "Multi-Tenant Shared Millennium Domain (parent domain shared across post-acute, rehab, and behavioral health organizations)",
+      "target_care_settings": "Inpatient Rehabilitation Facilities (IRF), Long-Term Care (LTC), Skilled Nursing, Outpatient Rehab (PT/OT/SLP), Behavioral Health",
+      "da2_domain_prefixes": [
+        "CWC Encounter",
+        "CWC Person",
+        "CWF GS Revenue",
+        "CWF GS Adjustments",
+        "CWF GS Payments",
+        "CWF GS GL"
+      ],
+      "custom_ccl_access": "Restricted / Prohibited for tenants (same multi-tenant shared-domain governance as CommunityWorks; standard reports use CWC/CWF DA2 domains)",
+      "primary_authoring_surface": "Discern Analytics 2.0 (DA2) Domain Query Builder + BIRT 4.4.2 Designer (.rptdesign XML)",
+      "cross_domain_join_strategy": "Multi-dataset BIRT Join Data Set on Enc Id / FIN; therapy minutes & assessments pulled via Clinical Events (CE) + Charges (Chg)",
+      "data_isolation_mechanism": "LOGICAL_DOMAIN_ID + ORGANIZATION_ID (DA_DOCUMENT_ORG_RELTN) + OWNER_GROUP_CD",
+      "clinical_workflow_distinctions": "Long length-of-stay census (Enc Admit Dt Tm <= cutoff AND Enc Disch Dt Tm IS NULL), therapy treatment minutes & CPT charges, FIM/CARE/IRF-PAI functional scores in CLINICAL_EVENT, recurring outpatient therapy series (SCH_APPT / SCH_EVENT)"
+    },
+    {
+      "id": "standalone_rho",
+      "name": "Standalone / Remote Hosted (RHO) / Dedicated Single-Tenant",
+      "tenancy_model": "Single-Tenant Dedicated Millennium Domain (1 health system per Millennium instance)",
+      "target_care_settings": "Large IDNs, academic medical centers, multi-hospital enterprise health systems",
+      "da2_domain_prefixes": [
+        "Standard Cerner Domains",
+        "Custom Extended DA_DOMAIN (EXTENDED_IND=1)",
+        "JDBC / Custom SQL Domains",
+        "CCL-backed ODA Datasets"
+      ],
+      "custom_ccl_access": "Full DVDev / Discern Explorer access (CREATE PROGRAM, custom .prg scripts, custom record structures, direct uar_get_code_* calls)",
+      "primary_authoring_surface": "CCL (.prg) + Discern Explorer + DA2 Custom Domains + BIRT with com.cerner.discern.connectivity.oda + Direct Oracle RDBMS / HealtheIntent ODS v1 feeds",
+      "cross_domain_join_strategy": "Direct SQL/CCL joins across V500 tables in a single query or custom DA_BUS_VIEW / DA_TABLE_RELTN extension",
+      "data_isolation_mechanism": "Dedicated V500 database instance; optional internal logical domains for M&A affiliates"
+    }
+  ]
+}

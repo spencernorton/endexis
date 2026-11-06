@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.4.2.v201410272105 Build &lt;4.4.2.v20150217-1805&gt;</property>
+    <text-property name="title">Active Inpatient Encounter Census (V1 Direct Upload)</text-property>
+    <list-property name="userProperties">
+        <structure>
+            <property name="name">uuid</property>
+            <property name="type">string</property>
+            <property name="default">5ad492c4-efc3-5e06-b07c-d913ea3364ed</property>
+        </structure>
+    </list-property>
+    <data-sources>
+        <oda-data-source extensionID="com.cerner.discern.connectivity.oda" name="Metadata Data Source" id="10">
+            <text-property name="displayName">Saved Query: Active Inpatient Encounter Census (V1 Direct Upload)_Query</text-property>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="com.cerner.discern.connectivity.oda.dataSet" name="Active Inpatient Encounter Census (V1 Direct Upload)_Query" id="11">
+            <list-property name="userProperties">
+                <structure>
+                    <property name="name">com.cerner.discern.da2.display.names.set</property>
+                    <property name="type">integer</property>
+                    <property name="default">0</property>
+                </structure>
+            </list-property>
+            <property name="com.cerner.discern.da2.display.names.set">1</property>
+            <property name="rowFetchLimit">0</property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Enc Admit Dt Tm</property>
+                    <property name="nativeName">Enc Admit Dt Tm</property>
+                    <property name="dataType">date</property>
+                    <property name="nativeDataType">91</property>
+                    <property name="position">1</property>
+                    <property name="isInput">true</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">Enc Id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Enc Encounter Number</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Person Full Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Person MRN</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Enc Loc Facility</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Enc Prsnl Reltn Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">Person Abs Birth Dt/Tm</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">Enc Active Ind</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">Enc Loc Nurse Unit</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">Enc Prsnl Reltn Type</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">Enc Loc Room</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">12</property>
+                        <property name="name">Prsnl Name First</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">13</property>
+                        <property name="name">Enc Loc Bed</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">Prsnl Position</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">Enc Type</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">16</property>
+                        <property name="name">Enc Status</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <method name="beforeOpen"><![CDATA[try { reportContext.setGlobalVariable("da2RowMap", {}); } catch (e) {}]]></method>
+            <method name="onFetch"><![CDATA[try { var m = reportContext.getGlobalVariable("da2RowMap") || {}; var k = row["Enc Id"]; if (k != null) { m[k] = (m[k] || 0) + 1; } } catch (e) {} return true;]]></method>
+            <property name="dataSource">Metadata Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">5ef4381c-6344-43c4-81b5-2c18cd6bcb70</property>
+                    <property name="nativeName">5ef4381c-6344-43c4-81b5-2c18cd6bcb70</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">7d8a7a80-6cf4-582a-9b97-d44e52fe18fe</property>
+                    <property name="nativeName">7d8a7a80-6cf4-582a-9b97-d44e52fe18fe</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">7f978d94-09bc-5317-8258-95b1d8a61b2b</property>
+                    <property name="nativeName">7f978d94-09bc-5317-8258-95b1d8a61b2b</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">3f2243f7-ae86-5244-afe9-3c8a0ac91db5</property>
+                    <property name="nativeName">3f2243f7-ae86-5244-afe9-3c8a0ac91db5</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">b09f6eab-aa80-4110-a4af-3dcbbd00384b</property>
+                    <property name="nativeName">b09f6eab-aa80-4110-a4af-3dcbbd00384b</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">dd429b62-758e-5209-a755-0e6a078e47ee</property>
+                    <property name="nativeName">dd429b62-758e-5209-a755-0e6a078e47ee</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">30683aa3-42b5-42f6-b7ee-fffff887c0fc</property>
+                    <property name="nativeName">30683aa3-42b5-42f6-b7ee-fffff887c0fc</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">4423ecb5-f6ed-563b-b199-ae6c3b3792c6</property>
+                    <property name="nativeName">4423ecb5-f6ed-563b-b199-ae6c3b3792c6</property>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">10327ece-26b5-5b66-b7c2-15965c42fd6a</property>
+                    <property name="nativeName">10327ece-26b5-5b66-b7c2-15965c42fd6a</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">3530de8c-64cc-5a67-ad5f-d80cd1baaeed</property>
+                    <property name="nativeName">3530de8c-64cc-5a67-ad5f-d80cd1baaeed</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">e72b9bcd-77e5-5dd4-a40a-b198f61efe83</property>
+                    <property name="nativeName">e72b9bcd-77e5-5dd4-a40a-b198f61efe83</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">12</property>
+                    <property name="name">4756029f-17b8-5208-9ad0-d835013ff130</property>
+                    <property name="nativeName">4756029f-17b8-5208-9ad0-d835013ff130</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">13</property>
+                    <property name="name">3eb0ad62-1187-5f88-9f33-72da4eb86bf3</property>
+                    <property name="nativeName">3eb0ad62-1187-5f88-9f33-72da4eb86bf3</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">14</property>
+                    <property name="name">ff0658fc-b191-5d78-863d-fbbdf6bb61aa</property>
+                    <property name="nativeName">ff0658fc-b191-5d78-863d-fbbdf6bb61aa</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">15</property>
+                    <property name="name">fb2d9c2b-409a-58c1-b747-7c3abe327bd9</property>
+                    <property name="nativeName">fb2d9c2b-409a-58c1-b747-7c3abe327bd9</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">16</property>
+                    <property name="name">9737a234-d145-59bf-bd15-603a7f5ad050</property>
+                    <property name="nativeName">9737a234-d145-59bf-bd15-603a7f5ad050</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[351297e4-97af-5fb7-8629-a14725cc84b6]]></xml-property>
+            <list-property name="privateDriverProperties">
+                <ex-property>
+                    <name>alwaysPrompt</name>
+                    <value>no</value>
+                </ex-property>
+                <ex-property>
+                    <name>defaultRuntimePrompts</name>
+                    <value>&lt;prompts&gt;&lt;qualification hidden=&quot;false&quot; prompt-mode=&quot;always&quot; runtimePromptName=&quot;Enc Admit Dt Tm&quot; uuid=&quot;12b2153b-cbad-587e-b93e-3c74df1c7803&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;lt;qualification&amp;gt;&amp;lt;filter joinType=&amp;quot;0&amp;quot; mode=&amp;quot;2&amp;quot; useIndex=&amp;quot;1&amp;quot;&amp;gt;&amp;lt;element name=&amp;quot;Enc Admit Dt Tm&amp;quot; type=&amp;quot;2&amp;quot; uuid=&amp;quot;12b2153b-cbad-587e-b93e-3c74df1c7803&amp;quot;/&amp;gt;&amp;lt;values type=&amp;quot;LIST&amp;quot; xCount=&amp;quot;1&amp;quot;&amp;gt;&amp;lt;value cdfmeaning=&amp;quot;&amp;quot; count=&amp;quot;7&amp;quot; display=&amp;quot;Last 7 Days&amp;quot; forward=&amp;quot;false&amp;quot; period=&amp;quot;2&amp;quot;/&amp;gt;&amp;lt;/values&amp;gt;&amp;lt;/filter&amp;gt;&amp;lt;/qualification&amp;gt;&lt;/qualification&gt;&lt;/prompts&gt;</value>
+                </ex-property>
+            </list-property>
+            <property name="_DATASET_NAME_">Active Inpatient Encounter Census (V1 Direct Upload)_Query</property>
+            <property name="_ENABLE_DATASET_CACHE_">true</property>
+            <property name="_COPY_RESULT_SET_">true</property>
+        </oda-data-set>
+    </data-sets>
+    <page-setup>
+        <simple-master-page name="Master Page" id="6">
+            <property name="type">us-legal</property>
+            <property name="orientation">landscape</property>
+            <property name="height">11in</property>
+            <property name="width">14in</property>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <table id="92">
+            <property name="dataSet">Active Inpatient Encounter Census (V1 Direct Upload)_Query</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Enc Id</property>
+                    <text-property name="displayName">Enc Id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Id"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Encounter Number</property>
+                    <text-property name="displayName">Enc Encounter Number</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Encounter Number"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Person Full Name</property>
+                    <text-property name="displayName">Person Full Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Person Full Name"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Person MRN</property>
+                    <text-property name="displayName">Person MRN</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Person MRN"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Facility</property>
+                    <text-property name="displayName">Enc Loc Facility</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Facility"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Prsnl Reltn Name</property>
+                    <text-property name="displayName">Enc Prsnl Reltn Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Prsnl Reltn Name"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Person Abs Birth Dt/Tm</property>
+                    <text-property name="displayName">Person Abs Birth Dt/Tm</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Person Abs Birth Dt/Tm"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Active Ind</property>
+                    <text-property name="displayName">Enc Active Ind</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Active Ind"]</expression>
+                    <property name="dataType">integer</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Nurse Unit</property>
+                    <text-property name="displayName">Enc Loc Nurse Unit</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Nurse Unit"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Prsnl Reltn Type</property>
+                    <text-property name="displayName">Enc Prsnl Reltn Type</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Prsnl Reltn Type"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Room</property>
+                    <text-property name="displayName">Enc Loc Room</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Room"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Prsnl Name First</property>
+                    <text-property name="displayName">Prsnl Name First</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Prsnl Name First"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Bed</property>
+                    <text-property name="displayName">Enc Loc Bed</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Bed"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Prsnl Position</property>
+                    <text-property name="displayName">Prsnl Position</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Prsnl Position"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Type</property>
+                    <text-property name="displayName">Enc Type</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Type"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Status</property>
+                    <text-property name="displayName">Enc Status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Status"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <column id="12"/>
+            <column id="17"/>
+            <column id="22"/>
+            <column id="27"/>
+            <column id="32"/>
+            <column id="37"/>
+            <column id="42"/>
+            <column id="47"/>
+            <column id="52"/>
+            <column id="57"/>
+            <column id="62"/>
+            <column id="67"/>
+            <column id="72"/>
+            <column id="77"/>
+            <column id="82"/>
+            <column id="87"/>
+            <header>
+                <row id="93">
+                    <cell id="13">
+                        <label id="14">
+                            <text-property name="text">Enc Id</text-property>
+                        </label>
+                    </cell>
+                    <cell id="18">
+                        <label id="19">
+                            <text-property name="text">Enc Encounter Number</text-property>
+                        </label>
+                    </cell>
+                    <cell id="23">
+                        <label id="24">
+                            <text-property name="text">Person Full Name</text-property>
+                        </label>
+                    </cell>
+                    <cell id="28">
+                        <label id="29">
+                            <text-property name="text">Person MRN</text-property>
+                        </label>
+                    </cell>
+                    <cell id="33">
+                        <label id="34">
+                            <text-property name="text">Enc Loc Facility</text-property>
+                        </label>
+                    </cell>
+                    <cell id="38">
+                        <label id="39">
+                            <text-property name="text">Enc Prsnl Reltn Name</text-property>
+                        </label>
+                    </cell>
+                    <cell id="43">
+                        <label id="44">
+                            <text-property name="text">Person Abs Birth Dt/Tm</text-property>
+                        </label>
+                    </cell>
+                    <cell id="48">
+                        <label id="49">
+                            <text-property name="text">Enc Active Ind</text-property>
+                        </label>
+                    </cell>
+                    <cell id="53">
+                        <label id="54">
+                            <text-property name="text">Enc Loc Nurse Unit</text-property>
+                        </label>
+                    </cell>
+                    <cell id="58">
+                        <label id="59">
+                            <text-property name="text">Enc Prsnl Reltn Type</text-property>
+                        </label>
+                    </cell>
+                    <cell id="63">
+                        <label id="64">
+                            <text-property name="text">Enc Loc Room</text-property>
+                        </label>
+                    </cell>
+                    <cell id="68">
+                        <label id="69">
+                            <text-property name="text">Prsnl Name First</text-property>
+                        </label>
+                    </cell>
+                    <cell id="73">
+                        <label id="74">
+                            <text-property name="text">Enc Loc Bed</text-property>
+                        </label>
+                    </cell>
+                    <cell id="78">
+                        <label id="79">
+                            <text-property name="text">Prsnl Position</text-property>
+                        </label>
+                    </cell>
+                    <cell id="83">
+                        <label id="84">
+                            <text-property name="text">Enc Type</text-property>
+                        </label>
+                    </cell>
+                    <cell id="88">
+                        <label id="89">
+                            <text-property name="text">Enc Status</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="94">
+                    <cell id="15">
+                        <data id="16">
+                            <property name="resultSetColumn">Enc Id</property>
+                        </data>
+                    </cell>
+                    <cell id="20">
+                        <data id="21">
+                            <property name="resultSetColumn">Enc Encounter Number</property>
+                        </data>
+                    </cell>
+                    <cell id="25">
+                        <data id="26">
+                            <property name="resultSetColumn">Person Full Name</property>
+                        </data>
+                    </cell>
+                    <cell id="30">
+                        <data id="31">
+                            <property name="resultSetColumn">Person MRN</property>
+                        </data>
+                    </cell>
+                    <cell id="35">
+                        <data id="36">
+                            <property name="resultSetColumn">Enc Loc Facility</property>
+                        </data>
+                    </cell>
+                    <cell id="40">
+                        <data id="41">
+                            <property name="resultSetColumn">Enc Prsnl Reltn Name</property>
+                        </data>
+                    </cell>
+                    <cell id="45">
+                        <data id="46">
+                            <property name="resultSetColumn">Person Abs Birth Dt/Tm</property>
+                        </data>
+                    </cell>
+                    <cell id="50">
+                        <data id="51">
+                            <property name="resultSetColumn">Enc Active Ind</property>
+                        </data>
+                    </cell>
+                    <cell id="55">
+                        <data id="56">
+                            <property name="resultSetColumn">Enc Loc Nurse Unit</property>
+                        </data>
+                    </cell>
+                    <cell id="60">
+                        <data id="61">
+                            <property name="resultSetColumn">Enc Prsnl Reltn Type</property>
+                        </data>
+                    </cell>
+                    <cell id="65">
+                        <data id="66">
+                            <property name="resultSetColumn">Enc Loc Room</property>
+                        </data>
+                    </cell>
+                    <cell id="70">
+                        <data id="71">
+                            <property name="resultSetColumn">Prsnl Name First</property>
+                        </data>
+                    </cell>
+                    <cell id="75">
+                        <data id="76">
+                            <property name="resultSetColumn">Enc Loc Bed</property>
+                        </data>
+                    </cell>
+                    <cell id="80">
+                        <data id="81">
+                            <property name="resultSetColumn">Prsnl Position</property>
+                        </data>
+                    </cell>
+                    <cell id="85">
+                        <data id="86">
+                            <property name="resultSetColumn">Enc Type</property>
+                        </data>
+                    </cell>
+                    <cell id="90">
+                        <data id="91">
+                            <property name="resultSetColumn">Enc Status</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+        </table>
+    </body>
+</report>

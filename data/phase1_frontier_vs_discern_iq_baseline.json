@@ -1,0 +1,140 @@
+{
+  "phase1_baseline_comparison": {
+    "zero_shot_nt_fast": {
+      "model": "ge/nt-fast (zero-shot)",
+      "holdout_filter_values": {
+        "evaluated_count": 28,
+        "acc_at_1": 0.0,
+        "acc_at_3": 0.1071,
+        "code_value_exact_match_rate": 0.0
+      },
+      "holdout_queries": {
+        "evaluated_count": 4,
+        "mean_element_recall": 0.0,
+        "mean_element_f1": 0.0,
+        "cclquery_xml_pass_at_1": 0.0,
+        "ejs_v500_sql_pass_at_1": 0.0
+      },
+      "frozen_scenarios": {
+        "evaluated_count": 4,
+        "ccl_prg_pass_at_1": 0.0,
+        "rptdesign_xml_pass_at_1": 0.0
+      }
+    },
+    "retrieval_augmented_nt_fast": {
+      "model": "ge/nt-fast (catalog-RAG)",
+      "holdout_filter_values": {
+        "evaluated_count": 28,
+        "acc_at_1": 0.3929,
+        "acc_at_3": 0.5,
+        "code_value_exact_match_rate": 0.6429
+      },
+      "holdout_queries": {
+        "evaluated_count": 4,
+        "mean_element_recall": 0.0192,
+        "mean_element_f1": 0.0122,
+        "cclquery_xml_pass_at_1": 0.0,
+        "ejs_v500_sql_pass_at_1": 0.5
+      },
+      "frozen_scenarios": {
+        "evaluated_count": 4,
+        "ccl_prg_pass_at_1": 0.25,
+        "rptdesign_xml_pass_at_1": 0.0
+      }
+    },
+    "retrieval_augmented_nt_heavy": {
+      "model": "ge/nt-heavy (catalog-RAG)",
+      "holdout_filter_values": {
+        "evaluated_count": 28,
+        "acc_at_1": 0.4643,
+        "acc_at_3": 0.5,
+        "code_value_exact_match_rate": 0.6429
+      },
+      "holdout_queries": {
+        "evaluated_count": 4,
+        "mean_element_recall": 0.0,
+        "mean_element_f1": 0.0,
+        "cclquery_xml_pass_at_1": 0.0,
+        "ejs_v500_sql_pass_at_1": 0.5
+      },
+      "frozen_scenarios": {
+        "evaluated_count": 4,
+        "ccl_prg_pass_at_1": 0.0,
+        "rptdesign_xml_pass_at_1": 0.0
+      }
+    },
+    "discern_iq_v1_baseline_51110a1": {
+      "corpus_counts": {
+        "sft_train_v1": 3637,
+        "dpo_contrastive_v1": 40,
+        "eval_frozen_v1": 14,
+        "eval_holdout_filter_values_v1": 140,
+        "eval_holdout_queries_v1": 4
+      },
+      "zero_leakage_verification": {
+        "leaked_filter_value_prompts": 0,
+        "leaked_query_prompts": 0,
+        "zero_leakage_passed": true
+      },
+      "holdout_filter_value_routing": {
+        "total_holdout_values": 140,
+        "acc_at_1": 0.8929,
+        "acc_at_3": 1.0,
+        "code_value_exact_match_rate": 1.0
+      },
+      "canonical_and_holdout_verifiers": {
+        "cclquery_xml_verified_count": 4,
+        "cclquery_xml_pass_at_1": 1.0,
+        "ejs_v500_sql_verified_count": 5,
+        "ejs_v500_sql_pass_at_1": 1.0,
+        "rptdesign_xml_pass_at_1": 1.0,
+        "holdout_da2_generator_pass_at_1": 1.0,
+        "holdout_mean_element_recall": 1.0,
+        "holdout_mean_element_f1": 0.6573,
+        "dpo_preference_validity_rate": 1.0
+      }
+    },
+    "zero_shot_claude_sonnet": {
+      "model": "Claude Sonnet 4.6 (zero-shot)",
+      "holdout_filter_values": {
+        "evaluated_count": 28,
+        "acc_at_1": 0.0,
+        "acc_at_3": 0.0,
+        "code_value_exact_match_rate": 0.0
+      },
+      "holdout_queries": {
+        "evaluated_count": 4,
+        "mean_element_recall": 0.0755,
+        "mean_element_f1": 0.0566,
+        "cclquery_xml_pass_at_1": 0.0,
+        "ejs_v500_sql_pass_at_1": 1.0
+      },
+      "frozen_scenarios": {
+        "evaluated_count": 4,
+        "ccl_prg_pass_at_1": 0.0,
+        "rptdesign_xml_pass_at_1": 0.0
+      }
+    },
+    "retrieval_augmented_claude_sonnet": {
+      "model": "Claude Sonnet 4.6 (catalog-RAG)",
+      "holdout_filter_values": {
+        "evaluated_count": 28,
+        "acc_at_1": 0.8214,
+        "acc_at_3": 1.0,
+        "code_value_exact_match_rate": 0.9286
+      },
+      "holdout_queries": {
+        "evaluated_count": 4,
+        "mean_element_recall": 0.0817,
+        "mean_element_f1": 0.0467,
+        "cclquery_xml_pass_at_1": 0.0,
+        "ejs_v500_sql_pass_at_1": 1.0
+      },
+      "frozen_scenarios": {
+        "evaluated_count": 4,
+        "ccl_prg_pass_at_1": 0.0,
+        "rptdesign_xml_pass_at_1": 0.0
+      }
+    }
+  }
+}

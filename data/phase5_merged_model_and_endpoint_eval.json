@@ -1,0 +1,116 @@
+{
+  "phase5_live_neural_deployment_and_evaluation": {
+    "merged_model_manifest": {
+      "model_id": "endexis-qwen3-0.6b-dpo-merged",
+      "base_model": "Qwen/Qwen3-0.6B",
+      "merged_linear_projections": 196,
+      "total_safetensors_keys": 310,
+      "max_lora_delta_frobenius_norm": 8.3415,
+      "merged_model_dir": "endexis-qwen3-0.6b-dpo-merged",
+      "safetensors_size_mb": 1136.91,
+      "export_wall_time_seconds": 15.85
+    },
+    "apollo_endpoint_health": {
+      "status": "ok",
+      "service": "endexis-neural",
+      "model": "endexis-qwen3-0.6b-dpo-merged",
+      "vram_allocated_mb": 1145.01,
+      "gpu_watcher": {
+        "idx": 0,
+        "mem_used_mb": 3193,
+        "mem_free_mb": 13182,
+        "mem_total_mb": 16376,
+        "mem_pct": 19.5,
+        "compute_mem_mb": 1658,
+        "graphics_mem_mb": 942,
+        "util_gpu_pct": 0,
+        "util_mem_pct": 2,
+        "temp_c": 57,
+        "power_w": 39.2
+      },
+      "active_plex_transcodes": 0,
+      "transport": "local_http"
+    },
+    "holdout_production_queries_neural_best_of_4": {
+      "evaluated_count": 4,
+      "pass_at_1": 1.0,
+      "mean_latency_ms": 2352.61,
+      "queries": [
+        {
+          "query_id": "cwf_gs_adjustments_transaction_detail_extract",
+          "neural_endpoint_active": true,
+          "transport": "local_http",
+          "latency_ms": 2414.67,
+          "vram_allocated_mb": 1145.02,
+          "all_candidates_verified_count": 4,
+          "bundle_valid": true,
+          "ccl_valid": true
+        },
+        {
+          "query_id": "bed_board_resuscitation_status_all_inpatients",
+          "neural_endpoint_active": true,
+          "transport": "local_http",
+          "latency_ms": 2317.35,
+          "vram_allocated_mb": 1145.02,
+          "all_candidates_verified_count": 4,
+          "bundle_valid": true,
+          "ccl_valid": true
+        },
+        {
+          "query_id": "outpatient_scheduling_and_slot_utilization",
+          "neural_endpoint_active": true,
+          "transport": "local_http",
+          "latency_ms": 2340.28,
+          "vram_allocated_mb": 1145.02,
+          "all_candidates_verified_count": 4,
+          "bundle_valid": true,
+          "ccl_valid": true
+        },
+        {
+          "query_id": "encounter_charges_with_ndc_and_duplicate_charge_audit",
+          "neural_endpoint_active": true,
+          "transport": "local_http",
+          "latency_ms": 2338.12,
+          "vram_allocated_mb": 1145.02,
+          "all_candidates_verified_count": 4,
+          "bundle_valid": true,
+          "ccl_valid": true
+        }
+      ]
+    },
+    "frozen_scenarios_best_of_4_pass_at_1": 1.0,
+    "full_evaluation_suite": {
+      "corpus_counts": {
+        "sft_train_v1": 4451,
+        "dpo_contrastive_v1": 181,
+        "eval_frozen_v1": 14,
+        "eval_holdout_filter_values_v1": 140,
+        "eval_holdout_queries_v1": 4
+      },
+      "zero_leakage_verification": {
+        "leaked_filter_value_prompts": 0,
+        "leaked_query_prompts": 0,
+        "zero_leakage_passed": true
+      },
+      "holdout_filter_value_routing": {
+        "total_holdout_values": 140,
+        "unconditioned_acc_at_1": 0.8929,
+        "acc_at_1": 1.0,
+        "acc_at_3": 1.0,
+        "code_value_exact_match_rate": 1.0
+      },
+      "canonical_and_holdout_verifiers": {
+        "cclquery_xml_verified_count": 4,
+        "cclquery_xml_pass_at_1": 1.0,
+        "ejs_v500_sql_verified_count": 5,
+        "ejs_v500_sql_pass_at_1": 1.0,
+        "rptdesign_xml_pass_at_1": 1.0,
+        "holdout_da2_generator_pass_at_1": 1.0,
+        "holdout_mean_element_recall": 1.0,
+        "holdout_mean_element_f1": 1.0,
+        "dpo_preference_validity_rate": 1.0
+      }
+    },
+    "wall_time_seconds": 48.06
+  }
+}

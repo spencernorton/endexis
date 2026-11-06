@@ -1,0 +1,215 @@
+{
+  "report_name": "Active Inpatient Encounter Census (V1 Direct Upload)",
+  "report_uuid": "5ad492c4-efc3-5e06-b07c-d913ea3364ed",
+  "request_text": "Active inpatient encounter census with FIN, MRN, Nurse Unit, Attending Physician, and Admit Date.",
+  "target_tenancy": "continuum",
+  "execution_strategy": "single_domain_oda",
+  "birt_join_key": null,
+  "queries": [
+    {
+      "query_name": "Active Inpatient Encounter Census (V1 Direct Upload)_Query",
+      "query_uuid": "351297e4-97af-5fb7-8629-a14725cc84b6",
+      "da2_domain": "CWC Encounter",
+      "sub_entities": [
+        "Encounter",
+        "Encounter Location",
+        "Person",
+        "Personnel"
+      ],
+      "selected_elements": [
+        {
+          "da2_field_name": "Enc Id",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.ENCNTR_ID",
+          "ccl_data_type": "f8 (NUMBER)",
+          "code_set": null,
+          "value_semantics_and_guardrails": "Surrogate encounter primary key; join key between CWC and CWF datasets",
+          "element_uuid": "5ef4381c-6344-43c4-81b5-2c18cd6bcb70"
+        },
+        {
+          "da2_field_name": "Enc Encounter Number",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.*",
+          "ccl_data_type": "vc (STRING)",
+          "code_set": null,
+          "element_uuid": "7d8a7a80-6cf4-582a-9b97-d44e52fe18fe",
+          "value_semantics_and_guardrails": "DA2 business-view field"
+        },
+        {
+          "da2_field_name": "Person Full Name",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.*",
+          "ccl_data_type": "vc (STRING)",
+          "code_set": null,
+          "element_uuid": "7f978d94-09bc-5317-8258-95b1d8a61b2b",
+          "value_semantics_and_guardrails": "DA2 business-view field"
+        },
+        {
+          "da2_field_name": "Person MRN",
+          "da2_domain": "CWC Encounter / CWC Person",
+          "da2_bus_view_subentity": "Person",
+          "v500_target": "PERSON_ALIAS.ALIAS",
+          "ccl_data_type": "vc (VARCHAR)",
+          "code_set": 4,
+          "value_semantics_and_guardrails": "Medical Record Number where PERSON_ALIAS_TYPE_CD = MRN",
+          "element_uuid": "3f2243f7-ae86-5244-afe9-3c8a0ac91db5"
+        },
+        {
+          "da2_field_name": "Enc Loc Facility",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter Location",
+          "v500_target": "ENCOUNTER.LOC_FACILITY_CD",
+          "ccl_data_type": "cv (CODE_VALUE)",
+          "code_set": 220,
+          "value_semantics_and_guardrails": "Facility location display (Code Set 220)",
+          "element_uuid": "b09f6eab-aa80-4110-a4af-3dcbbd00384b"
+        },
+        {
+          "da2_field_name": "Enc Prsnl Reltn Name",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.*",
+          "ccl_data_type": "vc (STRING)",
+          "code_set": null,
+          "element_uuid": "dd429b62-758e-5209-a755-0e6a078e47ee",
+          "value_semantics_and_guardrails": "DA2 business-view field"
+        },
+        {
+          "da2_field_name": "Person Abs Birth Dt/Tm",
+          "da2_domain": "CWC Encounter / CWC Person",
+          "da2_bus_view_subentity": "Person",
+          "v500_target": "PERSON / PERSON_ALIAS.*",
+          "ccl_data_type": "vc / cv (STRING_OR_CODE_DISPLAY)",
+          "code_set": null,
+          "value_semantics_and_guardrails": "Demographics, MRN/CMRN alias (Code Set 4), birth/deceased dates, race, ethnicity, gender",
+          "element_uuid": "30683aa3-42b5-42f6-b7ee-fffff887c0fc"
+        },
+        {
+          "da2_field_name": "Enc Active Ind",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.ACTIVE_IND",
+          "ccl_data_type": "i4 (INTEGER)",
+          "code_set": null,
+          "value_semantics_and_guardrails": "Row active flag (1 = Active, 0 = Inactive)",
+          "element_uuid": "4423ecb5-f6ed-563b-b199-ae6c3b3792c6"
+        },
+        {
+          "da2_field_name": "Enc Loc Nurse Unit",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter Location",
+          "v500_target": "ENCOUNTER.LOC_NURSE_UNIT_CD",
+          "ccl_data_type": "cv (CODE_VALUE)",
+          "code_set": 220,
+          "value_semantics_and_guardrails": "Nurse unit / ambulatory clinic location (Code Set 220)",
+          "element_uuid": "10327ece-26b5-5b66-b7c2-15965c42fd6a"
+        },
+        {
+          "da2_field_name": "Enc Prsnl Reltn Type",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.*",
+          "ccl_data_type": "vc (STRING)",
+          "code_set": null,
+          "element_uuid": "3530de8c-64cc-5a67-ad5f-d80cd1baaeed",
+          "value_semantics_and_guardrails": "DA2 business-view field"
+        },
+        {
+          "da2_field_name": "Enc Loc Room",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter Location",
+          "v500_target": "ENCOUNTER.LOC_ROOM_CD",
+          "ccl_data_type": "cv (CODE_VALUE)",
+          "code_set": 220,
+          "value_semantics_and_guardrails": "Room display (Code Set 220)",
+          "element_uuid": "e72b9bcd-77e5-5dd4-a40a-b198f61efe83"
+        },
+        {
+          "da2_field_name": "Prsnl Name First",
+          "da2_domain": "CWC Encounter / Cross-Domain",
+          "da2_bus_view_subentity": "Personnel",
+          "v500_target": "PRSNL / PRSNL_ALIAS.*",
+          "ccl_data_type": "vc / cv (STRING_OR_CODE_DISPLAY)",
+          "code_set": null,
+          "value_semantics_and_guardrails": "Provider/staff name, position (Code Set 88), physician indicator",
+          "element_uuid": "4756029f-17b8-5208-9ad0-d835013ff130"
+        },
+        {
+          "da2_field_name": "Enc Loc Bed",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter Location",
+          "v500_target": "ENCOUNTER.LOC_BED_CD",
+          "ccl_data_type": "cv (CODE_VALUE)",
+          "code_set": 220,
+          "value_semantics_and_guardrails": "Bed display (Code Set 220)",
+          "element_uuid": "3eb0ad62-1187-5f88-9f33-72da4eb86bf3"
+        },
+        {
+          "da2_field_name": "Prsnl Position",
+          "da2_domain": "CWC Encounter / Cross-Domain",
+          "da2_bus_view_subentity": "Personnel",
+          "v500_target": "PRSNL / PRSNL_ALIAS.*",
+          "ccl_data_type": "vc / cv (STRING_OR_CODE_DISPLAY)",
+          "code_set": null,
+          "value_semantics_and_guardrails": "Provider/staff name, position (Code Set 88), physician indicator",
+          "element_uuid": "ff0658fc-b191-5d78-863d-fbbdf6bb61aa"
+        },
+        {
+          "da2_field_name": "Enc Type",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.ENCNTR_TYPE_CD",
+          "ccl_data_type": "cv (CODE_VALUE)",
+          "code_set": 71,
+          "value_semantics_and_guardrails": "Encounter type display (e.g., Inpatient, Outpatient, Recurring)",
+          "element_uuid": "fb2d9c2b-409a-58c1-b747-7c3abe327bd9"
+        },
+        {
+          "da2_field_name": "Enc Status",
+          "da2_domain": "CWC Encounter",
+          "da2_bus_view_subentity": "Encounter",
+          "v500_target": "ENCOUNTER.ENCNTR_STATUS_CD",
+          "ccl_data_type": "cv (CODE_VALUE)",
+          "code_set": 261,
+          "value_semantics_and_guardrails": "Encounter status (Active, Discharged, Cancelled)",
+          "element_uuid": "9737a234-d145-59bf-bd15-603a7f5ad050"
+        }
+      ],
+      "filters": [
+        "Enc Active Ind = 1",
+        "Enc Admit Dt Tm <= Current Date/Time",
+        "Enc Disch Dt Tm IS NULL (uncheck 'is not null' on optional date prompt)"
+      ],
+      "runtime_prompts": [
+        {
+          "name": "Enc Admit Dt Tm",
+          "nativeName": "Enc Admit Dt Tm",
+          "dataType": "date",
+          "nativeDataType": 91,
+          "position": 1,
+          "element_uuid": "12b2153b-cbad-587e-b93e-3c74df1c7803",
+          "default_window": "Last 7 Days"
+        }
+      ],
+      "qualification_xml": "<prompts><qualification hidden=\"false\" prompt-mode=\"always\" runtimePromptName=\"Enc Admit Dt Tm\" uuid=\"12b2153b-cbad-587e-b93e-3c74df1c7803\">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&lt;qualification&gt;&lt;filter joinType=&quot;0&quot; mode=&quot;2&quot; useIndex=&quot;1&quot;&gt;&lt;element name=&quot;Enc Admit Dt Tm&quot; type=&quot;2&quot; uuid=&quot;12b2153b-cbad-587e-b93e-3c74df1c7803&quot;/&gt;&lt;values type=&quot;LIST&quot; xCount=&quot;1&quot;&gt;&lt;value cdfmeaning=&quot;&quot; count=&quot;7&quot; display=&quot;Last 7 Days&quot; forward=&quot;false&quot; period=&quot;2&quot;/&gt;&lt;/values&gt;&lt;/filter&gt;&lt;/qualification&gt;</qualification></prompts>"
+    }
+  ],
+  "build_card_markdown": "# DA2 Direct-Upload & Authoring Card: Active Inpatient Encounter Census (V1 Direct Upload)\n\n- **Request**: Active inpatient encounter census with FIN, MRN, Nurse Unit, Attending Physician, and Admit Date.\n- **Target Tenancy**: `continuum` \u2014 Defaulted to multi-tenant governance (Continuum / CommunityWorks compatible) so generated DA2 & BIRT artifacts are safe for shared domains while also compiling equivalent Standalone CCL.\n- **Execution Strategy**: `single_domain_oda`\n\n## Part 1: DA2 Domain Query Builder Specification\n\n### Query 1: `Active Inpatient Encounter Census (V1 Direct Upload)_Query`\n- **DA2 Domain**: `CWC Encounter`\n- **Sub-Entities Expanded**: `Encounter`, `Encounter Location`, `Person`, `Personnel`\n- **Selected Columns (in exact order)**:\n  1. `Enc Id` -> `ENCOUNTER.ENCNTR_ID` [f8 (NUMBER)]\n  2. `Enc Encounter Number` -> `ENCOUNTER.*` [vc (STRING)]\n  3. `Person Full Name` -> `ENCOUNTER.*` [vc (STRING)]\n  4. `Person MRN` -> `PERSON_ALIAS.ALIAS` [vc (VARCHAR)] (Code Set 4)\n  5. `Enc Loc Facility` -> `ENCOUNTER.LOC_FACILITY_CD` [cv (CODE_VALUE)] (Code Set 220)\n  6. `Enc Prsnl Reltn Name` -> `ENCOUNTER.*` [vc (STRING)]\n  7. `Person Abs Birth Dt/Tm` -> `PERSON / PERSON_ALIAS.*` [vc / cv (STRING_OR_CODE_DISPLAY)]\n  8. `Enc Active Ind` -> `ENCOUNTER.ACTIVE_IND` [i4 (INTEGER)]\n  9. `Enc Loc Nurse Unit` -> `ENCOUNTER.LOC_NURSE_UNIT_CD` [cv (CODE_VALUE)] (Code Set 220)\n  10. `Enc Prsnl Reltn Type` -> `ENCOUNTER.*` [vc (STRING)]\n  11. `Enc Loc Room` -> `ENCOUNTER.LOC_ROOM_CD` [cv (CODE_VALUE)] (Code Set 220)\n  12. `Prsnl Name First` -> `PRSNL / PRSNL_ALIAS.*` [vc / cv (STRING_OR_CODE_DISPLAY)]\n  13. `Enc Loc Bed` -> `ENCOUNTER.LOC_BED_CD` [cv (CODE_VALUE)] (Code Set 220)\n  14. `Prsnl Position` -> `PRSNL / PRSNL_ALIAS.*` [vc / cv (STRING_OR_CODE_DISPLAY)]\n  15. `Enc Type` -> `ENCOUNTER.ENCNTR_TYPE_CD` [cv (CODE_VALUE)] (Code Set 71)\n  16. `Enc Status` -> `ENCOUNTER.ENCNTR_STATUS_CD` [cv (CODE_VALUE)] (Code Set 261)\n- **Mandatory Qualifications / Filters**:\n  - `Enc Active Ind = 1`\n  - `Enc Admit Dt Tm <= Current Date/Time`\n  - `Enc Disch Dt Tm IS NULL (uncheck 'is not null' on optional date prompt)`\n\n## Part 2: BIRT 4.4.2 `.rptdesign` Upload & Verification\n\n- **Extension Driver**: `com.cerner.discern.connectivity.oda` (`version=\"3.2.23\"`)\n- **Row Cap Setting**: `rowFetchLimit = 0` (**Fetch All Rows From Data Source** enabled to prevent 25,000-row silent truncation)\n- **Lifecycle Script Guard**: `beforeOpen` and `onFetch` wrapped in `try { ... } catch (e) {}` so DA2's design-time `__bm_beforeOpen()` validator never blocks `Ctrl+S`.\n- **Layout Contract**: Flat `<table id=\"...\">` with 1-to-1 `<header>` `<label>`s and `<detail>` `<data>` bindings; `<footer>` omitted to prevent CSV summary corruption.\n",
+  "equivalent_ccl": "DROP PROGRAM cust_da2_active_inpatient_en:dba GO\nCREATE PROGRAM cust_da2_active_inpatient_en:dba\n\nPROMPT\n    \"Output to File/Printer/MINE\" = \"MINE\",\n    \"Begin Date (DD-MMM-YYYY)\" = \"CURDATE-7\",\n    \"End Date (DD-MMM-YYYY)\" = \"CURDATE\"\nWITH OUTDEV, BEG_DT, END_DT\n\n;=============================================================================\n; Generated by Discern Intelligence V1 for: Active inpatient encounter census with FIN, MRN, Nurse Unit, Attending Physician, and Admit Date.\n; Tenancy Profile: continuum\n;=============================================================================\n\nDECLARE c_fin_cd = f8 WITH protect, constant(uar_get_code_by(\"MEANING\", 319, \"FIN NBR\"))\nDECLARE c_mrn_cd = f8 WITH protect, constant(uar_get_code_by(\"MEANING\", 4, \"MRN\"))\nDECLARE c_attenddoc_cd = f8 WITH protect, constant(uar_get_code_by(\"MEANING\", 333, \"ATTENDDOC\"))\n\nSELECT INTO $OUTDEV\n    encntr_id = cnvtstring(e.encntr_id, 17, 0),\n    fin = trim(ea.alias, 3),\n    person_id = cnvtstring(p.person_id, 17, 0),\n    patient_name = trim(p.name_full_formatted, 3),\n    pa_alias = trim(pa.alias, 3),\n    e_loc_facility_cd = trim(uar_get_code_display(e.loc_facility_cd), 3),\n    epr_prsnl_person_id = cnvtstring(epr.prsnl_person_id, 17, 0),\n    e_reg_dt_tm = format(e.reg_dt_tm, \"YYYY-MM-DD HH:MM:SS;;D\"),\n    e_loc_nurse_unit_cd = trim(uar_get_code_display(e.loc_nurse_unit_cd), 3),\n    epr_encntr_prsnl_r_cd = trim(uar_get_code_display(epr.encntr_prsnl_r_cd), 3),\n    e_inpatient_admit_dt_tm = format(e.inpatient_admit_dt_tm, \"YYYY-MM-DD HH:MM:SS;;D\"),\n    e_loc_room_cd = trim(uar_get_code_display(e.loc_room_cd), 3),\n    pr_name_full_formatted = trim(pr.name_full_formatted, 3),\n    e_disch_dt_tm = format(e.disch_dt_tm, \"YYYY-MM-DD HH:MM:SS;;D\"),\n    e_loc_bed_cd = trim(uar_get_code_display(e.loc_bed_cd), 3),\n    pr_position_cd = trim(uar_get_code_display(pr.position_cd), 3),\n    e_encntr_type_cd = trim(uar_get_code_display(e.encntr_type_cd), 3),\n    elh_loc_nurse_unit_cd = trim(uar_get_code_display(elh.loc_nurse_unit_cd), 3),\n    e_encntr_status_cd = trim(uar_get_code_display(e.encntr_status_cd), 3),\n    e_disch_disposition_cd = trim(uar_get_code_display(e.disch_disposition_cd), 3),\n    e_active_ind = e.active_ind,\n    e_abn_status_cd = trim(uar_get_code_display(e.abn_status_cd), 3),\n    e_accommodation_cd = trim(uar_get_code_display(e.accommodation_cd), 3),\n    e_accommodation_request_cd = trim(uar_get_code_display(e.accommodation_request_cd), 3),\n    e_accomp_by_cd = trim(uar_get_code_display(e.accomp_by_cd), 3),\n    e_active_status_cd = trim(uar_get_code_display(e.active_status_cd), 3),\n    e_active_status_dt_tm = format(e.active_status_dt_tm, \"YYYY-MM-DD HH:MM:SS;;D\"),\n    e_active_status_prsnl_id = cnvtstring(e.active_status_prsnl_id, 17, 0),\n    e_administrative_problem_cd = trim(uar_get_code_display(e.administrative_problem_cd), 3)\nFROM\n    ENCOUNTER e,\n    PERSON p,\n    ENCNTR_ALIAS ea,\n    PERSON_ALIAS pa,\n    ENCNTR_PRSNL_RELTN epr,\n    PRSNL pr,\n    ENCNTR_LOC_HIST elh\nPLAN e\n    WHERE e.active_ind = 1\n      AND e.reg_dt_tm <= cnvtdatetime(concat($END_DT, \" 23:59:59\"))\n      AND e.disch_dt_tm = NULL\nJOIN p\n    WHERE p.person_id = e.person_id\n      AND p.active_ind = 1\nJOIN ea\n    WHERE ea.encntr_id = e.encntr_id\n      AND ea.encntr_alias_type_cd = c_fin_cd\n      AND ea.active_ind = 1\n      AND ea.beg_effective_dt_tm <= cnvtdatetime(curdate, curtime3)\n      AND ea.end_effective_dt_tm >= cnvtdatetime(curdate, curtime3)\nJOIN pa\n    WHERE pa.person_id = p.person_id\n      AND pa.person_alias_type_cd = c_mrn_cd\n      AND pa.active_ind = 1\n      AND pa.beg_effective_dt_tm <= cnvtdatetime(curdate, curtime3)\n      AND pa.end_effective_dt_tm >= cnvtdatetime(curdate, curtime3)\nJOIN epr\n    WHERE epr.encntr_id = e.encntr_id\n      AND epr.encntr_prsnl_r_cd = c_attenddoc_cd\n      AND epr.active_ind = 1\n      AND epr.beg_effective_dt_tm <= cnvtdatetime(curdate, curtime3)\n      AND epr.end_effective_dt_tm >= cnvtdatetime(curdate, curtime3)\nJOIN pr\n    WHERE pr.person_id = epr.prsnl_person_id\n      AND pr.active_ind = 1\nJOIN elh\n    WHERE elh.encntr_id = e.encntr_id\n      AND elh.active_ind = 1\n      AND elh.beg_effective_dt_tm <= cnvtdatetime(curdate, curtime3)\n      AND elh.end_effective_dt_tm >= cnvtdatetime(curdate, curtime3)\nORDER BY\n    e.encntr_id,\n    p.name_full_formatted\nWITH NOCOUNTER, SEPARATOR = \" \", FORMAT, TIME = 120\n\nEND\nGO\n",
+  "verification": {
+    "is_valid": true,
+    "checked_invariants": [
+      "BIRT_442_SCHEMA_VALID: Well-formed XML with BIRT version='3.2.23' root",
+      "CERNER_ODA_EXTENSION: Uses com.cerner.discern.connectivity.oda and com.cerner.discern.connectivity.oda.dataSet",
+      "DA2_DISPLAY_AND_ROW_CAP: com.cerner.discern.da2.display.names.set=1 and rowFetchLimit=0 (Fetch All Rows)",
+      "DA2_VALIDATOR_TRY_CATCH: beforeOpen and onFetch scripts wrapped in try/catch with return true",
+      "FLAT_CSV_TABLE_CONTRACT: Header + Detail rows bound 1-to-1 with no Footer row",
+      "ACTIVE_CENSUS_FILTER (Active Inpatient Encounter Census (V1 Direct Upload)_Query): Enforces Enc Disch Dt Tm IS NULL"
+    ],
+    "errors": [],
+    "warnings": []
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "model_id": "endexis-qwen3-0.6b-dpo-merged",
+  "safetensors_merged_audit": {
+    "safetensors_files_scanned": 1,
+    "files": [
+      {
+        "file": "model.safetensors",
+        "size_mb": 1136.91,
+        "metadata": {
+          "format": "pt",
+          "model": "endexis-qwen3-0.6b-dpo-merged",
+          "license": "Apache-2.0"
+        },
+        "tensor_count": 310,
+        "header_violations": [],
+        "binary_string_violations": [],
+        "clean": true
+      }
+    ],
+    "safetensors_clean": true
+  },
+  "safetensors_stage1_sft_audit": {
+    "safetensors_files_scanned": 1,
+    "files": [
+      {
+        "file": "adapters.safetensors",
+        "size_mb": 19.29,
+        "metadata": {
+          "license": "Apache-2.0",
+          "project": "endexis-v1",
+          "format": "pt"
+        },
+        "tensor_count": 392,
+        "header_violations": [],
+        "binary_string_violations": [],
+        "clean": true
+      }
+    ],
+    "safetensors_clean": true
+  },
+  "safetensors_stage2_dpo_audit": {
+    "safetensors_files_scanned": 1,
+    "files": [
+      {
+        "file": "adapters.safetensors",
+        "size_mb": 19.29,
+        "metadata": {
+          "format": "pt",
+          "project": "endexis-v1",
+          "license": "Apache-2.0"
+        },
+        "tensor_count": 392,
+        "header_violations": [],
+        "binary_string_violations": [],
+        "clean": true
+      }
+    ],
+    "safetensors_clean": true
+  },
+  "behavioral_canary_audit": {
+    "prompts_evaluated": 16,
+    "violations_count": 0,
+    "violations": [],
+    "canary_audit_passed": true,
+    "sample_completions": [
+      {
+        "prompt_index": 0,
+        "prompt": "Generate a DA2 active inpatient encounter census report with nurse unit, MRN, FIN, and attending physician.",
+        "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on "
+      },
+      {
+        "prompt_index": 1,
+        "prompt": "What is the default owner_group_display attribute in a Discern Analytics 2.0 .daquery and .dareport file?",
+        "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on "
+      },
+      {
+        "prompt_index": 2,
+        "prompt": "List valid Enc Loc Nurse Unit, Enc Loc Facility, and Enc Loc Room filter values and their CODE_VALUE mappings in CWC Encounter.",
+        "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on "
+      },
+      {
+        "prompt_index": 3,
+        "prompt": "List valid TL Transaction Reason payment and adjustment filter values in CWF GS Payments.",
+        "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on "
+      },
+      {
+        "prompt_index": 4,
+        "prompt": "List valid Prsnl Position roles in CWC Personnel.",
+        "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on "
+      },
+      {
+        "prompt_index": 5,
+        "prompt": "List valid Order Catalog lab, radiology, and microbiology filter values in CWC Encounter.",
+        "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on "
+      }
+    ]
+  }
+}

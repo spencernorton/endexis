@@ -1,0 +1,10 @@
+{
+  "model_id": "endexis-qwen3-0.6b-dpo-merged",
+  "base_model": "Qwen/Qwen3-0.6B",
+  "merged_linear_projections": 196,
+  "total_safetensors_keys": 310,
+  "max_lora_delta_frobenius_norm": 8.3925,
+  "merged_model_dir": "endexis-qwen3-0.6b-dpo-merged",
+  "safetensors_size_mb": 1136.91,
+  "export_wall_time_seconds": 1.44
+}

@@ -1,0 +1,753 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.4.2.v201410272105 Build &lt;4.4.2.v20150217-1805&gt;</property>
+    <text-property name="title">Joint Clinical Events and Medication Orders by Encounter (V1 Direct Upload)</text-property>
+    <list-property name="userProperties">
+        <structure>
+            <property name="name">uuid</property>
+            <property name="type">string</property>
+            <property name="default">4941cfed-3c7b-54bf-b408-8c643329f9aa</property>
+        </structure>
+    </list-property>
+    <data-sources>
+        <oda-data-source extensionID="com.cerner.discern.connectivity.oda" name="Metadata Data Source" id="10">
+            <text-property name="displayName">Saved Query: Joint Clinical Events and Medication Orders by Encounter (V1 Direct Upload)_Query</text-property>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="com.cerner.discern.connectivity.oda.dataSet" name="Joint Clinical Events and Medication Orders by Encounter (V1 Direct Upload)_Query" id="11">
+            <list-property name="userProperties">
+                <structure>
+                    <property name="name">com.cerner.discern.da2.display.names.set</property>
+                    <property name="type">integer</property>
+                    <property name="default">0</property>
+                </structure>
+            </list-property>
+            <property name="com.cerner.discern.da2.display.names.set">1</property>
+            <property name="rowFetchLimit">0</property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Ord Orig Order Dt/Tm</property>
+                    <property name="nativeName">Ord Orig Order Dt/Tm</property>
+                    <property name="dataType">date</property>
+                    <property name="nativeDataType">91</property>
+                    <property name="position">1</property>
+                    <property name="isInput">true</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">Enc Id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Enc Encounter Number</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Person Full Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Enc Loc Facility</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">CE Event Id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Ord Order Id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">Enc Active Ind</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">Enc Loc Nurse Unit</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">CE Event</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">Ord Mnemonic</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">Enc Loc Room</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">12</property>
+                        <property name="name">CE Result Value</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">13</property>
+                        <property name="name">Ord Status</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">Enc Loc Bed</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">CE Result Units</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">16</property>
+                        <property name="name">Ord Detail Display</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">17</property>
+                        <property name="name">Enc Type</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">18</property>
+                        <property name="name">CE Result Status</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">19</property>
+                        <property name="name">Ord Orig Order Dt/Tm</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">20</property>
+                        <property name="name">Enc Status</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">21</property>
+                        <property name="name">CE End Dt/Tm</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">22</property>
+                        <property name="name">CE Performed Prsnl Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">23</property>
+                        <property name="name">CE Valid Until Dt Tm</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <method name="beforeOpen"><![CDATA[try { reportContext.setGlobalVariable("da2RowMap", {}); } catch (e) {}]]></method>
+            <method name="onFetch"><![CDATA[try { var m = reportContext.getGlobalVariable("da2RowMap") || {}; var k = row["Enc Id"]; if (k != null) { m[k] = (m[k] || 0) + 1; } } catch (e) {} return true;]]></method>
+            <property name="dataSource">Metadata Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">5ef4381c-6344-43c4-81b5-2c18cd6bcb70</property>
+                    <property name="nativeName">5ef4381c-6344-43c4-81b5-2c18cd6bcb70</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">7d8a7a80-6cf4-582a-9b97-d44e52fe18fe</property>
+                    <property name="nativeName">7d8a7a80-6cf4-582a-9b97-d44e52fe18fe</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">7f978d94-09bc-5317-8258-95b1d8a61b2b</property>
+                    <property name="nativeName">7f978d94-09bc-5317-8258-95b1d8a61b2b</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">b09f6eab-aa80-4110-a4af-3dcbbd00384b</property>
+                    <property name="nativeName">b09f6eab-aa80-4110-a4af-3dcbbd00384b</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">e55af19a-2472-528a-9a94-cdc9ec6e7b9a</property>
+                    <property name="nativeName">e55af19a-2472-528a-9a94-cdc9ec6e7b9a</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">b7316d48-e41e-547e-8045-f1051a103b13</property>
+                    <property name="nativeName">b7316d48-e41e-547e-8045-f1051a103b13</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">4423ecb5-f6ed-563b-b199-ae6c3b3792c6</property>
+                    <property name="nativeName">4423ecb5-f6ed-563b-b199-ae6c3b3792c6</property>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">10327ece-26b5-5b66-b7c2-15965c42fd6a</property>
+                    <property name="nativeName">10327ece-26b5-5b66-b7c2-15965c42fd6a</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">26a5c317-7cbf-576f-9d83-5c53304156e5</property>
+                    <property name="nativeName">26a5c317-7cbf-576f-9d83-5c53304156e5</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">8a1fa20a-8155-5450-ad2e-b6d1648b6c6f</property>
+                    <property name="nativeName">8a1fa20a-8155-5450-ad2e-b6d1648b6c6f</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">e72b9bcd-77e5-5dd4-a40a-b198f61efe83</property>
+                    <property name="nativeName">e72b9bcd-77e5-5dd4-a40a-b198f61efe83</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">12</property>
+                    <property name="name">eedc32c0-d523-523d-9938-8c0f7f1f7e69</property>
+                    <property name="nativeName">eedc32c0-d523-523d-9938-8c0f7f1f7e69</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">13</property>
+                    <property name="name">7e8a40fd-e3a1-52e5-9896-d7dc4e0ee136</property>
+                    <property name="nativeName">7e8a40fd-e3a1-52e5-9896-d7dc4e0ee136</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">14</property>
+                    <property name="name">3eb0ad62-1187-5f88-9f33-72da4eb86bf3</property>
+                    <property name="nativeName">3eb0ad62-1187-5f88-9f33-72da4eb86bf3</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">15</property>
+                    <property name="name">9bf7ab5c-1655-523c-a1fa-d3e2b4ee1844</property>
+                    <property name="nativeName">9bf7ab5c-1655-523c-a1fa-d3e2b4ee1844</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">16</property>
+                    <property name="name">e4b47f01-0862-5522-badf-4030229c5b7c</property>
+                    <property name="nativeName">e4b47f01-0862-5522-badf-4030229c5b7c</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">17</property>
+                    <property name="name">fb2d9c2b-409a-58c1-b747-7c3abe327bd9</property>
+                    <property name="nativeName">fb2d9c2b-409a-58c1-b747-7c3abe327bd9</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">18</property>
+                    <property name="name">946cdf6c-94b1-5116-b9c9-38307a7ae134</property>
+                    <property name="nativeName">946cdf6c-94b1-5116-b9c9-38307a7ae134</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">19</property>
+                    <property name="name">b2b8f1a6-d92c-5aa4-8991-b7e93d4780d7</property>
+                    <property name="nativeName">b2b8f1a6-d92c-5aa4-8991-b7e93d4780d7</property>
+                    <property name="dataType">date-time</property>
+                </structure>
+                <structure>
+                    <property name="position">20</property>
+                    <property name="name">9737a234-d145-59bf-bd15-603a7f5ad050</property>
+                    <property name="nativeName">9737a234-d145-59bf-bd15-603a7f5ad050</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">21</property>
+                    <property name="name">b1d5f0a6-2a5f-5d60-9975-81cfd81c4549</property>
+                    <property name="nativeName">b1d5f0a6-2a5f-5d60-9975-81cfd81c4549</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">22</property>
+                    <property name="name">ba58ab36-ffba-5224-83f7-e0194dc507ec</property>
+                    <property name="nativeName">ba58ab36-ffba-5224-83f7-e0194dc507ec</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">23</property>
+                    <property name="name">078a896e-f604-558d-beeb-eebe2a061b06</property>
+                    <property name="nativeName">078a896e-f604-558d-beeb-eebe2a061b06</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[59c9518c-0ce7-5410-b508-5ceb44582466]]></xml-property>
+            <list-property name="privateDriverProperties">
+                <ex-property>
+                    <name>alwaysPrompt</name>
+                    <value>no</value>
+                </ex-property>
+                <ex-property>
+                    <name>defaultRuntimePrompts</name>
+                    <value>&lt;prompts&gt;&lt;qualification hidden=&quot;false&quot; prompt-mode=&quot;always&quot; runtimePromptName=&quot;Ord Orig Order Dt/Tm&quot; uuid=&quot;b2b8f1a6-d92c-5aa4-8991-b7e93d4780d7&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;lt;qualification&amp;gt;&amp;lt;filter joinType=&amp;quot;0&amp;quot; mode=&amp;quot;2&amp;quot; useIndex=&amp;quot;1&amp;quot;&amp;gt;&amp;lt;element name=&amp;quot;Ord Orig Order Dt/Tm&amp;quot; type=&amp;quot;2&amp;quot; uuid=&amp;quot;b2b8f1a6-d92c-5aa4-8991-b7e93d4780d7&amp;quot;/&amp;gt;&amp;lt;values type=&amp;quot;LIST&amp;quot; xCount=&amp;quot;1&amp;quot;&amp;gt;&amp;lt;value cdfmeaning=&amp;quot;&amp;quot; count=&amp;quot;7&amp;quot; display=&amp;quot;Last 7 Days&amp;quot; forward=&amp;quot;false&amp;quot; period=&amp;quot;2&amp;quot;/&amp;gt;&amp;lt;/values&amp;gt;&amp;lt;/filter&amp;gt;&amp;lt;/qualification&amp;gt;&lt;/qualification&gt;&lt;/prompts&gt;</value>
+                </ex-property>
+            </list-property>
+            <property name="_DATASET_NAME_">Joint Clinical Events and Medication Orders by Encounter (V1 Direct Upload)_Query</property>
+            <property name="_ENABLE_DATASET_CACHE_">true</property>
+            <property name="_COPY_RESULT_SET_">true</property>
+        </oda-data-set>
+    </data-sets>
+    <page-setup>
+        <simple-master-page name="Master Page" id="6">
+            <property name="type">us-legal</property>
+            <property name="orientation">landscape</property>
+            <property name="height">11in</property>
+            <property name="width">14in</property>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <table id="127">
+            <property name="dataSet">Joint Clinical Events and Medication Orders by Encounter (V1 Direct Upload)_Query</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Enc Id</property>
+                    <text-property name="displayName">Enc Id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Id"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Encounter Number</property>
+                    <text-property name="displayName">Enc Encounter Number</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Encounter Number"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Person Full Name</property>
+                    <text-property name="displayName">Person Full Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Person Full Name"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Facility</property>
+                    <text-property name="displayName">Enc Loc Facility</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Facility"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE Event Id</property>
+                    <text-property name="displayName">CE Event Id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE Event Id"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Ord Order Id</property>
+                    <text-property name="displayName">Ord Order Id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Ord Order Id"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Active Ind</property>
+                    <text-property name="displayName">Enc Active Ind</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Active Ind"]</expression>
+                    <property name="dataType">integer</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Nurse Unit</property>
+                    <text-property name="displayName">Enc Loc Nurse Unit</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Nurse Unit"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE Event</property>
+                    <text-property name="displayName">CE Event</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE Event"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Ord Mnemonic</property>
+                    <text-property name="displayName">Ord Mnemonic</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Ord Mnemonic"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Room</property>
+                    <text-property name="displayName">Enc Loc Room</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Room"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE Result Value</property>
+                    <text-property name="displayName">CE Result Value</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE Result Value"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Ord Status</property>
+                    <text-property name="displayName">Ord Status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Ord Status"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Loc Bed</property>
+                    <text-property name="displayName">Enc Loc Bed</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Loc Bed"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE Result Units</property>
+                    <text-property name="displayName">CE Result Units</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE Result Units"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Ord Detail Display</property>
+                    <text-property name="displayName">Ord Detail Display</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Ord Detail Display"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Type</property>
+                    <text-property name="displayName">Enc Type</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Type"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE Result Status</property>
+                    <text-property name="displayName">CE Result Status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE Result Status"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Ord Orig Order Dt/Tm</property>
+                    <text-property name="displayName">Ord Orig Order Dt/Tm</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Ord Orig Order Dt/Tm"]</expression>
+                    <property name="dataType">date-time</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Enc Status</property>
+                    <text-property name="displayName">Enc Status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Enc Status"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE End Dt/Tm</property>
+                    <text-property name="displayName">CE End Dt/Tm</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE End Dt/Tm"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE Performed Prsnl Name</property>
+                    <text-property name="displayName">CE Performed Prsnl Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE Performed Prsnl Name"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">CE Valid Until Dt Tm</property>
+                    <text-property name="displayName">CE Valid Until Dt Tm</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CE Valid Until Dt Tm"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <column id="12"/>
+            <column id="17"/>
+            <column id="22"/>
+            <column id="27"/>
+            <column id="32"/>
+            <column id="37"/>
+            <column id="42"/>
+            <column id="47"/>
+            <column id="52"/>
+            <column id="57"/>
+            <column id="62"/>
+            <column id="67"/>
+            <column id="72"/>
+            <column id="77"/>
+            <column id="82"/>
+            <column id="87"/>
+            <column id="92"/>
+            <column id="97"/>
+            <column id="102"/>
+            <column id="107"/>
+            <column id="112"/>
+            <column id="117"/>
+            <column id="122"/>
+            <header>
+                <row id="128">
+                    <cell id="13">
+                        <label id="14">
+                            <text-property name="text">Enc Id</text-property>
+                        </label>
+                    </cell>
+                    <cell id="18">
+                        <label id="19">
+                            <text-property name="text">Enc Encounter Number</text-property>
+                        </label>
+                    </cell>
+                    <cell id="23">
+                        <label id="24">
+                            <text-property name="text">Person Full Name</text-property>
+                        </label>
+                    </cell>
+                    <cell id="28">
+                        <label id="29">
+                            <text-property name="text">Enc Loc Facility</text-property>
+                        </label>
+                    </cell>
+                    <cell id="33">
+                        <label id="34">
+                            <text-property name="text">CE Event Id</text-property>
+                        </label>
+                    </cell>
+                    <cell id="38">
+                        <label id="39">
+                            <text-property name="text">Ord Order Id</text-property>
+                        </label>
+                    </cell>
+                    <cell id="43">
+                        <label id="44">
+                            <text-property name="text">Enc Active Ind</text-property>
+                        </label>
+                    </cell>
+                    <cell id="48">
+                        <label id="49">
+                            <text-property name="text">Enc Loc Nurse Unit</text-property>
+                        </label>
+                    </cell>
+                    <cell id="53">
+                        <label id="54">
+                            <text-property name="text">CE Event</text-property>
+                        </label>
+                    </cell>
+                    <cell id="58">
+                        <label id="59">
+                            <text-property name="text">Ord Mnemonic</text-property>
+                        </label>
+                    </cell>
+                    <cell id="63">
+                        <label id="64">
+                            <text-property name="text">Enc Loc Room</text-property>
+                        </label>
+                    </cell>
+                    <cell id="68">
+                        <label id="69">
+                            <text-property name="text">CE Result Value</text-property>
+                        </label>
+                    </cell>
+                    <cell id="73">
+                        <label id="74">
+                            <text-property name="text">Ord Status</text-property>
+                        </label>
+                    </cell>
+                    <cell id="78">
+                        <label id="79">
+                            <text-property name="text">Enc Loc Bed</text-property>
+                        </label>
+                    </cell>
+                    <cell id="83">
+                        <label id="84">
+                            <text-property name="text">CE Result Units</text-property>
+                        </label>
+                    </cell>
+                    <cell id="88">
+                        <label id="89">
+                            <text-property name="text">Ord Detail Display</text-property>
+                        </label>
+                    </cell>
+                    <cell id="93">
+                        <label id="94">
+                            <text-property name="text">Enc Type</text-property>
+                        </label>
+                    </cell>
+                    <cell id="98">
+                        <label id="99">
+                            <text-property name="text">CE Result Status</text-property>
+                        </label>
+                    </cell>
+                    <cell id="103">
+                        <label id="104">
+                            <text-property name="text">Ord Orig Order Dt/Tm</text-property>
+                        </label>
+                    </cell>
+                    <cell id="108">
+                        <label id="109">
+                            <text-property name="text">Enc Status</text-property>
+                        </label>
+                    </cell>
+                    <cell id="113">
+                        <label id="114">
+                            <text-property name="text">CE End Dt/Tm</text-property>
+                        </label>
+                    </cell>
+                    <cell id="118">
+                        <label id="119">
+                            <text-property name="text">CE Performed Prsnl Name</text-property>
+                        </label>
+                    </cell>
+                    <cell id="123">
+                        <label id="124">
+                            <text-property name="text">CE Valid Until Dt Tm</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="129">
+                    <cell id="15">
+                        <data id="16">
+                            <property name="resultSetColumn">Enc Id</property>
+                        </data>
+                    </cell>
+                    <cell id="20">
+                        <data id="21">
+                            <property name="resultSetColumn">Enc Encounter Number</property>
+                        </data>
+                    </cell>
+                    <cell id="25">
+                        <data id="26">
+                            <property name="resultSetColumn">Person Full Name</property>
+                        </data>
+                    </cell>
+                    <cell id="30">
+                        <data id="31">
+                            <property name="resultSetColumn">Enc Loc Facility</property>
+                        </data>
+                    </cell>
+                    <cell id="35">
+                        <data id="36">
+                            <property name="resultSetColumn">CE Event Id</property>
+                        </data>
+                    </cell>
+                    <cell id="40">
+                        <data id="41">
+                            <property name="resultSetColumn">Ord Order Id</property>
+                        </data>
+                    </cell>
+                    <cell id="45">
+                        <data id="46">
+                            <property name="resultSetColumn">Enc Active Ind</property>
+                        </data>
+                    </cell>
+                    <cell id="50">
+                        <data id="51">
+                            <property name="resultSetColumn">Enc Loc Nurse Unit</property>
+                        </data>
+                    </cell>
+                    <cell id="55">
+                        <data id="56">
+                            <property name="resultSetColumn">CE Event</property>
+                        </data>
+                    </cell>
+                    <cell id="60">
+                        <data id="61">
+                            <property name="resultSetColumn">Ord Mnemonic</property>
+                        </data>
+                    </cell>
+                    <cell id="65">
+                        <data id="66">
+                            <property name="resultSetColumn">Enc Loc Room</property>
+                        </data>
+                    </cell>
+                    <cell id="70">
+                        <data id="71">
+                            <property name="resultSetColumn">CE Result Value</property>
+                        </data>
+                    </cell>
+                    <cell id="75">
+                        <data id="76">
+                            <property name="resultSetColumn">Ord Status</property>
+                        </data>
+                    </cell>
+                    <cell id="80">
+                        <data id="81">
+                            <property name="resultSetColumn">Enc Loc Bed</property>
+                        </data>
+                    </cell>
+                    <cell id="85">
+                        <data id="86">
+                            <property name="resultSetColumn">CE Result Units</property>
+                        </data>
+                    </cell>
+                    <cell id="90">
+                        <data id="91">
+                            <property name="resultSetColumn">Ord Detail Display</property>
+                        </data>
+                    </cell>
+                    <cell id="95">
+                        <data id="96">
+                            <property name="resultSetColumn">Enc Type</property>
+                        </data>
+                    </cell>
+                    <cell id="100">
+                        <data id="101">
+                            <property name="resultSetColumn">CE Result Status</property>
+                        </data>
+                    </cell>
+                    <cell id="105">
+                        <data id="106">
+                            <property name="resultSetColumn">Ord Orig Order Dt/Tm</property>
+                        </data>
+                    </cell>
+                    <cell id="110">
+                        <data id="111">
+                            <property name="resultSetColumn">Enc Status</property>
+                        </data>
+                    </cell>
+                    <cell id="115">
+                        <data id="116">
+                            <property name="resultSetColumn">CE End Dt/Tm</property>
+                        </data>
+                    </cell>
+                    <cell id="120">
+                        <data id="121">
+                            <property name="resultSetColumn">CE Performed Prsnl Name</property>
+                        </data>
+                    </cell>
+                    <cell id="125">
+                        <data id="126">
+                            <property name="resultSetColumn">CE Valid Until Dt Tm</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+        </table>
+    </body>
+</report>

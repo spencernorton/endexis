@@ -1,0 +1,3416 @@
+{
+  "catalog_version": "1.1.0",
+  "provenance": "historical_reference_findings_2026-11-03:candidates_2_3_4_5_6_and_public_reference_downloads",
+  "event_set_hierarchy_and_search": {
+    "provenance": "historical_reference_findings_2026-11-03:candidate_2:uar-dev-master/datasets/MD_D_EVENT_SET_HIERARCHY_and_MD_D_EVENT_SET_SEARCH",
+    "root_event_set_filter": {
+      "table": "V500_EVENT_SET_CODE",
+      "predicate": "EVENT_SET_CD_DEFINITION = 'ALL OCF EVENT SETS'",
+      "purpose": "Anchors Level 1 (LVL1_CODE = A.PARENT_EVENT_SET_CD) at the root of the Cerner Open Clinical Foundation (OCF) Event Set Hierarchy (ESH)."
+    },
+    "v500_source_tables": [
+      {
+        "table": "V500_EVENT_SET_CODE",
+        "role": "Event set definition and display lookup (EVENT_SET_CD, EVENT_SET_NAME, EVENT_SET_CD_DISP, EVENT_SET_CD_DEFINITION)."
+      },
+      {
+        "table": "V500_EVENT_SET_CANON",
+        "role": "Parent-child grouper hierarchy edges (PARENT_EVENT_SET_CD -> EVENT_SET_CD, EVENT_SET_COLLATING_SEQ). Traversed across 9 self-joins (A..I) to produce 10 hierarchy levels (LVL1_CODE..LVL10_CODE)."
+      },
+      {
+        "table": "V500_EVENT_SET_EXPLODE",
+        "role": "Pre-exploded closure bridge mapping any grouper or primitive EVENT_SET_CD (BOTTOM_LEVEL_EVENT_SET_CODE) directly to leaf EVENT_CD (Code Set 72)."
+      },
+      {
+        "table": "CODE_VALUE",
+        "role": "Resolves leaf EVENT_CD (Code Set 72) display string (CV.DISPLAY AS EVENT_DISPLAY)."
+      },
+      {
+        "table": "CLINICAL_EVENT",
+        "role": "Scanned in Transformation 2 (insert_orphans) to identify charted EVENT_CD values not linked to any active event set under ALL OCF EVENT SETS."
+      }
+    ],
+    "md_d_event_set_hierarchy": {
+      "mnemonic": "MD_D_EVENT_SET_HIERARCHY",
+      "principal_column": "EVENT_CODE",
+      "columns": [
+        "LVL1_CODE",
+        "LVL1_DISPLAY",
+        "LVL2_CODE",
+        "LVL2_DISPLAY",
+        "LVL3_CODE",
+        "LVL3_DISPLAY",
+        "LVL4_CODE",
+        "LVL4_DISPLAY",
+        "LVL5_CODE",
+        "LVL5_DISPLAY",
+        "LVL6_CODE",
+        "LVL6_DISPLAY",
+        "LVL7_CODE",
+        "LVL7_DISPLAY",
+        "LVL8_CODE",
+        "LVL8_DISPLAY",
+        "LVL9_CODE",
+        "LVL9_DISPLAY",
+        "LVL10_CODE",
+        "LVL10_DISPLAY",
+        "BOTTOM_LEVEL_EVENT_SET_CODE",
+        "BOTTOM_LEVEL_EVENT_SET_DISPLAY",
+        "EVENT_CODE",
+        "EVENT_DISPLAY"
+      ],
+      "level_count": 10,
+      "bottom_level_coalesce_expression": "COALESCE(I.EVENT_SET_CD, H.EVENT_SET_CD, G.EVENT_SET_CD, F.EVENT_SET_CD, E.EVENT_SET_CD, D.EVENT_SET_CD, C.EVENT_SET_CD, B.EVENT_SET_CD, A.EVENT_SET_CD)",
+      "canonical_hierarchy_sql": "WITH EVT_SET\nAS (\n  SELECT DISTINCT A.PARENT_EVENT_SET_CD AS LVL1_CODE\n    ,PAR_DISP.EVENT_SET_CD_DISP AS LVL1_DISPLAY\n    ,A.EVENT_SET_CD AS LVL2_CODE\n    ,CLD_DISP.EVENT_SET_CD_DISP AS LVL2_DISPLAY\n    ,B.EVENT_SET_CD AS LVL3_CODE\n    ,B_DISP.EVENT_SET_CD_DISP AS LVL3_DISPLAY\n    ,C.EVENT_SET_CD AS LVL4_CODE\n    ,C_DISP.EVENT_SET_CD_DISP AS LVL4_DISPLAY\n    ,D.EVENT_SET_CD AS LVL5_CODE\n    ,D_DISP.EVENT_SET_CD_DISP AS LVL5_DISPLAY\n    ,E.EVENT_SET_CD AS LVL6_CODE\n    ,E_DISP.EVENT_SET_CD_DISP AS LVL6_DISPLAY\n    ,F.EVENT_SET_CD AS LVL7_CODE\n    ,F_DISP.EVENT_SET_CD_DISP AS LVL7_DISPLAY\n    ,G.EVENT_SET_CD AS LVL8_CODE\n    ,G_DISP.EVENT_SET_CD_DISP AS LVL8_DISPLAY\n    ,H.EVENT_SET_CD AS LVL9_CODE\n    ,H_DISP.EVENT_SET_CD_DISP AS LVL9_DISPLAY\n    ,I.EVENT_SET_CD AS LVL10_CODE\n    ,I_DISP.EVENT_SET_CD_DISP AS LVL10_DISPLAY\n    ,COALESCE(I.EVENT_SET_CD, H.EVENT_SET_CD, G.EVENT_SET_CD, F.EVENT_SET_CD, E.EVENT_SET_CD, D.EVENT_SET_CD, C.EVENT_SET_CD, B.EVENT_SET_CD, A.EVENT_SET_CD) AS BOTTOM_LEVEL_EVENT_SET_CODE\n    ,COALESCE(I_DISP.EVENT_SET_CD_DISP, H_DISP.EVENT_SET_CD_DISP, G_DISP.EVENT_SET_CD_DISP, F_DISP.EVENT_SET_CD_DISP, E_DISP.EVENT_SET_CD_DISP, D_DISP.EVENT_SET_CD_DISP, C_DISP.EVENT_SET_CD_DISP, B_DISP.EVENT_SET_CD_DISP, CLD_DISP.EVENT_SET_CD_DISP) AS BOTTOM_LEVEL_EVENT_SET_DISPLAY\n  FROM ~~millenniumSchemaName~~.V500_EVENT_SET_CANON A\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE PAR_DISP ON A.PARENT_EVENT_SET_CD = PAR_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE CLD_DISP ON A.EVENT_SET_CD = CLD_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON B ON A.EVENT_SET_CD = B.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE B_DISP ON B.EVENT_SET_CD = B_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON C ON B.EVENT_SET_CD = C.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE C_DISP ON C.EVENT_SET_CD = C_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON D ON C.EVENT_SET_CD = D.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE D_DISP ON D.EVENT_SET_CD = D_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON E ON D.EVENT_SET_CD = E.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE E_DISP ON E.EVENT_SET_CD = E_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON F ON E.EVENT_SET_CD = F.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE F_DISP ON F.EVENT_SET_CD = F_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON G ON F.EVENT_SET_CD = G.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE G_DISP ON G.EVENT_SET_CD = G_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON H ON G.EVENT_SET_CD = H.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE H_DISP ON H.EVENT_SET_CD = H_DISP.EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CANON I ON H.EVENT_SET_CD = I.PARENT_EVENT_SET_CD\n  LEFT JOIN ~~millenniumSchemaName~~.V500_EVENT_SET_CODE I_DISP ON I.EVENT_SET_CD = I_DISP.EVENT_SET_CD\n  WHERE A.PARENT_EVENT_SET_CD = (\n      SELECT EVENT_SET_CD\n      FROM ~~millenniumSchemaName~~.V500_EVENT_SET_CODE\n      WHERE EVENT_SET_CD_DEFINITION = 'ALL OCF EVENT SETS'\n      )\n  )\nSELECT EVT_SET.LVL1_CODE\n  ,EVT_SET.LVL1_DISPLAY\n  ,EVT_SET.LVL2_CODE\n  ,EVT_SET.LVL2_DISPLAY\n  ,EVT_SET.LVL3_CODE\n  ,EVT_SET.LVL3_DISPLAY\n  ,EVT_SET.LVL4_CODE\n  ,EVT_SET.LVL4_DISPLAY\n  ,EVT_SET.LVL5_CODE\n  ,EVT_SET.LVL5_DISPLAY\n  ,EVT_SET.LVL6_CODE\n  ,EVT_SET.LVL6_DISPLAY\n  ,EVT_SET.LVL7_CODE\n  ,EVT_SET.LVL7_DISPLAY\n  ,EVT_SET.LVL8_CODE\n  ,EVT_SET.LVL8_DISPLAY\n  ,EVT_SET.LVL9_CODE\n  ,EVT_SET.LVL9_DISPLAY\n  ,EVT_SET.LVL10_CODE\n  ,EVT_SET.LVL10_DISPLAY\n  ,EVT_SET.BOTTOM_LEVEL_EVENT_SET_CODE\n  ,EVT_SET.BOTTOM_LEVEL_EVENT_SET_DISPLAY\n  ,EXPD.EVENT_CD AS EVENT_CODE\n  ,CV.DISPLAY AS EVENT_DISPLAY\nFROM EVT_SET\nJOIN ~~millenniumSchemaName~~.V500_EVENT_SET_EXPLODE EXPD ON EVT_SET.BOTTOM_LEVEL_EVENT_SET_CODE = EXPD.EVENT_SET_CD\nJOIN ~~millenniumSchemaName~~.CODE_VALUE CV ON EXPD.EVENT_CD = CV.CODE_VALUE\n",
+      "validated_orphan_event_sql": "WITH ce AS (\n  SELECT DISTINCT EVENT_CD\n  FROM ~~millenniumSchemaName~~.CLINICAL_EVENT a\n)\nSELECT 0 AS LVL1_CODE\n     , 'ORPHAN EVENT CODE' AS LVL1_DISPLAY\n     , 0 AS LVL2_CODE\n     , 'ORPHAN EVENT CODE' AS LVL2_DISPLAY\n     , 0 AS LVL3_CODE\n     , 'ORPHAN EVENT CODE' AS LVL3_DISPLAY\n     , 0 AS LVL4_CODE\n     , 'ORPHAN EVENT CODE' AS LVL4_DISPLAY\n     , 0 AS LVL5_CODE\n     , 'ORPHAN EVENT CODE' AS LVL5_DISPLAY\n     , 0 AS LVL6_CODE\n     , 'ORPHAN EVENT CODE' AS LVL6_DISPLAY\n     , 0 AS LVL7_CODE\n     , 'ORPHAN EVENT CODE' AS LVL7_DISPLAY\n     , 0 AS LVL8_CODE\n     , 'ORPHAN EVENT CODE' AS LVL8_DISPLAY\n     , 0 AS LVL9_CODE\n     , 'ORPHAN EVENT CODE' AS LVL9_DISPLAY\n     , 0 AS LVL10_CODE\n     , 'ORPHAN EVENT CODE' AS LVL10_DISPLAY\n     , 0 AS BOTTOM_LEVEL_EVENT_SET_CODE\n     , 'ORPHAN EVENT CODE' AS BOTTOM_LEVEL_EVENT_SET_DISPLAY\n     , a.EVENT_CD AS EVENT_CODE\n     , c.DISPLAY AS EVENT_DISPLAY\nFROM ce a\nLEFT JOIN ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY b ON a.EVENT_CD = b.EVENT_CODE\nLEFT JOIN ~~millenniumSchemaName~~.CODE_VALUE c ON a.EVENT_CD = c.CODE_VALUE\nWHERE b.EVENT_CODE IS NULL",
+      "validation_findings": [
+        "Historical Transformation 1 (insert) correctly projects all 24 columns (LVL1_CODE..LVL10_DISPLAY, BOTTOM_LEVEL_EVENT_SET_CODE, BOTTOM_LEVEL_EVENT_SET_DISPLAY, EVENT_CODE, EVENT_DISPLAY).",
+        "Historical Transformation 2 (named 'insert-ophans' [sic] in MD_D_EVENT_SET_HIERARCHY.sql) projected only 22 columns, omitting BOTTOM_LEVEL_EVENT_SET_CODE and BOTTOM_LEVEL_EVENT_SET_DISPLAY. Corrected in validated_orphan_event_sql so all 24 columns align."
+      ]
+    },
+    "md_d_event_set_search": {
+      "mnemonic": "MD_D_EVENT_SET_SEARCH",
+      "principal_column": "EVENT_CODE",
+      "columns": [
+        "LVL_CODE",
+        "LVL_DISPLAY",
+        "EVENT_CODE",
+        "EVENT_DISPLAY",
+        "LVL"
+      ],
+      "description": "Flattens LVL1_CODE..LVL10_CODE from MD_D_EVENT_SET_HIERARCHY via a 10-branch UNION ALL query into (LVL_CODE, LVL_DISPLAY, EVENT_CODE, EVENT_DISPLAY, LVL) for fast keyword or code searching at any hierarchy depth.",
+      "vertica_snowflake_sql": "SELECT DISTINCT LVL1_CODE AS LVL_CODE\n  ,LVL1_DISPLAY AS LVL_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,1::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL1_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL2_CODE\n  ,LVL2_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,2::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL2_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL3_CODE\n  ,LVL3_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,3::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL3_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL4_CODE\n  ,LVL4_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,4::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL4_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL5_CODE\n  ,LVL5_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,5::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL5_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL6_CODE\n  ,LVL6_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,6::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL6_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL7_CODE\n  ,LVL7_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,7::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL7_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL8_CODE\n  ,LVL8_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,8::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL8_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL9_CODE\n  ,LVL9_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,9::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL9_CODE IS NOT NULL\n\nUNION ALL\n\nSELECT DISTINCT LVL10_CODE\n  ,LVL10_DISPLAY\n  ,EVENT_CODE\n  ,EVENT_DISPLAY\n  ,10::INT AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL10_CODE IS NOT NULL\n",
+      "oracle_rdb_sql": "/*\nTABLE MNEMONIC: MD_D_EVENT_SET_SEARCH\nDESCRIPTION: \nTABLE NAME: MD_D_EVENT_SET_SEARCH\nTRUNCATE: True\nPRINCIPAL COLUMNS: event_code\n*/\n\n/********************************************\nTYPE: Insert\nINDEX: 1\nNAME: insert\nINSERT/UPDATE: False\n********************************************/\n\nSELECT DISTINCT LVL1_CODE AS LVL_CODE\n              , LVL1_DISPLAY AS LVL_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 1 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL1_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL2_CODE\n              , LVL2_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 2 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL2_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL3_CODE\n              , LVL3_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 3 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL3_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL4_CODE\n              , LVL4_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 4 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL4_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL5_CODE\n              , LVL5_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 5 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL5_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL6_CODE\n              , LVL6_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 6 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL6_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL7_CODE\n              , LVL7_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 7 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL7_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL8_CODE\n              , LVL8_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 8 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL8_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL9_CODE\n              , LVL9_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 9 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL9_CODE IS NOT NULL\nUNION ALL\nSELECT DISTINCT LVL10_CODE\n              , LVL10_DISPLAY\n              , EVENT_CODE\n              , EVENT_DISPLAY\n              , 10 AS LVL\nFROM ~~cdsSchemaName~~.MD_D_EVENT_SET_HIERARCHY\nWHERE LVL10_CODE IS NOT NULL\n",
+      "ccl_equivalent_prg": "SELECT INTO $OUTDEV\n    lvl1_cd = a.parent_event_set_cd\n  , lvl1_disp = par_disp.event_set_cd_disp\n  , lvl2_cd = a.event_set_cd\n  , lvl2_disp = cld_disp.event_set_cd_disp\n  , lvl3_cd = b.event_set_cd\n  , lvl3_disp = b_disp.event_set_cd_disp\n  , bottom_event_set_cd = evaluate(c.event_set_cd, 0.0, evaluate(b.event_set_cd, 0.0, a.event_set_cd, b.event_set_cd), c.event_set_cd)\n  , event_cd = expd.event_cd\n  , event_disp = uar_get_code_display(expd.event_cd)\nFROM\n    v500_event_set_code root_esc\n  , v500_event_set_canon a\n  , v500_event_set_code par_disp\n  , v500_event_set_code cld_disp\n  , v500_event_set_canon b\n  , v500_event_set_code b_disp\n  , v500_event_set_canon c\n  , v500_event_set_explode expd\nPLAN root_esc\n  WHERE root_esc.event_set_cd_definition = \"ALL OCF EVENT SETS\"\nJOIN a\n  WHERE a.parent_event_set_cd = root_esc.event_set_cd\nJOIN par_disp\n  WHERE par_disp.event_set_cd = a.parent_event_set_cd\nJOIN cld_disp\n  WHERE cld_disp.event_set_cd = a.event_set_cd\nJOIN b\n  WHERE b.parent_event_set_cd = outerjoin(a.event_set_cd)\nJOIN b_disp\n  WHERE b_disp.event_set_cd = outerjoin(b.event_set_cd)\nJOIN c\n  WHERE c.parent_event_set_cd = outerjoin(b.event_set_cd)\nJOIN expd\n  WHERE expd.event_set_cd = a.event_set_cd\nWITH nocounter, separator = \" \", format",
+      "validation_findings": [
+        "MD_D_EVENT_SET_SEARCH.sql uses PostgreSQL/Vertica/Snowflake typecast syntax '1::INT AS LVL' through '10::INT AS LVL'. For Oracle RDB / Millennium SQL, strip '::INT' or use CAST(1 AS NUMBER(10))."
+      ]
+    }
+  },
+  "terminology_crosswalks": {
+    "provenance": "historical_reference_findings_2026-11-03:candidate_3:selected_definition_sheets",
+    "code_set_36_language_crosswalk": {
+      "code_set": 36,
+      "code_set_name": "Language",
+      "hl7_field": "PID-15",
+      "v500_column": "PERSON.LANGUAGE_CD",
+      "da2_field_name": "Person Language",
+      "total_mappings": 229,
+      "validation_note": "Normalized 3 appended rows (Friulian, Frisian, Asturian) that omitted columns A-C (Code Set 36 / Language / PID-15) in the source crosswalk.",
+      "entries": [
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Abkhazian",
+          "millennium_display_key": "ABKHAZIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Afar",
+          "millennium_display_key": "AFAR",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Afghan/Pashto/Pusho",
+          "millennium_display_key": "AFGHANPASHTOPUSHO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Afrikaans",
+          "millennium_display_key": "AFRIKAANS",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Akan",
+          "millennium_display_key": "AKAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Albanian",
+          "millennium_display_key": "ALBANIAN",
+          "press_ganey_language_code": 57,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Amharic",
+          "millennium_display_key": "AMHARIC",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Apache",
+          "millennium_display_key": "APACHE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Aragonese",
+          "millennium_display_key": "ARAGONESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Armenian",
+          "millennium_display_key": "ARMENIAN",
+          "press_ganey_language_code": 31,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Assamese",
+          "millennium_display_key": "ASSAMESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Avaric",
+          "millennium_display_key": "AVARIC",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Avestan",
+          "millennium_display_key": "AVESTAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Aymara",
+          "millennium_display_key": "AYMARA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Azerbaijani",
+          "millennium_display_key": "AZERBAIJANI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Bambara",
+          "millennium_display_key": "BAMBARA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Bashkir",
+          "millennium_display_key": "BASHKIR",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Basque",
+          "millennium_display_key": "BASQUE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Belarusian",
+          "millennium_display_key": "BELARUSIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Bengali",
+          "millennium_display_key": "BENGALI",
+          "press_ganey_language_code": 60,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Bihari Languages",
+          "millennium_display_key": "BIHARILANGUAGES",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Bislama",
+          "millennium_display_key": "BISLAMA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Bosnian",
+          "millennium_display_key": "BOSNIAN",
+          "press_ganey_language_code": 50,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Breton",
+          "millennium_display_key": "BRETON",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Bulgarian",
+          "millennium_display_key": "BULGARIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Burmese",
+          "millennium_display_key": "BURMESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Calo",
+          "millennium_display_key": "CALO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Cambodian",
+          "millennium_display_key": "CAMBODIAN",
+          "press_ganey_language_code": 34,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Cantonese",
+          "millennium_display_key": "CANTONESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Catalan",
+          "millennium_display_key": "CATALAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Silesian",
+          "millennium_display_key": "SILESIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Central Khmer",
+          "millennium_display_key": "CENTRALKHMER",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kashubian",
+          "millennium_display_key": "KASHUBIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Chechen",
+          "millennium_display_key": "CHECHEN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Chinese",
+          "millennium_display_key": "CHINESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Choctaw",
+          "millennium_display_key": "CHOCTAW",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Church Slavic",
+          "millennium_display_key": "CHURCHSLAVIC",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Chuvash",
+          "millennium_display_key": "CHUVASH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Cornish",
+          "millennium_display_key": "CORNISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Corsican",
+          "millennium_display_key": "CORSICAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Cree",
+          "millennium_display_key": "CREE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Creole",
+          "millennium_display_key": "CREOLE",
+          "press_ganey_language_code": 21,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Croatian",
+          "millennium_display_key": "CROATIAN",
+          "press_ganey_language_code": 52,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Czech",
+          "millennium_display_key": "CZECH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Danish",
+          "millennium_display_key": "DANISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Dari",
+          "millennium_display_key": "DARI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Dhivehi",
+          "millennium_display_key": "DHIVEHI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Dutch",
+          "millennium_display_key": "DUTCH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Dzongkha",
+          "millennium_display_key": "DZONGKHA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "English",
+          "millennium_display_key": "ENGLISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Esperanto",
+          "millennium_display_key": "ESPERANTO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Estonian",
+          "millennium_display_key": "ESTONIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ethiopian",
+          "millennium_display_key": "ETHIOPIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ewe",
+          "millennium_display_key": "EWE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Faroese",
+          "millennium_display_key": "FAROESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Farsi",
+          "millennium_display_key": "FARSI",
+          "press_ganey_language_code": 59,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sorbian",
+          "millennium_display_key": "SORBIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Finnish",
+          "millennium_display_key": "FINNISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "French",
+          "millennium_display_key": "FRENCH",
+          "press_ganey_language_code": 20,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Fulah",
+          "millennium_display_key": "FULAH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Gaelic",
+          "millennium_display_key": "GAELIC",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Galician",
+          "millennium_display_key": "GALICIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ganda",
+          "millennium_display_key": "GANDA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Georgian",
+          "millennium_display_key": "GEORGIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "German",
+          "millennium_display_key": "GERMAN",
+          "press_ganey_language_code": 4,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Greek",
+          "millennium_display_key": "GREEK",
+          "press_ganey_language_code": 7,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Guarani",
+          "millennium_display_key": "GUARANI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Gujarati",
+          "millennium_display_key": "GUJARATI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Haitian",
+          "millennium_display_key": "HAITIAN",
+          "press_ganey_language_code": 36,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hausa",
+          "millennium_display_key": "HAUSA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hebrew",
+          "millennium_display_key": "HEBREW",
+          "press_ganey_language_code": 37,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Herero",
+          "millennium_display_key": "HERERO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hindi",
+          "millennium_display_key": "HINDI",
+          "press_ganey_language_code": 38,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hindustani",
+          "millennium_display_key": "HINDUSTANI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hiri Motu",
+          "millennium_display_key": "HIRIMOTU",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hmong",
+          "millennium_display_key": "HMONG",
+          "press_ganey_language_code": 26,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hopi",
+          "millennium_display_key": "HOPI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Hungarian",
+          "millennium_display_key": "HUNGARIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ibonese",
+          "millennium_display_key": "IBONESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Icelandic",
+          "millennium_display_key": "ICELANDIC",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ido",
+          "millennium_display_key": "IDO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Igbo",
+          "millennium_display_key": "IGBO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ladin",
+          "millennium_display_key": "LADIN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Mirandese",
+          "millennium_display_key": "MIRANDESE",
+          "press_ganey_language_code": 56,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Picard",
+          "millennium_display_key": "PICARD",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Indonesian",
+          "millennium_display_key": "INDONESIAN",
+          "press_ganey_language_code": 42,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Interlingua",
+          "millennium_display_key": "INTERLINGUA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Interlingue",
+          "millennium_display_key": "INTERLINGUE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Inuktitut",
+          "millennium_display_key": "INUKTITUT",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Inupiaq",
+          "millennium_display_key": "INUPIAQ",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Irish",
+          "millennium_display_key": "IRISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Italian",
+          "millennium_display_key": "ITALIAN",
+          "press_ganey_language_code": 5,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Japanese",
+          "millennium_display_key": "JAPANESE",
+          "press_ganey_language_code": 28,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Javanese",
+          "millennium_display_key": "JAVANESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kalaallisut",
+          "millennium_display_key": "KALAALLISUT",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kannada",
+          "millennium_display_key": "KANNADA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kanuri",
+          "millennium_display_key": "KANURI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Karen",
+          "millennium_display_key": "KAREN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Karenni",
+          "millennium_display_key": "KARENNI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kashmiri",
+          "millennium_display_key": "KASHMIRI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kazakh",
+          "millennium_display_key": "KAZAKH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Keresan",
+          "millennium_display_key": "KERESAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kikuyu",
+          "millennium_display_key": "KIKUYU",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kinyarwanda",
+          "millennium_display_key": "KINYARWANDA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kirghiz",
+          "millennium_display_key": "KIRGHIZ",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Komi",
+          "millennium_display_key": "KOMI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kongo",
+          "millennium_display_key": "KONGO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Konkani",
+          "millennium_display_key": "KONKANI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Korean",
+          "millennium_display_key": "KOREAN",
+          "press_ganey_language_code": 29,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kuanyama",
+          "millennium_display_key": "KUANYAMA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Kurdish",
+          "millennium_display_key": "KURDISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Lao",
+          "millennium_display_key": "LAO",
+          "press_ganey_language_code": 43,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Latin",
+          "millennium_display_key": "LATIN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Latvian",
+          "millennium_display_key": "LATVIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Limburgan",
+          "millennium_display_key": "LIMBURGAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Lingala",
+          "millennium_display_key": "LINGALA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Lithuanian",
+          "millennium_display_key": "LITHUANIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Luba-Katanga",
+          "millennium_display_key": "LUBAKATANGA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Luxembourgish",
+          "millennium_display_key": "LUXEMBOURGISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Macedonian",
+          "millennium_display_key": "MACEDONIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Malagasy",
+          "millennium_display_key": "MALAGASY",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Malay",
+          "millennium_display_key": "MALAY",
+          "press_ganey_language_code": 44,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Malayalam",
+          "millennium_display_key": "MALAYALAM",
+          "press_ganey_language_code": 58,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Maltese",
+          "millennium_display_key": "MALTESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Mandarin",
+          "millennium_display_key": "MANDARIN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Manx",
+          "millennium_display_key": "MANX",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Lombard",
+          "millennium_display_key": "LOMBARD",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Marathi",
+          "millennium_display_key": "MARATHI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sicilian",
+          "millennium_display_key": "SICILIAN",
+          "press_ganey_language_code": 24,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Mien",
+          "millennium_display_key": "MIEN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Modern Greek",
+          "millennium_display_key": "MODERNGREEK",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Mongolian",
+          "millennium_display_key": "MONGOLIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ligurian",
+          "millennium_display_key": "LIGURIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Navajo",
+          "millennium_display_key": "NAVAJO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ndonga",
+          "millennium_display_key": "NDONGA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Nepali",
+          "millennium_display_key": "NEPALI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "North Ndebele",
+          "millennium_display_key": "NORTHNDEBELE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Northern Sami",
+          "millennium_display_key": "NORTHERNSAMI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Norwegian",
+          "millennium_display_key": "NORWEGIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Norwegian Bokm?l",
+          "millennium_display_key": "NORWEGIANBOKML",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Norwegian Nynorsk",
+          "millennium_display_key": "NORWEGIANNYNORSK",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Nyanja",
+          "millennium_display_key": "NYANJA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Occitan",
+          "millennium_display_key": "OCCITAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ojibwa",
+          "millennium_display_key": "OJIBWA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Oriya",
+          "millennium_display_key": "ORIYA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Oromo",
+          "millennium_display_key": "OROMO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ossetian",
+          "millennium_display_key": "OSSETIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Other",
+          "millennium_display_key": "OTHER",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Pakistani",
+          "millennium_display_key": "PAKISTANI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Pali",
+          "millennium_display_key": "PALI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Piedmontese",
+          "millennium_display_key": "PIEDMONTESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Panjabi/Punjabi",
+          "millennium_display_key": "PANJABIPUNJABI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Pashto",
+          "millennium_display_key": "PASHTO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Patient Refuses",
+          "millennium_display_key": "PATIENTREFUSES",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Persian",
+          "millennium_display_key": "PERSIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Polish",
+          "millennium_display_key": "POLISH",
+          "press_ganey_language_code": 6,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Portuguese",
+          "millennium_display_key": "PORTUGUESE",
+          "press_ganey_language_code": 47,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Quechua",
+          "millennium_display_key": "QUECHUA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Romanian",
+          "millennium_display_key": "ROMANIAN",
+          "press_ganey_language_code": 55,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Romansh",
+          "millennium_display_key": "ROMANSH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Rundi",
+          "millennium_display_key": "RUNDI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Russian",
+          "millennium_display_key": "RUSSIAN",
+          "press_ganey_language_code": 3,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Venetian",
+          "millennium_display_key": "VENETIAN",
+          "press_ganey_language_code": 25,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sango",
+          "millennium_display_key": "SANGO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sanskrit",
+          "millennium_display_key": "SANSKRIT",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sardinian",
+          "millennium_display_key": "SARDINIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Scottish Gaelic",
+          "millennium_display_key": "SCOTTISHGAELIC",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Serbian",
+          "millennium_display_key": "SERBIAN",
+          "press_ganey_language_code": 51,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Serbo-Croatian",
+          "millennium_display_key": "SERBOCROATIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Shona",
+          "millennium_display_key": "SHONA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sichuan Yi",
+          "millennium_display_key": "SICHUANYI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sign Language",
+          "millennium_display_key": "SIGNLANGUAGE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sindhi",
+          "millennium_display_key": "SINDHI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sinhala",
+          "millennium_display_key": "SINHALA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sinhalese",
+          "millennium_display_key": "SINHALESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Slovak",
+          "millennium_display_key": "SLOVAK",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Slovenian",
+          "millennium_display_key": "SLOVENIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Somali",
+          "millennium_display_key": "SOMALI",
+          "press_ganey_language_code": 27,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "South Ndebele",
+          "millennium_display_key": "SOUTHNDEBELE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Southern Sotho",
+          "millennium_display_key": "SOUTHERNSOTHO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Spanish",
+          "millennium_display_key": "SPANISH",
+          "press_ganey_language_code": 1,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Sundanese",
+          "millennium_display_key": "SUNDANESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Swahili",
+          "millennium_display_key": "SWAHILI",
+          "press_ganey_language_code": 45,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Swati",
+          "millennium_display_key": "SWATI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Swatowese",
+          "millennium_display_key": "SWATOWESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Swedish",
+          "millennium_display_key": "SWEDISH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Rusyn",
+          "millennium_display_key": "RUSYN",
+          "press_ganey_language_code": 30,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Votic",
+          "millennium_display_key": "VOTIC",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Taiwanese",
+          "millennium_display_key": "TAIWANESE",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tajik",
+          "millennium_display_key": "TAJIK",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tamil",
+          "millennium_display_key": "TAMIL",
+          "press_ganey_language_code": 64,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tatar",
+          "millennium_display_key": "TATAR",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Telugu",
+          "millennium_display_key": "TELUGU",
+          "press_ganey_language_code": 65,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tewa",
+          "millennium_display_key": "TEWA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Thai",
+          "millennium_display_key": "THAI",
+          "press_ganey_language_code": 46,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tibetan",
+          "millennium_display_key": "TIBETAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tigrinya",
+          "millennium_display_key": "TIGRINYA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tiwa",
+          "millennium_display_key": "TIWA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Toisan",
+          "millennium_display_key": "TOISAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Livonian",
+          "millennium_display_key": "LIVONIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Towa",
+          "millennium_display_key": "TOWA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tsonga",
+          "millennium_display_key": "TSONGA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Tswana",
+          "millennium_display_key": "TSWANA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Turkish",
+          "millennium_display_key": "TURKISH",
+          "press_ganey_language_code": 53,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Turkmen",
+          "millennium_display_key": "TURKMEN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Twi",
+          "millennium_display_key": "TWI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Uighur",
+          "millennium_display_key": "UIGHUR",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Ukrainian",
+          "millennium_display_key": "UKRAINIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Unknown/Not Reported",
+          "millennium_display_key": "UNKNOWNNOTREPORTED",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Urdu",
+          "millennium_display_key": "URDU",
+          "press_ganey_language_code": 39,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Uzbek",
+          "millennium_display_key": "UZBEK",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Venda",
+          "millennium_display_key": "VENDA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Vietnamese",
+          "millennium_display_key": "VIETNAMESE",
+          "press_ganey_language_code": 13,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Karelian",
+          "millennium_display_key": "KARELIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Volapuk",
+          "millennium_display_key": "VOLAPUK",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Walloon",
+          "millennium_display_key": "WALLOON",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Welsh",
+          "millennium_display_key": "WELSH",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Western Frisian",
+          "millennium_display_key": "WESTERNFRISIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Wolof",
+          "millennium_display_key": "WOLOF",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Xhosa",
+          "millennium_display_key": "XHOSA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Yao",
+          "millennium_display_key": "YAO",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Yiddish",
+          "millennium_display_key": "YIDDISH",
+          "press_ganey_language_code": 40,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Yoruba",
+          "millennium_display_key": "YORUBA",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Zhuang",
+          "millennium_display_key": "ZHUANG",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Zulu",
+          "millennium_display_key": "ZULU",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Zuni",
+          "millennium_display_key": "ZUNI",
+          "press_ganey_language_code": 0,
+          "validation_status": "validated"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Friulian",
+          "millennium_display_key": "FRIULIAN",
+          "press_ganey_language_code": 23,
+          "validation_status": "normalized_missing_code_set_columns"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Frisian",
+          "millennium_display_key": "FRISIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "normalized_missing_code_set_columns"
+        },
+        {
+          "millennium_code_set": 36,
+          "millennium_code_set_name": "Language",
+          "hl7_field": "PID-15",
+          "v500_column": "PERSON.LANGUAGE_CD",
+          "da2_field_name": "Person Language",
+          "millennium_display": "Asturian",
+          "millennium_display_key": "ASTURIAN",
+          "press_ganey_language_code": 0,
+          "validation_status": "normalized_missing_code_set_columns"
+        }
+      ]
+    },
+    "ub04_admission_source_code_set_2_hcahps": {
+      "code_set": 2,
+      "code_set_name": "Admission Source",
+      "ub04_field": "FL-15 (Point of Origin for Admission or Visit)",
+      "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+      "da2_field_name": "Enc Admit Source",
+      "entries": [
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "1",
+          "description": "Non-health care facility point of origin",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "2",
+          "description": "Clinic referral",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "4",
+          "description": "Transfer from a hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "5",
+          "description": "Transfer from an SNF or ICF",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "6",
+          "description": "Transfer from another health care facility",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "9",
+          "description": "Information not available",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "D",
+          "description": "Transfer from one distinct unit to another distinct unit of the same hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "E",
+          "description": "Transfer from ambulatory surgery center",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "F",
+          "description": "Transfer from hospice facility",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-15",
+          "millennium_code_set": 2,
+          "v500_column": "ENCOUNTER.ADMIT_SRC_CD",
+          "da2_field_name": "Enc Admit Source",
+          "ub04_code": "G",
+          "description": "Transfer from a Designated Disaster Alternative Care Site (ACS)",
+          "hcahps_eligible": true
+        }
+      ]
+    },
+    "ub04_discharge_status_code_set_19_hcahps": {
+      "code_set": 19,
+      "code_set_name": "Discharge Disposition",
+      "ub04_field": "FL-17 (Patient Discharge Status)",
+      "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+      "da2_field_name": "Enc Discharge Disp",
+      "validation_note": "Excluded site-specific temporary code '30 = temp - discharge for Cerner' from standard UB-04 FL-17 crosswalk.",
+      "entries": [
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "01",
+          "description": "Home care or self-care",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "02",
+          "description": "Another short-term general hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "04",
+          "description": "Intermediate care facility (ICF)",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "05",
+          "description": "Cancer center or children’s hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "06",
+          "description": "Home with home health services",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "07",
+          "description": "Left against medical advice",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "09",
+          "description": "Admitted as an inpatient to this hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "43",
+          "description": "Discharged to federal health care facility",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "62",
+          "description": "Inpatient rehabilitation facility",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "63",
+          "description": "Long-term care hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "65",
+          "description": "Psychiatric hospital or psychiatric unit",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "66",
+          "description": "Transfer to critical access hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "69",
+          "description": "Discharged to designated disaster alternative care site",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "81",
+          "description": "Discharged to home with planned acute care hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "82",
+          "description": "Discharged to a short-term general hospital",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "84",
+          "description": "Discharged to custodial or supportive care facility with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "85",
+          "description": "Discharged to cancer center or children’s hospital with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "86",
+          "description": "Discharged to home under HH organization with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "87",
+          "description": "Discharged to court/law enforcement with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "88",
+          "description": "Discharged to federal health care facility with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "90",
+          "description": "Discharged to IRF with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "91",
+          "description": "Discharged to a Medicare certified LTCH with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "93",
+          "description": "Discharged to psychiatric unit with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "94",
+          "description": "Discharged to CAH with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "95",
+          "description": "Discharged to another type of health care institution not defined elsewhere in this code list with planned AC hospital inpatient readmission",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "M",
+          "description": "Missing",
+          "hcahps_eligible": true
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "03",
+          "description": "Skilled nursing facility (SNF)",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "20",
+          "description": "Expired",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "21",
+          "description": "Discharged to court/law enforcement",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "40",
+          "description": "Expired at home",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "41",
+          "description": "Expired in a medical facility",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "42",
+          "description": "Expired, place unknown",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "50",
+          "description": "Hospice – home",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "51",
+          "description": "Hospice - medical facility",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "61",
+          "description": "SNF swing bed within hospital",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "64",
+          "description": "Certified Medicaid nursing facility",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "83",
+          "description": "Discharged to SNF with planned AC hospital inpatient readmission",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "89",
+          "description": "Discharged to hospital-based Medicare approved swing bed with planned AC hospital inpatient readmission",
+          "hcahps_eligible": false
+        },
+        {
+          "ub04_field": "FL-17",
+          "millennium_code_set": 19,
+          "v500_column": "ENCOUNTER.DISCH_DISPOSITION_CD",
+          "da2_field_name": "Enc Discharge Disp",
+          "ub04_code": "92",
+          "description": "Discharged to nursing facility certified under Medicaid but not Medicare with planned AC hospital inpatient readmission",
+          "hcahps_eligible": false
+        }
+      ]
+    },
+    "regulatory_ip_da2_field_specifications": [
+      {
+        "data_element": "Account (Register) Number",
+        "length": 15,
+        "data_type": "Alphanumeric",
+        "da2_elements": [
+          "Enc Financial Num",
+          "F Enc Recur Seq"
+        ],
+        "v500_targets": [
+          "ENCNTR_ALIAS.ALIAS",
+          "PFT_ENCNTR.RECUR_SEQ"
+        ],
+        "notes": "Append -<RECUR_SEQ> when RECUR_SEQ > 0 for recurring accounts."
+      },
+      {
+        "data_element": "Medical Record Number",
+        "length": 15,
+        "data_type": "Alphanumeric",
+        "da2_elements": [
+          "Person MRN"
+        ],
+        "v500_targets": [
+          "PERSON_ALIAS.ALIAS",
+          "ENCNTR_ALIAS.ALIAS"
+        ]
+      },
+      {
+        "data_element": "Date of Birth",
+        "length": 8,
+        "data_type": "Date (YYYYMMDD)",
+        "da2_elements": [
+          "Person Abs Birth Dt/Tm"
+        ],
+        "v500_targets": [
+          "PERSON.ABS_BIRTH_DT_TM",
+          "PERSON.BIRTH_DT_TM"
+        ]
+      },
+      {
+        "data_element": "Sex",
+        "length": 1,
+        "data_type": "Integer",
+        "da2_elements": [
+          "Person Sex"
+        ],
+        "v500_targets": [
+          "PERSON.SEX_CD"
+        ],
+        "code_set": 57
+      },
+      {
+        "data_element": "Race/Ethnicity",
+        "length": 2,
+        "data_type": "Alphanumeric",
+        "da2_elements": [
+          "Person Race"
+        ],
+        "v500_targets": [
+          "PERSON.RACE_CD",
+          "PERSON.ETHNIC_GRP_CD"
+        ],
+        "code_set": 282
+      },
+      {
+        "data_element": "Patient Primary Language",
+        "length": 3,
+        "data_type": "Alphanumeric",
+        "da2_elements": [
+          "Person Language"
+        ],
+        "v500_targets": [
+          "PERSON.LANGUAGE_CD"
+        ],
+        "code_set": 36
+      },
+      {
+        "data_element": "Date of Admission",
+        "length": 6,
+        "data_type": "Date",
+        "da2_elements": [
+          "Enc Arrive Dt/Tm",
+          "Enc Registration Dt/Tm"
+        ],
+        "v500_targets": [
+          "ENCOUNTER.ARRIVE_DT_TM",
+          "ENCOUNTER.REG_DT_TM"
+        ]
+      },
+      {
+        "data_element": "Date of Discharge",
+        "length": 6,
+        "data_type": "Date",
+        "da2_elements": [
+          "Enc Discharge Dt/Tm"
+        ],
+        "v500_targets": [
+          "ENCOUNTER.DISCH_DT_TM"
+        ]
+      },
+      {
+        "data_element": "Principal Source of Payment",
+        "length": 2,
+        "data_type": "Integer",
+        "da2_elements": [
+          "HP Plan Name Key",
+          "Enc Financial Class"
+        ],
+        "v500_targets": [
+          "HEALTH_PLAN.PLAN_NAME_KEY",
+          "ENCOUNTER.FINANCIAL_CLASS_CD"
+        ],
+        "code_set": 354
+      },
+      {
+        "data_element": "Disposition of Patient",
+        "length": 2,
+        "data_type": "Integer",
+        "da2_elements": [
+          "Enc Discharge Disp"
+        ],
+        "v500_targets": [
+          "ENCOUNTER.DISCH_DISPOSITION_CD"
+        ],
+        "code_set": 19
+      },
+      {
+        "data_element": "Total Charges",
+        "length": 8,
+        "data_type": "Integer",
+        "da2_elements": [
+          "BO Total Charges"
+        ],
+        "v500_targets": [
+          "BO_HP_RELTN.TOTAL_CHARGE_AMT"
+        ]
+      },
+      {
+        "data_element": "Attending Physician",
+        "length": 9,
+        "data_type": "Alphanumeric",
+        "da2_elements": [
+          "Enc Attending Phys Id",
+          "Enc Attending Phys"
+        ],
+        "v500_targets": [
+          "ENCNTR_PRSNL_RELTN.PRSNL_PERSON_ID"
+        ],
+        "code_set": 333
+      },
+      {
+        "data_element": "Point of Origin / Source of Admission",
+        "length": 1,
+        "data_type": "Alphanumeric",
+        "da2_elements": [
+          "Enc Admit Source"
+        ],
+        "v500_targets": [
+          "ENCOUNTER.ADMIT_SRC_CD"
+        ],
+        "code_set": 2
+      }
+    ],
+    "hospital_bed_capacity_extract_specifications": [
+      {
+        "seq": 1,
+        "element": "TimeStamp",
+        "format": "ISO-8601 UTC Offset",
+        "v500_source": "cnvtdatetime(curdate, curtime3)"
+      },
+      {
+        "seq": 2,
+        "element": "System",
+        "format": "String",
+        "v500_source": "LOGICAL_DOMAIN.MNEMONIC"
+      },
+      {
+        "seq": 3,
+        "element": "Facility",
+        "format": "String",
+        "v500_source": "ENCOUNTER.LOC_FACILITY_CD (Code Set 220)"
+      },
+      {
+        "seq": 4,
+        "element": "FacilityID",
+        "format": "Identifier",
+        "v500_source": "ENCOUNTER.ORGANIZATION_ID"
+      },
+      {
+        "seq": 5,
+        "element": "Unit",
+        "format": "String",
+        "v500_source": "ENCOUNTER.LOC_NURSE_UNIT_CD (Code Set 220)"
+      },
+      {
+        "seq": 6,
+        "element": "Room",
+        "format": "String",
+        "v500_source": "ENCOUNTER.LOC_ROOM_CD (Code Set 220)"
+      },
+      {
+        "seq": 7,
+        "element": "Bed",
+        "format": "String",
+        "v500_source": "ENCOUNTER.LOC_BED_CD (Code Set 220)"
+      },
+      {
+        "seq": 8,
+        "element": "BedType",
+        "format": "String",
+        "v500_source": "BED.BED_TYPE_CD"
+      },
+      {
+        "seq": 9,
+        "element": "LevelOfCareGroup",
+        "format": "String",
+        "v500_source": "ENCOUNTER.ACCOMMODATION_CD / ENCOUNTER.MED_SERVICE_CD"
+      },
+      {
+        "seq": 10,
+        "element": "isActive",
+        "format": "Boolean (0/1)",
+        "v500_source": "BED.ACTIVE_IND"
+      },
+      {
+        "seq": 11,
+        "element": "isOccupied",
+        "format": "Boolean (0/1)",
+        "v500_source": "ENCOUNTER.ENCNTR_STATUS_CD = ACTIVE AND DISCH_DT_TM IS NULL"
+      },
+      {
+        "seq": 12,
+        "element": "isBlocked",
+        "format": "Boolean (0/1)",
+        "v500_source": "BED.BED_STATUS_CD"
+      },
+      {
+        "seq": 13,
+        "element": "isNegativePressure",
+        "format": "Boolean (0/1)",
+        "v500_source": "ROOM.ISOLATION_CD"
+      },
+      {
+        "seq": 14,
+        "element": "isBurnBed",
+        "format": "Boolean (0/1)",
+        "v500_source": "LOCATION.LOC_NURSE_UNIT_CD"
+      },
+      {
+        "seq": 15,
+        "element": "PatientCOVIDStatus",
+        "format": "Positive/Negative/Suspected",
+        "v500_source": "CLINICAL_EVENT.RESULT_VAL / PROBLEM.NOMENCLATURE_ID"
+      },
+      {
+        "seq": 16,
+        "element": "PatientRSVStatus",
+        "format": "Positive/Negative/Suspected",
+        "v500_source": "CLINICAL_EVENT.RESULT_VAL"
+      },
+      {
+        "seq": 17,
+        "element": "PatientInfluenzaStatus",
+        "format": "Positive/Negative/Suspected",
+        "v500_source": "CLINICAL_EVENT.RESULT_VAL"
+      },
+      {
+        "seq": 18,
+        "element": "isPatientLevelCareICU",
+        "format": "Boolean (0/1)",
+        "v500_source": "ENCOUNTER.LOC_NURSE_UNIT_CD / ACCOMMODATION_CD"
+      },
+      {
+        "seq": 19,
+        "element": "patientAdmitDate",
+        "format": "ISO-8601 Timestamp",
+        "v500_source": "ENCOUNTER.REG_DT_TM / INPATIENT_ADMIT_DT_TM"
+      },
+      {
+        "seq": 20,
+        "element": "patientAge",
+        "format": "Numeric (cap at 90 for HIPAA Safe Harbor)",
+        "v500_source": "datetimediff(sysdate, PERSON.BIRTH_DT_TM) / 365.25"
+      }
+    ]
+  },
+  "oracle_health_public_reference_summary": {
+    "provenance": "reference_download_manifest_2026-11-03.json",
+    "document_count": 39,
+    "feed_family_overview_count": 17,
+    "versioned_feed_document_count": 16,
+    "millennium_platform_codevalues_rest_api": {
+      "endpoint": "GET /20240101/codeValues",
+      "query_parameters": [
+        "id",
+        "codeSet",
+        "cdfMeaning",
+        "conceptCki",
+        "displayKey",
+        "activeIndicator"
+      ],
+      "constraint": "Either 'id' or 'codeSet' must be supplied, but not both."
+    },
+    "fhir_r4_proprietary_code_system_uri": "https://fhir.cerner.com/<ehr_source_id>/codeSet/<code_set>",
+    "core_event_manager_esh_notes": [
+      "Results, diagnostic reports, and vital signs are organized under the Event Set Hierarchy (ESH) maintained in CoreEventManager.exe.",
+      "Correspondence and clinical grouper event sets map to standard concepts via CONCEPT_CKI in V500_EVENT_SET_CODE."
+    ]
+  },
+  "historical_review_audit_ledger": {
+    "review_date": "2026-11-03",
+    "added": [
+      "Candidate 1: All 48 direct DA2 XCW_* view/alias/join-key mappings (24 ENCOUNTER_ID, 23 PERSON_ID, 1 ORG_ID) + 9 '(via ...)' relational-path variants in da2_view_alias_join_catalog.json (kept separate from raw V500 table names).",
+      "Candidate 1 backing V500 tables: Added 24 underlying V500 tables (DRG_ENCNTR_EXTENSION, ENCNTR_ACCIDENT, ENCNTR_ENCNTR_RELTN, ENCNTR_LEAVE, ENCNTR_PERSON_RELTN, HM_RECOMMENDATION, LOCATION_GROUP, MED_IDENTIFIER, ORG_TYPE_RELTN, PERSON_NAME_HIST, PERSON_PERSON_RELTN, PERSON_PLAN_RELTN, PFT_BILL_ACTIVITY, PFT_CHARGE, PFT_TRANS_ALIAS, PROBLEM_ACTION, PROBLEM_COMMENT, PROC_PRSNL_RELTN, PRSNL_GROUP, PRSNL_GROUP_RELTN, REACTION, REFERRAL, SCH_EVENT_COMM, SCH_RESOURCE) plus LOGICAL_DOMAIN and MLTM_NDC_MAIN_DRUG_CODE (188 -> 214 V500 tables).",
+      "Candidate 2: Validated MD_D_EVENT_SET_HIERARCHY (10-level V500_EVENT_SET_CANON/V500_EVENT_SET_CODE/V500_EVENT_SET_EXPLODE expansion + corrected 24-column orphan query) and MD_D_EVENT_SET_SEARCH (10-branch UNION ALL flattened search view across Vertica/Snowflake, Oracle RDB, and CCL).",
+      "Candidate 3: Extracted 229 Code Set 36 (Language / PID-15 / Press Ganey) mappings, 10 UB-04 FL-15 Admission Source (Code Set 2) HCAHPS mappings, 38 UB-04 FL-17 Discharge Status (Code Set 19) HCAHPS mappings, 13 regulatory IP/OP -> DA2 field mappings, and 20 standardized Hospital Bed Capacity extract elements.",
+      "Candidate 4 & 6: Extracted Discern SQL Engine (EJS v3.15.1) CWC_* table alias conventions, 6 Oracle SQL scalar helper functions (omf_get_cv_display, cclsql_utc_cnvt, PM_GET_ALIAS, PM_GET_ENCNTR_PRSNL_ID, SQL_GET_NAME_DISPLAY, RCRGETFINNBR), Combined Query '<SubqueryAlias>:<ElementName>' ODA prefixing rule, and 28 new validated DA2 elements (144 -> 172 DA2 elements)."
+    ],
+    "already_covered": [
+      "Underlying V500 event-set tables (V500_EVENT_SET_CODE, V500_EVENT_SET_CANON, V500_EVENT_SET_EXPLODE), CLINICAL_EVENT, and CODE_VALUE.",
+      "26 of the 48 underlying V500 tables referenced by the XCW_* views (ENCOUNTER, PERSON, ORDERS, ORDER_ACTION, ORDER_DETAIL, MED_ADMIN_EVENT, SCH_APPT, SCH_EVENT, etc.).",
+      "6 unprefixed ODA dataset columns in benzo_opioid_current/fixed.rptdesign ('Enc Id', 'Person Name Full Format', 'Enc Loc Facility', 'Person Abs Birth Dt/Tm', 'Enc Discharge Dt/Tm', 'Enc Discharge Disp') and the BIRT 4.4.2 beforeOpen/onFetch try/catch architecture.",
+      "HealtheIntent millennium-ods/v1 table inventory and 2025.4.01 / 2026.1.01 EHI HTML schema pages (which supersede the 1,260 common basenames in the older 2018.01 Millenium data model.Zip archive)."
+    ],
+    "rejected": [
+      "SQL/Pharmacy - Intervention Education Detail RAW.sql: Rejected because the file body is actually 'Accounting - Charge Report [149d6a3a-f970-4ef7-8b2d-e829c398a3ce]' containing revenue/charge-selection logic unrelated to Pharmacy Intervention Education.",
+      "SQL/Pharmacy - Intervention Education Detail Standardized.sql: Rejected due to both the Accounting/Charge content mismatch and a syntax error on line 3 ('SELECT ENC.facility sdl.facility AS \"Patient Facility\"' missing comma).",
+      "SQL/Pharmacy - Coagulation Modifiers Not Active RAW.sql: Rejected as a duplicate copy of 'Pharmacy - Coagulation Modifiers Active [8db8d425-27a3-497a-9dc6-aac7904c1cf0]'.",
+      "SQL/Intervention Summary RAW.sql and SQL/Pharmacy - Intervention Education Complete - Missing Standardized.sql: Rejected (0-byte empty files).",
+      "Candidate 3 client-specific tabs, staff notes, external Google Docs links, and example/patient rows (eCensus sample row, PBX modify, PFS Authorization sample name, ad-hoc MRN export tab, Precaution Orders, Foundation dc listing, Physician Row 4 overlapping column range 7-21 and Rows 5-6 swapped First/Last Name descriptions, and temporary discharge code '30 = temp - discharge for Cerner'): Rejected to preserve strict client isolation and data accuracy.",
+      "Candidate 5 (Millenium data model.Zip, release 2018.01) as a schema replacement: Rejected from overwriting our newer 2025.4.01/2026.1.01 V500 schema baseline.",
+      "Candidate 6 subquery-prefixed labels ('Benzo:Order Mnemonic', 'Opioid:Order Mnemonic', etc.) as standalone global DA_ELEMENT names: Rejected as global element names because 'Benzo:' and 'Opioid:' are query-specific Combined Query subquery aliases; modeled instead as the general '<SubqueryAlias>:<ElementName>' Combined Query rule."
+    ]
+  }
+}

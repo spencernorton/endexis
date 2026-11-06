@@ -1,0 +1,1035 @@
+{
+  "catalog_version": "1.1.0",
+  "provenance": "historical_reference_findings_2026-11-03:candidate_1_and_candidate_4",
+  "design_note": "Keep DA2 presentation view names (XCW_*) and Discern SQL Engine table aliases (CWC_*) strictly separate from raw Millennium V500 table names.",
+  "summary_counts": {
+    "distinct_direct_da2_views": 48,
+    "encounter_id_join_views": 24,
+    "person_id_join_views": 23,
+    "org_id_join_views": 1,
+    "relational_via_variants": 9
+  },
+  "da2_views": [
+    {
+      "source_row": 3,
+      "da2_view_name": "XCW_DRG_ENCNTR_EXTENSION",
+      "da2_view_entry": "XCW_DRG_ENCNTR_EXTENSION",
+      "da2_alias": "DRG_ENC_EXT",
+      "da2_abbreviation": "DEE",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "DRG_ENCNTR_EXTENSION",
+      "v500_primary_keys": [
+        "ACTIVE_STATUS_PRSNL_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_3"
+    },
+    {
+      "source_row": 4,
+      "da2_view_name": "XCW_ENCNTR_ACCIDENT",
+      "da2_view_entry": "XCW_ENCNTR_ACCIDENT",
+      "da2_alias": "ENC_ACCIDENT",
+      "da2_abbreviation": "EAC",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_ACCIDENT",
+      "v500_primary_keys": [
+        "ACC_EMPL_ORG_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_4"
+    },
+    {
+      "source_row": 5,
+      "da2_view_name": "XCW_ENCNTR_ALIAS",
+      "da2_view_entry": "XCW_ENCNTR_ALIAS",
+      "da2_alias": "ENC_ALIAS",
+      "da2_abbreviation": "EA",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_ALIAS",
+      "v500_primary_keys": [
+        "ENCNTR_ALIAS_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_5"
+    },
+    {
+      "source_row": 6,
+      "da2_view_name": "XCW_ENCNTR_ENCNTR_RELTN",
+      "da2_view_entry": "XCW_ENCNTR_ENCNTR_RELTN",
+      "da2_alias": "ENC_ENC_RELTN",
+      "da2_abbreviation": "EER",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_ENCNTR_RELTN",
+      "v500_primary_keys": [
+        "ENCNTR_ENCNTR_RELTN_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_6"
+    },
+    {
+      "source_row": 7,
+      "da2_view_name": "XCW_ENCNTR_INFO",
+      "da2_view_entry": "XCW_ENCNTR_INFO",
+      "da2_alias": "ENC_INFO",
+      "da2_abbreviation": "EI",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_INFO",
+      "v500_primary_keys": [
+        "ENCNTR_INFO_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_7"
+    },
+    {
+      "source_row": 8,
+      "da2_view_name": "XCW_ENCNTR_LEAVE",
+      "da2_view_entry": "XCW_ENCNTR_LEAVE",
+      "da2_alias": "ENC_LEAVE",
+      "da2_abbreviation": "EL",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_LEAVE",
+      "v500_primary_keys": [
+        "ENCNTR_LEAVE_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_8"
+    },
+    {
+      "source_row": 9,
+      "da2_view_name": "XCW_ENCNTR_LOC_HIST",
+      "da2_view_entry": "XCW_ENCNTR_LOC_HIST",
+      "da2_alias": "ENC_LOC_HIST",
+      "da2_abbreviation": "ELH",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_LOC_HIST",
+      "v500_primary_keys": [
+        "ENCNTR_LOC_HIST_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_9"
+    },
+    {
+      "source_row": 10,
+      "da2_view_name": "XCW_ENCNTR_PERSON_RELTN",
+      "da2_view_entry": "XCW_ENCNTR_PERSON_RELTN",
+      "da2_alias": "ENC_PERSON_RELTN",
+      "da2_abbreviation": "EPR",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_PERSON_RELTN",
+      "v500_primary_keys": [
+        "ENCNTR_PERSON_RELTN_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_10"
+    },
+    {
+      "source_row": 11,
+      "da2_view_name": "XCW_ENCNTR_PLAN_RELTN",
+      "da2_view_entry": "XCW_ENCNTR_PLAN_RELTN",
+      "da2_alias": "ENC_PLAN_RELTN",
+      "da2_abbreviation": "EPL",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_PLAN_RELTN",
+      "v500_primary_keys": [
+        "ENCNTR_PLAN_RELTN_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_11"
+    },
+    {
+      "source_row": 12,
+      "da2_view_name": "XCW_ENCNTR_PRSNL_RELTN",
+      "da2_view_entry": "XCW_ENCNTR_PRSNL_RELTN",
+      "da2_alias": "ENC_PRSNL_RELTN",
+      "da2_abbreviation": "EPR",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCNTR_PRSNL_RELTN",
+      "v500_primary_keys": [
+        "ENCNTR_PRSNL_RELTN_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_12"
+    },
+    {
+      "source_row": 13,
+      "da2_view_name": "XCW_ENCOUNTER",
+      "da2_view_entry": "XCW_ENCOUNTER",
+      "da2_alias": "ENCOUNTER",
+      "da2_abbreviation": "ENC",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ENCOUNTER",
+      "v500_primary_keys": [
+        "ENCNTR_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_13"
+    },
+    {
+      "source_row": 14,
+      "da2_view_name": "XCW_HEALTH_MAINTENANCE",
+      "da2_view_entry": "XCW_HEALTH_MAINTENANCE",
+      "da2_alias": "HEALTH_MAINT",
+      "da2_abbreviation": "HM",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "HM_RECOMMENDATION",
+      "v500_primary_keys": [
+        "RECOMMENDATION_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_14"
+    },
+    {
+      "source_row": 17,
+      "da2_view_name": "XCW_LOCATION",
+      "da2_view_entry": "XCW_LOCATION",
+      "da2_alias": "LOCATION",
+      "da2_abbreviation": "LOC",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "LOCATION",
+      "v500_primary_keys": [
+        "LOCATION_CD"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "DA2 view joins LOCATION / LOCATION_GROUP to ENCOUNTER location code columns (LOC_FACILITY_CD, LOC_NURSE_UNIT_CD, LOC_ROOM_CD, LOC_BED_CD) at ENCOUNTER_ID grain.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_17"
+    },
+    {
+      "source_row": 18,
+      "da2_view_name": "XCW_LOCATION_GROUP",
+      "da2_view_entry": "XCW_LOCATION_GROUP",
+      "da2_alias": "LOC_GROUP",
+      "da2_abbreviation": "LG",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "LOCATION_GROUP",
+      "v500_primary_keys": [
+        "ACTIVE_STATUS_PRSNL_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "DA2 view joins LOCATION / LOCATION_GROUP to ENCOUNTER location code columns (LOC_FACILITY_CD, LOC_NURSE_UNIT_CD, LOC_ROOM_CD, LOC_BED_CD) at ENCOUNTER_ID grain.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_18"
+    },
+    {
+      "source_row": 19,
+      "da2_view_name": "XCW_MED_ADMIN_EVENT",
+      "da2_view_entry": "XCW_MED_ADMIN_EVENT",
+      "da2_alias": "MED_ADMIN_EVENT",
+      "da2_abbreviation": "MAE",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "MED_ADMIN_EVENT",
+      "v500_primary_keys": [
+        "MED_ADMIN_EVENT_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_19"
+    },
+    {
+      "source_row": 20,
+      "da2_view_name": "XCW_MED_IDENTIFIER",
+      "da2_view_entry": "XCW_MED_IDENTIFIER",
+      "da2_alias": "MED_IDENTIFIER",
+      "da2_abbreviation": "MID",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "MED_IDENTIFIER",
+      "v500_primary_keys": [
+        "ITEM_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "DA2 view exposes MED_IDENTIFIER at ENCOUNTER_ID grain via ORDERS / ORDER_PRODUCT bridge; raw V500.MED_IDENTIFIER PK is MED_IDENTIFIER_ID.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_20"
+    },
+    {
+      "source_row": 21,
+      "da2_view_name": "XCW_NOMENCLATURE",
+      "da2_view_entry": "XCW_NOMENCLATURE",
+      "da2_alias": "NOMENCLATURE",
+      "da2_abbreviation": "NOM",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "NOMENCLATURE",
+      "v500_primary_keys": [
+        "NOMENCLATURE_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "DA2 view exposes NOMENCLATURE at ENCOUNTER_ID grain via DIAGNOSIS / PROBLEM / CE_CODED_RESULT bridge; raw V500.NOMENCLATURE PK is NOMENCLATURE_ID.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_21"
+    },
+    {
+      "source_row": 22,
+      "da2_view_name": "XCW_ORDER_ACTION",
+      "da2_view_entry": "XCW_ORDER_ACTION",
+      "da2_alias": "ORDER_ACTION",
+      "da2_abbreviation": "OA",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ORDER_ACTION",
+      "v500_primary_keys": [
+        "ACTION_SEQUENCE",
+        "ORDER_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_22"
+    },
+    {
+      "source_row": 23,
+      "da2_view_name": "XCW_ORDER_DETAIL",
+      "da2_view_entry": "XCW_ORDER_DETAIL",
+      "da2_alias": "ORDER_DETAIL",
+      "da2_abbreviation": "OD",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "ORDER_DETAIL",
+      "v500_primary_keys": [
+        "ACTION_SEQUENCE",
+        "DETAIL_SEQUENCE",
+        "ORDER_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_23"
+    },
+    {
+      "source_row": 24,
+      "da2_view_name": "XCW_ORDERS",
+      "da2_view_entry": "XCW_ORDERS",
+      "da2_alias": "ORDERS",
+      "da2_abbreviation": "ORD",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "ORDERS",
+      "v500_primary_keys": [
+        "ORDER_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "DA2 view join key is documented as PERSON_ID for patient-level order rollup; raw V500.ORDERS has PK ORDER_ID and FKs both ENCNTR_ID and PERSON_ID.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_24"
+    },
+    {
+      "source_row": 25,
+      "da2_view_name": "XCW_ORG_TYPE_RELTN",
+      "da2_view_entry": "XCW_ORG_TYPE_RELTN",
+      "da2_alias": "ORG_TYPE_RELTN",
+      "da2_abbreviation": "OTR",
+      "documented_da2_join_key": "ORG_ID",
+      "effective_da2_join_key": "ORG_ID",
+      "underlying_v500_table": "ORG_TYPE_RELTN",
+      "v500_primary_keys": [
+        "ACTIVE_STATUS_PRSNL_ID"
+      ],
+      "v500_join_column": "ORGANIZATION_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_25"
+    },
+    {
+      "source_row": 30,
+      "da2_view_name": "XCW_PERSON",
+      "da2_view_entry": "XCW_PERSON",
+      "da2_alias": "PERSON",
+      "da2_abbreviation": "PER",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON",
+      "v500_primary_keys": [
+        "PERSON_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_30"
+    },
+    {
+      "source_row": 31,
+      "da2_view_name": "XCW_PERSON_ALIAS",
+      "da2_view_entry": "XCW_PERSON_ALIAS",
+      "da2_alias": "PERSON_ALIAS",
+      "da2_abbreviation": "PA",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_ALIAS",
+      "v500_primary_keys": [
+        "PERSON_ALIAS_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_31"
+    },
+    {
+      "source_row": 32,
+      "da2_view_name": "XCW_PERSON_INFO",
+      "da2_view_entry": "XCW_PERSON_INFO",
+      "da2_alias": "PERSON_INFO",
+      "da2_abbreviation": "PI",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_INFO",
+      "v500_primary_keys": [
+        "PERSON_INFO_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_32"
+    },
+    {
+      "source_row": 33,
+      "da2_view_name": "XCW_PERSON_NAME",
+      "da2_view_entry": "XCW_PERSON_NAME",
+      "da2_alias": "PERSON_NAME",
+      "da2_abbreviation": "PN",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_NAME",
+      "v500_primary_keys": [
+        "PERSON_NAME_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_33"
+    },
+    {
+      "source_row": 34,
+      "da2_view_name": "XCW_PERSON_NAME_HIST",
+      "da2_view_entry": "XCW_PERSON_NAME_HIST",
+      "da2_alias": "PERSON_NAME_HIST",
+      "da2_abbreviation": "PNH",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_NAME_HIST",
+      "v500_primary_keys": [
+        "ACTIVE_STATUS_PRSNL_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_34"
+    },
+    {
+      "source_row": 35,
+      "da2_view_name": "XCW_PERSON_ORG_RELTN",
+      "da2_view_entry": "XCW_PERSON_ORG_RELTN",
+      "da2_alias": "PERSON_ORG_RELTN",
+      "da2_abbreviation": "POR",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_ORG_RELTN",
+      "v500_primary_keys": [
+        "PERSON_ORG_RELTN_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_35"
+    },
+    {
+      "source_row": 36,
+      "da2_view_name": "XCW_PERSON_PATIENT",
+      "da2_view_entry": "XCW_PERSON_PATIENT",
+      "da2_alias": "PERSON_PATIENT",
+      "da2_abbreviation": "PP",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_PATIENT",
+      "v500_primary_keys": [],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_36"
+    },
+    {
+      "source_row": 37,
+      "da2_view_name": "XCW_PERSON_PERSON_RELTN",
+      "da2_view_entry": "XCW_PERSON_PERSON_RELTN",
+      "da2_alias": "PERSON_PERSON_RELTN",
+      "da2_abbreviation": "PPR",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_PERSON_RELTN",
+      "v500_primary_keys": [
+        "PERSON_PERSON_RELTN_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_37"
+    },
+    {
+      "source_row": 38,
+      "da2_view_name": "XCW_PERSON_PLAN_RELTN",
+      "da2_view_entry": "XCW_PERSON_PLAN_RELTN",
+      "da2_alias": "PERSON_PLAN_RELTN",
+      "da2_abbreviation": "PPR",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PERSON_PLAN_RELTN",
+      "v500_primary_keys": [
+        "PERSON_PLAN_RELTN_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_38"
+    },
+    {
+      "source_row": 39,
+      "da2_view_name": "XCW_PFT_BILL_ACTIVITY",
+      "da2_view_entry": "XCW_PFT_BILL_ACTIVITY",
+      "da2_alias": "PFT_BILL_ACT",
+      "da2_abbreviation": "PBA",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PFT_BILL_ACTIVITY",
+      "v500_primary_keys": [
+        "PFT_BILL_ACTIVITY_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_39"
+    },
+    {
+      "source_row": 40,
+      "da2_view_name": "XCW_PFT_CHARGE",
+      "da2_view_entry": "XCW_PFT_CHARGE",
+      "da2_alias": "PFT_CHARGE",
+      "da2_abbreviation": "PC",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PFT_CHARGE",
+      "v500_primary_keys": [
+        "PFT_CHARGE_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_40"
+    },
+    {
+      "source_row": 41,
+      "da2_view_name": "XCW_PFT_TRANS_ALIAS",
+      "da2_view_entry": "XCW_PFT_TRANS_ALIAS",
+      "da2_alias": "PFT_TRANS_ALIAS",
+      "da2_abbreviation": "PTA",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PFT_TRANS_ALIAS",
+      "v500_primary_keys": [
+        "PFT_TRANS_ALIAS_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_41"
+    },
+    {
+      "source_row": 44,
+      "da2_view_name": "XCW_PROBLEM",
+      "da2_view_entry": "XCW_PROBLEM",
+      "da2_alias": "PROBLEM",
+      "da2_abbreviation": "PROB",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PROBLEM",
+      "v500_primary_keys": [
+        "PROBLEM_INSTANCE_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_44"
+    },
+    {
+      "source_row": 45,
+      "da2_view_name": "XCW_PROBLEM_ACTION",
+      "da2_view_entry": "XCW_PROBLEM_ACTION",
+      "da2_alias": "PROBLEM_ACTION",
+      "da2_abbreviation": "PA",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PROBLEM_ACTION",
+      "v500_primary_keys": [
+        "PROBLEM_ACTION_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_45"
+    },
+    {
+      "source_row": 46,
+      "da2_view_name": "XCW_PROBLEM_COMMENT",
+      "da2_view_entry": "XCW_PROBLEM_COMMENT",
+      "da2_alias": "PROBLEM_COMMENT",
+      "da2_abbreviation": "PC",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PROBLEM_COMMENT",
+      "v500_primary_keys": [
+        "ACTIVE_STATUS_PRSNL_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_46"
+    },
+    {
+      "source_row": 47,
+      "da2_view_name": "XCW_PROC_PRSNL_RELTN",
+      "da2_view_entry": "XCW_PROC_PRSNL_RELTN",
+      "da2_alias": "PROC_PRSNL_RELTN",
+      "da2_abbreviation": "PPR",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PROC_PRSNL_RELTN",
+      "v500_primary_keys": [
+        "ACTIVE_STATUS_PRSNL_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_47"
+    },
+    {
+      "source_row": 48,
+      "da2_view_name": "XCW_PRSNL",
+      "da2_view_entry": "XCW_PRSNL",
+      "da2_alias": "PRSNL",
+      "da2_abbreviation": "PRL",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PRSNL",
+      "v500_primary_keys": [
+        "PERSON_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "In Millennium V500, PRSNL is a subtype of PERSON and uses PERSON_ID as its primary key.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_48"
+    },
+    {
+      "source_row": 49,
+      "da2_view_name": "XCW_PRSNL_ALIAS",
+      "da2_view_entry": "XCW_PRSNL_ALIAS",
+      "da2_alias": "PRSNL_ALIAS",
+      "da2_abbreviation": "PA",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PRSNL_ALIAS",
+      "v500_primary_keys": [],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "In Millennium V500, PRSNL is a subtype of PERSON and uses PERSON_ID as its primary key.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_49"
+    },
+    {
+      "source_row": 50,
+      "da2_view_name": "XCW_PRSNL_GROUP",
+      "da2_view_entry": "XCW_PRSNL_GROUP",
+      "da2_alias": "PRSNL_GROUP",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PRSNL_GROUP",
+      "v500_primary_keys": [
+        "PRSNL_GROUP_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_50"
+    },
+    {
+      "source_row": 51,
+      "da2_view_name": "XCW_PRSNL_GROUP_RELTN",
+      "da2_view_entry": "XCW_PRSNL_GROUP_RELTN",
+      "da2_alias": "PRSNL_GROUP_RELTN",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PRSNL_GROUP_RELTN",
+      "v500_primary_keys": [
+        "PRSNL_GROUP_RELTN_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_51"
+    },
+    {
+      "source_row": 52,
+      "da2_view_name": "XCW_REACTION",
+      "da2_view_entry": "XCW_REACTION",
+      "da2_alias": "REACTION",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "REACTION",
+      "v500_primary_keys": [
+        "REACTION_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_52"
+    },
+    {
+      "source_row": 54,
+      "da2_view_name": "XCW_SCH_APPT",
+      "da2_view_entry": "XCW_SCH_APPT",
+      "da2_alias": "SCH_APPT",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "SCH_APPT",
+      "v500_primary_keys": [
+        "SCH_APPT_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_54"
+    },
+    {
+      "source_row": 55,
+      "da2_view_name": "XCW_SCH_EV_ACTION",
+      "da2_view_entry": "XCW_SCH_EV_ACTION",
+      "da2_alias": "SCH_EV_ACTION",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "SCH_EVENT_ACTION",
+      "v500_primary_keys": [
+        "SCH_ACTION_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_55"
+    },
+    {
+      "source_row": 56,
+      "da2_view_name": "XCW_SCH_EV_COMMENT",
+      "da2_view_entry": "XCW_SCH_EV_COMMENT",
+      "da2_alias": "SCH_EV_COMMENT",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "SCH_EVENT_COMM",
+      "v500_primary_keys": [
+        "ACTIVE_STATUS_PRSNL_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_56"
+    },
+    {
+      "source_row": 57,
+      "da2_view_name": "XCW_SCH_EVENT",
+      "da2_view_entry": "XCW_SCH_EVENT",
+      "da2_alias": "SCH_EVENT",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "SCH_EVENT",
+      "v500_primary_keys": [
+        "SCH_EVENT_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_57"
+    },
+    {
+      "source_row": 58,
+      "da2_view_name": "XCW_SCH_EVENT_PATIENT",
+      "da2_view_entry": "XCW_SCH_EVENT_PATIENT",
+      "da2_alias": "SCH_EVENT_PATIENT",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "SCH_EVENT_PATIENT",
+      "v500_primary_keys": [],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_58"
+    },
+    {
+      "source_row": 59,
+      "da2_view_name": "XCW_SCH_RESOURCE",
+      "da2_view_entry": "XCW_SCH_RESOURCE",
+      "da2_alias": "SCH_RESOURCE",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "SCH_RESOURCE",
+      "v500_primary_keys": [
+        "RESOURCE_CD"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_59"
+    }
+  ],
+  "relational_path_variants": [
+    {
+      "source_row": 15,
+      "da2_view_name": "XCW_HEALTH_PLAN",
+      "da2_view_entry": "XCW_HEALTH_PLAN (via Encounter)",
+      "da2_alias": "HP_ENC",
+      "da2_abbreviation": "HPE",
+      "documented_da2_join_key": "ENCOUNTER_ID",
+      "effective_da2_join_key": "ENCOUNTER_ID",
+      "underlying_v500_table": "HEALTH_PLAN",
+      "v500_primary_keys": [
+        "HEALTH_PLAN_ID"
+      ],
+      "v500_join_column": "ENCNTR_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_15"
+    },
+    {
+      "source_row": 16,
+      "da2_view_name": "XCW_HEALTH_PLAN",
+      "da2_view_entry": "XCW_HEALTH_PLAN (via Person)",
+      "da2_alias": "HP_PERSON",
+      "da2_abbreviation": "HPP",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "HEALTH_PLAN",
+      "v500_primary_keys": [
+        "HEALTH_PLAN_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_16"
+    },
+    {
+      "source_row": 26,
+      "da2_view_name": "XCW_ORGANIZATION",
+      "da2_view_entry": "XCW_ORGANIZATION (via Allergy)",
+      "da2_alias": "ORG_ALLERGY",
+      "da2_abbreviation": "OA",
+      "documented_da2_join_key": "ORG_ID",
+      "effective_da2_join_key": "ORG_ID",
+      "underlying_v500_table": "ORGANIZATION",
+      "v500_primary_keys": [
+        "ORGANIZATION_ID"
+      ],
+      "v500_join_column": "ORGANIZATION_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_26"
+    },
+    {
+      "source_row": 27,
+      "da2_view_name": "XCW_ORGANIZATION",
+      "da2_view_entry": "XCW_ORGANIZATION (via Charge Mod)",
+      "da2_alias": "ORG_CHARGE_MOD",
+      "da2_abbreviation": "OCM",
+      "documented_da2_join_key": "ORG_ID",
+      "effective_da2_join_key": "ORG_ID",
+      "underlying_v500_table": "ORGANIZATION",
+      "v500_primary_keys": [
+        "ORGANIZATION_ID"
+      ],
+      "v500_join_column": "ORGANIZATION_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_27"
+    },
+    {
+      "source_row": 28,
+      "da2_view_name": "XCW_ORGANIZATION",
+      "da2_view_entry": "XCW_ORGANIZATION (via Diagnosis)",
+      "da2_alias": "ORG_DIAGNOSIS",
+      "da2_abbreviation": "OD",
+      "documented_da2_join_key": "ORG_ID",
+      "effective_da2_join_key": "ORG_ID",
+      "underlying_v500_table": "ORGANIZATION",
+      "v500_primary_keys": [
+        "ORGANIZATION_ID"
+      ],
+      "v500_join_column": "ORGANIZATION_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_28"
+    },
+    {
+      "source_row": 29,
+      "da2_view_name": "XCW_ORGANIZATION",
+      "da2_view_entry": "XCW_ORGANIZATION (via DRG)",
+      "da2_alias": "ORG_DRG",
+      "da2_abbreviation": "ODRG",
+      "documented_da2_join_key": "ORG_ID",
+      "effective_da2_join_key": "ORG_ID",
+      "underlying_v500_table": "ORGANIZATION",
+      "v500_primary_keys": [
+        "ORGANIZATION_ID"
+      ],
+      "v500_join_column": "ORGANIZATION_ID",
+      "validation_status": "validated",
+      "validation_notes": "Direct 1:1 DA2 view wrapper over V500 table.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_29"
+    },
+    {
+      "source_row": 42,
+      "da2_view_name": "XCW_PHONE",
+      "da2_view_entry": "XCW_PHONE (via Organization)",
+      "da2_alias": "PHONE_ORG",
+      "da2_abbreviation": "PO",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "ORG_ID",
+      "underlying_v500_table": "PHONE",
+      "v500_primary_keys": [
+        "PHONE_ID"
+      ],
+      "v500_join_column": "PARENT_ENTITY_ID",
+      "validation_status": "corrected",
+      "validation_notes": "Source spreadsheet Row 42 listed PERSON_ID due to copy-down; corrected to ORG_ID (V500.PHONE polymorphic join PARENT_ENTITY_NAME = 'ORGANIZATION' AND PARENT_ENTITY_ID = ORGANIZATION_ID).",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_42"
+    },
+    {
+      "source_row": 43,
+      "da2_view_name": "XCW_PHONE",
+      "da2_view_entry": "XCW_PHONE (via Person)",
+      "da2_alias": "PHONE_PERSON",
+      "da2_abbreviation": "PP",
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "PHONE",
+      "v500_primary_keys": [
+        "PHONE_ID"
+      ],
+      "v500_join_column": "PARENT_ENTITY_ID",
+      "validation_status": "validated",
+      "validation_notes": "V500.PHONE polymorphic join: PARENT_ENTITY_NAME = 'PERSON' AND PARENT_ENTITY_ID = PERSON_ID.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_43"
+    },
+    {
+      "source_row": 53,
+      "da2_view_name": "XCW_REFERRAL",
+      "da2_view_entry": "XCW_REFERRAL (via Person)",
+      "da2_alias": "REFERRAL_PERSON",
+      "da2_abbreviation": null,
+      "documented_da2_join_key": "PERSON_ID",
+      "effective_da2_join_key": "PERSON_ID",
+      "underlying_v500_table": "REFERRAL",
+      "v500_primary_keys": [
+        "REFERRAL_ID"
+      ],
+      "v500_join_column": "PERSON_ID",
+      "validation_status": "validated",
+      "validation_notes": "Source row omitted 3-letter abbreviation; use da2_alias or table_name in SQL.",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_1:Sheet1_row_53"
+    }
+  ],
+  "ejs_sql_engine_conventions": {
+    "engine_version_observed": "Discern SQL Engine (EJS) v. 3.15.1",
+    "table_alias_prefix": "CWC_",
+    "table_alias_examples": {
+      "ENCOUNTER": "CWC_ENCOUNTER",
+      "ENCNTR_ALIAS": "CWC_ENCNTR_ALIAS",
+      "PERSON": "CWC_PERSON",
+      "ORDERS": "CWC_ORDERS",
+      "ORDER_ACTION": "CWC_ORDER_ACTION",
+      "ORDER_DETAIL": "CWC_ORDER_DETAIL",
+      "MED_ADMIN_EVENT": "CWC_MED_ADMIN_EVENT",
+      "CLINICAL_EVENT": "CWC_CLINICAL_EVENT",
+      "CE_MED_RESULT": "CWC_CE_MED_RESULT",
+      "PI_THERA_CLASS_VW": "CWC_PI_THERA_CLASS_VW",
+      "MLTM_NDC_MAIN_DRUG_CODE": "CWC_MLTM_NDC_MAIN_DRUG_CODE"
+    },
+    "scalar_helper_functions": [
+      {
+        "function": "omf_get_cv_display(<code_value_column>)",
+        "purpose": "Oracle SQL function used by DA2 EJS to resolve CODE_VALUE.DISPLAY (equivalent to CCL uar_get_code_display()).",
+        "ccl_equivalent": "uar_get_code_display(<code_value_column>)"
+      },
+      {
+        "function": "cclsql_utc_cnvt(<dt_tm_column>, 1, 54)",
+        "purpose": "Oracle SQL function used by DA2 EJS to convert UTC dq8/DATE timestamps to local time zone.",
+        "ccl_equivalent": "cnvtdatetimeutc(<dt_tm_column>, 1)"
+      },
+      {
+        "function": "PM_GET_ALIAS('MRN', 0, CWC_PERSON.PERSON_ID, 0, SYSDATE)",
+        "purpose": "Oracle SQL helper returning active Person MRN without a fan-out join on PERSON_ALIAS.",
+        "ccl_equivalent": "JOIN PERSON_ALIAS pa WHERE pa.person_id = p.person_id AND pa.person_alias_type_cd = uar_get_code_by('MEANING', 4, 'MRN')"
+      },
+      {
+        "function": "PM_GET_ENCNTR_PRSNL_ID('ATTENDDOC', CWC_ENCOUNTER.ENCNTR_ID, SYSDATE)",
+        "purpose": "Oracle SQL helper resolving active Attending Physician PRSNL_PERSON_ID for an encounter.",
+        "ccl_equivalent": "JOIN ENCNTR_PRSNL_RELTN epr WHERE epr.encntr_id = e.encntr_id AND epr.encntr_prsnl_r_cd = uar_get_code_by('MEANING', 333, 'ATTENDDOC')"
+      },
+      {
+        "function": "SQL_GET_NAME_DISPLAY(<person_id>, OMF_GET_CVALUE(213, 'PRSNL', 'MEANING'))",
+        "purpose": "Oracle SQL helper resolving formatted personnel name for Code Set 213 name type PRSNL.",
+        "ccl_equivalent": "JOIN PRSNL pr WHERE pr.person_id = <person_id>"
+      },
+      {
+        "function": "RCRGETFINNBR(PE.ENCNTR_ID)",
+        "purpose": "Patient Accounting / RevCycle Oracle SQL helper resolving FIN number for PFT_ENCNTR.",
+        "ccl_equivalent": "JOIN ENCNTR_ALIAS ea WHERE ea.encntr_id = e.encntr_id AND ea.encntr_alias_type_cd = uar_get_code_by('MEANING', 319, 'FIN NBR')"
+      }
+    ],
+    "combined_query_subquery_prefix_rule": {
+      "description": "When a DA2 Combined Query merges two subqueries (e.g. Subquery 'Benzo' and Subquery 'Opioid'), DA2 prefixes duplicate element names in cachedMetaData with '<SubqueryAlias>:<ElementName>' (e.g. 'Benzo:Order Mnemonic', 'Opioid:Order Mnemonic') while keeping shared encounter/person merge keys unprefixed ('Enc Id', 'Person Name Full Format').",
+      "provenance": "historical_reference_findings_2026-11-03:candidate_6:combined_query_oda_metadata"
+    }
+  }
+}

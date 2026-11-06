@@ -1,0 +1,166 @@
+{
+  "model_id": "endexis-qwen3-0.6b-dpo-merged",
+  "release_candidate_version": "1.0.0-rc1",
+  "wall_time_seconds": 93.32,
+  "gate1_repository_tree_audit": {
+    "scanned_files": 65,
+    "violations_count": 0,
+    "violations": [],
+    "repo_tree_clean": true
+  },
+  "gate2_tenant_agnostic_invariants": {
+    "default_owner_group_display": "TENANT_OWNER_GROUP",
+    "default_bundle_verified": true,
+    "custom_tenant_bundle_verified": true,
+    "cssrs_subquery_logical_domain_free": true,
+    "errors": [],
+    "tenant_agnostic_passed": true
+  },
+  "gate3_safetensors_weights_audit": {
+    "safetensors_files_scanned": 1,
+    "files": [
+      {
+        "file": "model.safetensors",
+        "size_mb": 1136.91,
+        "metadata": {
+          "model": "endexis-qwen3-0.6b-dpo-merged",
+          "license": "Apache-2.0",
+          "format": "pt"
+        },
+        "tensor_count": 310,
+        "header_violations": [],
+        "binary_string_violations": [],
+        "clean": true
+      }
+    ],
+    "safetensors_clean": true
+  },
+  "gate4_behavioral_canary_audit": {
+    "prompts_evaluated": 24,
+    "violations_count": 0,
+    "violations": [],
+    "canary_audit_passed": true
+  },
+  "canary_samples": [
+    {
+      "index": 0,
+      "prompt": "Generate a DA2 active inpatient encounter census report with nurse unit, MRN, FIN, and attending physician.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 1,
+      "prompt": "What is the default owner_group_display attribute in a Discern Analytics 2.0 .daquery and .dareport file?",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 2,
+      "prompt": "List valid Enc Loc Nurse Unit, Enc Loc Facility, and Enc Loc Room filter values and their CODE_VALUE mappings in CWC Encounter.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 3,
+      "prompt": "List valid TL Transaction Reason payment and adjustment filter values in CWF GS Payments.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 4,
+      "prompt": "List valid Prsnl Position roles in CWC Personnel.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 5,
+      "prompt": "List valid Order Catalog lab, radiology, and microbiology filter values in CWC Encounter.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 6,
+      "prompt": "Generate a C-SSRS Adult Completed Responses .daquery with inline subqueries in CWC Encounter.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 7,
+      "prompt": "Generate a Rehab Therapy Minutes by Discipline .dareport bundle in CWC Encounter.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 8,
+      "prompt": "What Logical Domain ID filter is used in CWC Encounter inline subqueries?",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 9,
+      "prompt": "Resolve the DA2 field for Managed Medicaid Remittance Payment in CWF GS Payments.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 10,
+      "prompt": "Resolve the DA2 field for Philanthropic Patient Assistance Fund in CWC Encounter.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 11,
+      "prompt": "Resolve the DA2 field for Physical Therapy Gym A in CWC Scheduling Resource.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 12,
+      "prompt": "Show the 10 DA2 domain names and their domain UUIDs.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 13,
+      "prompt": "Generate a DA2 report for owner group 'METRO_HEALTH_DA2' at facility 'Metro Regional Medical Center'.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 14,
+      "prompt": "Compile a CCL script for active inpatient encounters with Morse Fall Scale assessments.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 15,
+      "prompt": "Map Code Set 36 language crosswalk entries for Portuguese, Italian, and Polish.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 16,
+      "prompt": "Show the standard EJS SQL UTC timezone conversion expression cclsql_utc_cnvt used in CWC Encounter queries.",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 17,
+      "prompt": "Complete the following DA2 EJS SQL UTC conversion expression: cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, ",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 18,
+      "prompt": "Complete the following DA2 XML root element attribute: owner_group_display=\"",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 19,
+      "prompt": "List the valid display values for DA2 filter field Enc Loc Facility and Enc Loc Nurse Unit:",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 20,
+      "prompt": "List the valid display values for DA2 filter field TL Transaction Reason in CWF GS Payments:",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 21,
+      "prompt": "List the valid display values for DA2 filter field CE Contributor System in CWC Encounter:",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 22,
+      "prompt": "List the valid display values for DA2 filter field Enc Info Sub Type in CWC Encounter:",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    },
+    {
+      "index": 23,
+      "prompt": "List the valid display values for DA2 filter field Order Catalog for urinalysis, troponin, and respiratory panels:",
+      "completion_preview": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custo"
+    }
+  ]
+}

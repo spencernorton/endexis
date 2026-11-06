@@ -1,0 +1,4838 @@
+[
+  {
+    "code_set": 1,
+    "name": "Millennium Code Set 1",
+    "referenced_by_columns": [
+      "ENCNTR_INFO.VALUE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 2,
+    "name": "Admission Source / Point of Origin (UB-04 FL-15)",
+    "referenced_by_columns": [
+      "AOAV_PERSON_ENCNTR.AOAV_PRIOR_LOC_TYPE_CD",
+      "LH_D_ADMIT_SRC.ADMIT_SRC_CD",
+      "SIM_QUEUE_DETAIL_INFO.ENTITY_TYPE_FLAG"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "BORNINSIDETHEHOSPITAL",
+      "TRANSFERFROMAHOSPITAL"
+    ],
+    "ccl_uar_usage_count": 2,
+    "hl7_or_ub04_field": "UB-04 FL-15 / HL7 PV1-14",
+    "provenance": "historical_reference_findings_2026-11-03:candidate_3_ub04_fl15",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/2"
+  },
+  {
+    "code_set": 3,
+    "name": "Encounter Admission Type",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "NEWBORN"
+    ],
+    "ccl_displaykeys": [
+      "EMERGENCY",
+      "NEWBORN",
+      "URGENT"
+    ],
+    "ccl_uar_usage_count": 4,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/3"
+  },
+  {
+    "code_set": 4,
+    "name": "Person Alias Type (MRN, SSN, CMRN)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CMRN",
+      "MRN",
+      "SSN"
+    ],
+    "ccl_displaykeys": [
+      "ACCOUNTNUMBER",
+      "MRN",
+      "SSN"
+    ],
+    "ccl_uar_usage_count": 29,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4"
+  },
+  {
+    "code_set": 8,
+    "name": "Clinical Result / Auth Status (AUTH, MODIFIED, ALTERED, INERROR, UNORM)",
+    "referenced_by_columns": [
+      "DTS_TRANS_STATS.RESULT_STATUS_CD",
+      "LH_CNT_IC_ADV_MICRO.RESULT_STATUS_CD",
+      "PAT_ED_DOCUMENT.STATUS_CD",
+      "PAT_ED_DOC_ACTIVITY.STATUS_CD",
+      "SI_DOCUMENT_METADATA.DOC_REFERENCE_STATUS_CD"
+    ],
+    "ccl_meanings": [
+      "ALTERED",
+      "AUTH",
+      "IN ERROR",
+      "INERROR",
+      "MODIFIED"
+    ],
+    "ccl_displaykeys": [
+      "AUTHVERIFIED",
+      "TRANSCRIBED"
+    ],
+    "ccl_uar_usage_count": 10
+  },
+  {
+    "code_set": 14,
+    "name": "Millennium Code Set 14",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "ORD COMMENT"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 16,
+    "name": "Courtesy",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/16",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 17,
+    "name": "Diagnosis Type (ADMIT, DISCHARGE, FINAL, WORKING, RFV)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "ADMIT",
+      "DISCHARGE",
+      "FINAL",
+      "RFV"
+    ],
+    "ccl_displaykeys": [
+      "ADMITTING",
+      "DISCHARGE",
+      "FINAL",
+      "REASONFORVISIT"
+    ],
+    "ccl_uar_usage_count": 18
+  },
+  {
+    "code_set": 18,
+    "name": "Diet",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/18",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 19,
+    "name": "Discharge Disposition / Patient Status (UB-04 FL-17)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "EXPIRED",
+      "HOME",
+      "LEFTWITHOUTBEINGSEEN"
+    ],
+    "ccl_uar_usage_count": 4,
+    "hl7_or_ub04_field": "UB-04 FL-17 / HL7 PV1-36",
+    "provenance": "historical_reference_findings_2026-11-03:candidate_3_ub04_fl17",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/19"
+  },
+  {
+    "code_set": 20,
+    "name": "Millennium Code Set 20",
+    "referenced_by_columns": [
+      "AOAV_PERSON_ENCNTR.AOAV_DISCH_LOC_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 21,
+    "name": "Millennium Code Set 21",
+    "referenced_by_columns": [
+      "HIM_EVENT_ALLOCATION.ACTION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "PERFORM"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 23,
+    "name": "Millennium Code Set 23",
+    "referenced_by_columns": [
+      "AP_CASE_SYNOPTIC_WS_DATA.ANSWER_TEXT_FORMAT_CD",
+      "PL_ORG_LOGO_XREF.FORMAT_CD",
+      "SI_DOCUMENT_METADATA.DOC_FORMAT_CD",
+      "SI_INTEROP_METADATA.DOC_FORMAT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 27,
+    "name": "Ethnic Group / Hispanic Origin (HL7 PID-22)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "HISPANICLATINOORSPANISHORIGIN",
+      "HISPANICORLATINO",
+      "NOTHISPANICLATINOORSPANISHORIGIN",
+      "NOTHISPANICORLATINO"
+    ],
+    "ccl_uar_usage_count": 4,
+    "hl7_or_ub04_field": "HL7 PID-22"
+  },
+  {
+    "code_set": 34,
+    "name": "Medical Service / Hospital Service",
+    "referenced_by_columns": [
+      "CHARGE.MED_SERVICE_CD",
+      "INTERFACE_CHARGE.MED_SERVICE_CD",
+      "LH_D_MED_SERVICE.MED_SERVICE_CD",
+      "WORKLOAD.MED_SERVICE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "DONOR",
+      "HOSPICEPROGRAM",
+      "INTERFACILITY",
+      "LABORANDDELIVERY",
+      "LONGTERMCARE",
+      "SLEEPSTUDIES",
+      "SWINGBED"
+    ],
+    "ccl_uar_usage_count": 9,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/34"
+  },
+  {
+    "code_set": 36,
+    "name": "Language (Patient Primary Language, HL7 PID-15)",
+    "referenced_by_columns": [
+      "NOMENCLATURE_LOAD.LANGUAGE_CD",
+      "NOMENCLATURE_LOAD_NS.LANGUAGE_CD",
+      "SI_XDOC_METADATA.LANGUAGE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ALBANIAN",
+      "ARABIC",
+      "ARMENIAN",
+      "BENGALI",
+      "BOSNIAN",
+      "CAMBODIAN",
+      "CANTONESE",
+      "CHINESE",
+      "CREOLE",
+      "CROATIAN",
+      "DUTCH",
+      "ENGLISH",
+      "FARSI",
+      "FRENCH",
+      "GERMAN",
+      "GREEK",
+      "GUJARATI",
+      "HAITIAN",
+      "HEBREW",
+      "HINDI",
+      "HMONG",
+      "HUNGARIAN",
+      "INDONESIAN",
+      "ITALIAN",
+      "JAPANESE",
+      "KOREAN",
+      "LAO",
+      "MALAY",
+      "MALAYALAM",
+      "MANDARIN",
+      "POLISH",
+      "PORTUGUESE",
+      "PUNJABI",
+      "ROMANIAN",
+      "RUSSIAN",
+      "SERBIAN",
+      "SIGNLANGUAGE",
+      "SOMALI",
+      "SPANISH",
+      "SWAHILI",
+      "TAMIL",
+      "TELUGU",
+      "THAI",
+      "TURKISH",
+      "UKRAINIAN",
+      "URDU",
+      "VIETNAMESE",
+      "YIDDISH"
+    ],
+    "ccl_uar_usage_count": 0,
+    "hl7_or_ub04_field": "HL7 PID-15",
+    "provenance": "historical_reference_findings_2026-11-03:candidate_3_code_set_36_language_crosswalk",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/36"
+  },
+  {
+    "code_set": 38,
+    "name": "Marital Status",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/38",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 40,
+    "name": "Person Relationship Types",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CHLD_RESP",
+      "MOTHER"
+    ],
+    "ccl_displaykeys": [
+      "CHILD"
+    ],
+    "ccl_uar_usage_count": 9,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/40"
+  },
+  {
+    "code_set": 43,
+    "name": "Phone Type (HOME, BUSINESS, MOBILE)",
+    "referenced_by_columns": [
+      "FT_PRSNL_CONTACT.PHONE_NBR_TYPE_CD",
+      "HPD_SERVICE.EMAIL_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "BUSINESS"
+    ],
+    "ccl_displaykeys": [
+      "BUSINESS",
+      "FAXBUSINESS",
+      "HOME",
+      "MOBILE"
+    ],
+    "ccl_uar_usage_count": 28
+  },
+  {
+    "code_set": 48,
+    "name": "Active Status (ACTIVE, INACTIVE, COMBINED)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ACTIVE"
+    ],
+    "ccl_uar_usage_count": 26
+  },
+  {
+    "code_set": 52,
+    "name": "Normalcy / Criticality (NORMAL, LOW, HIGH, CRITICAL)",
+    "referenced_by_columns": [
+      "BR_CAT_EVENT_NORMALCY.NORMALCY_CD",
+      "HF_R_HL7_ISOLATE.CLIENT_RESULT_IND_CODE",
+      "HF_R_HL7_ISOLATE.CLIENT_RESULT_IND_DESC",
+      "HF_R_HL7_ISOLATE.CLIENT_RESULT_IND_DISPLAY",
+      "HF_R_HL7_ISOLATE.CLIENT_RESULT_IND_MEANING",
+      "HF_R_ISOLATE.CLIENT_RESULT_IND_CODE",
+      "HF_R_ISOLATE.CLIENT_RESULT_IND_DESC",
+      "HF_R_ISOLATE.CLIENT_RESULT_IND_DISPLAY",
+      "HF_R_ISOLATE.CLIENT_RESULT_IND_MEANING",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_RESULT_IND_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_RESULT_IND_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_RESULT_IND_DISPLAY"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/52"
+  },
+  {
+    "code_set": 53,
+    "name": "Clinical Event Class (TXT, NUM, MED, DOC, GRP, RAD, MBO)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "IMMUN",
+      "MED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 54,
+    "name": "Units of Measure",
+    "referenced_by_columns": [
+      "AP_CASE_SYNOPTIC_WS_DATA.ANSWER_UNIT_CD",
+      "BR_AUTO_RLI_ALIAS.UNIT_MEANING",
+      "CE_CALCULATION_RESULT.UNIT_OF_MEASURE_CD",
+      "CE_PRODUCT.PRODUCT_QUANTITY_UNIT_CD",
+      "CE_PRODUCT.PRODUCT_STRENGTH_UNIT_CD",
+      "CE_PRODUCT.PRODUCT_VOLUME_UNIT_CD",
+      "DD_SDOC_DATA.VALUE_UNIT_CD",
+      "DRC_UNIT.DRC_UNIT_CKI",
+      "DRC_UNIT_EXPRSN.UNIT_EXPRSN_CKI",
+      "FILL_PRINT_ORD_HX.BASAL_RATE_UNIT_CD",
+      "FILL_PRINT_ORD_HX.CLINICIAN_DOSE_UNIT_CD",
+      "FILL_PRINT_ORD_HX.DOSE_LIMIT_TIME_UNIT_CD",
+      "FILL_PRINT_ORD_HX.DOSE_LIMIT_UNIT_CD",
+      "FILL_PRINT_ORD_HX.LOADING_DOSE_UNIT_CD",
+      "HF_R_HL7_ISOLATE.CLIENT_UNIT_CODE",
+      "HF_R_HL7_ISOLATE.CLIENT_UNIT_DESC",
+      "HF_R_HL7_ISOLATE.CLIENT_UNIT_DISPLAY",
+      "HF_R_HL7_ISOLATE.CLIENT_UNIT_MEANING",
+      "HF_R_ISOLATE.CLIENT_UNIT_CODE",
+      "HF_R_ISOLATE.CLIENT_UNIT_DESC",
+      "HF_R_ISOLATE.CLIENT_UNIT_DISPLAY",
+      "HF_R_ISOLATE.CLIENT_UNIT_MEANING",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_UNIT_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_UNIT_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_UNIT_DISPLAY",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_UNIT_MEANING",
+      "MIC_DETAIL_TASK.UNITS_CD",
+      "MIC_EVENT_DETAIL.RESULT_UNIT_CD",
+      "MIC_REF_ANG_REPORT.UNITS_CD",
+      "MIC_SUS_MED_RESULT.RESULT_UNITS_CD",
+      "MLLD_NDC_INGRED_STRENGTH.STRENGTH_DENOM_UNIT_CD",
+      "MLLD_NDC_INGRED_STRENGTH.STRENGTH_NUM_UNIT_CD",
+      "MLLD_UNITS.UNIT_CD",
+      "MLTM_DRC_PREMISE.DOSE_UNIT_CD",
+      "MLTM_NDC_INGRED_STRENGTH.STRENGTH_DENOM_UNIT_CD",
+      "MLTM_NDC_INGRED_STRENGTH.STRENGTH_NUM_UNIT_CD",
+      "ORDER_SENTENCE_FILTER.AGE_UNIT_CD",
+      "PBS_DRUG.PACK_SIZE_UNIT_CD",
+      "PBS_LISTING.MAXIMUM_QTY_UNIT_CD",
+      "PW_COMP_OS_RELTN.NORMALIZED_DOSE_UNIT_IND"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 57,
+    "name": "Millennium Code Set 57",
+    "referenced_by_columns": [
+      "AOAV_PERSON_ENCNTR.AOAV_SEX_CD",
+      "CNT_DCP_INTERP2.SEX_CD",
+      "CNT_EQUATION.SEX_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "FEMALE"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 62,
+    "name": "Millennium Code Set 62",
+    "referenced_by_columns": [
+      "MLTM_CUSTOM_CSA_SCHEDULE.STATE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 64,
+    "name": "Millennium Code Set 64",
+    "referenced_by_columns": [
+      "LH_D_INTERP_RESULTS.INTERP_CD",
+      "MIC_INTERP_DATA.INTERP_RESULT_CD",
+      "MIC_MEDICATION_RANGE.DEFAULT_RESULT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 65,
+    "name": "Millennium Code Set 65",
+    "referenced_by_columns": [
+      "MIC_ABN_SUS_RESULT.SUS_METHOD_CD",
+      "MIC_VALID_SUS_PANEL.METHOD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 66,
+    "name": "Millennium Code Set 66",
+    "referenced_by_columns": [
+      "CNT_EQUATION.AGE_FROM_UNITS_CD",
+      "CNT_EQUATION.AGE_TO_UNITS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 67,
+    "name": "VIP",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/67",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 69,
+    "name": "Encounter Type Class (INPATIENT, OUTPATIENT, EMERGENCY, RECURRING)",
+    "referenced_by_columns": [
+      "ORDER_RESULTS_HOLD_CONFIG.ENCOUNTER_TYPE_CLASS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "INPATIENT"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 71,
+    "name": "Encounter Type (Inpatient, Outpatient, Day Stay, Observation, Emergency)",
+    "referenced_by_columns": [
+      "CHARGE.ADMIT_TYPE_CD",
+      "DD_SREF_CRIT_ENC_TYP_RELTN.ENCNTR_TYPE_CD",
+      "INTERFACE_CHARGE.ADMIT_TYPE_CD",
+      "LH_D_ENCNTR_TYPE.ENCNTR_TYPE_CD",
+      "SERVICE_TYPE_GROUPING.PARENT_CD",
+      "WORKLOAD.ENCNTR_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "INPATIENT",
+      "OBSERVATION",
+      "OUTPATIENT"
+    ],
+    "ccl_displaykeys": [
+      "CLIENT",
+      "CLINIC",
+      "EMERGENCY",
+      "EMS",
+      "HISTORY",
+      "INPATIENT",
+      "OUTPATIENTDIAGNOSTIC",
+      "MULTIDAYOUTPATIENT",
+      "NURSINGHOME",
+      "OBSERVATION",
+      "OUTPATIENT",
+      "OUTPATIENTINABED",
+      "PHONEMESSAGE",
+      "PREADMIT",
+      "PRECLIENT",
+      "PRERECURRING",
+      "PREREG",
+      "RECURRING",
+      "RESULTSONLY",
+      "SAMEDAYSURGERY",
+      "SWINGBED"
+    ],
+    "ccl_uar_usage_count": 59,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/71"
+  },
+  {
+    "code_set": 72,
+    "name": "Clinical Event Code (Discrete DTA / Observation Catalog)",
+    "referenced_by_columns": [
+      "CDI_DOCUMENT_TYPE_LIST.CODE_SET",
+      "CDI_DOCUMENT_TYPE_LIST.EVENT_CD",
+      "CDI_PENDING_DOCUMENT.EVENT_CODESET",
+      "CHART_ACTIVITY_TEMP.EVENT_CD",
+      "SA_REF_FLUID.EVENT_CD",
+      "SI_DOCUMENT_METADATA.EVENT_CD",
+      "SI_INTEROP_METADATA.EVENT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ACTIVITYBRADEN",
+      "APGAR1MINUTEBYHISTORY",
+      "APGAR5MINUTEBYHISTORY",
+      "BATHINGADLINDEX",
+      "BEDMOBILITYASSISTANCE",
+      "BIRTHWEIGHTNB",
+      "BRADENQSCORE",
+      "BRADENSCORE",
+      "Birth Weight",
+      "Birth Weight:",
+      "CLINICALHEIGHT",
+      "CLINICALWEIGHT",
+      "DATEANDTIMEOFINJURY",
+      "DATETIMEOFDEATH",
+      "Delivery Type Birth",
+      "Delivery Type, Birth",
+      "FRICTIONANDSHEARBRADEN",
+      "HIGHFALLRISKWARRANTED",
+      "HUMPTYDUMPTYSCORE",
+      "LEVELOFCONSCIOUSNESS",
+      "MODEOFARRIVAL",
+      "MOBILITYBRADEN",
+      "MOISTUREBRADEN",
+      "MORSEFALLSCORE",
+      "NUTRITIONBRADEN",
+      "OXYGENTHERAPY",
+      "PHYSICIANPROGRESSNOTES",
+      "REMINDERS",
+      "SENSORYPERCEPTIONBRADEN",
+      "REFERRALNUMBER",
+      "TRAUMATEAMACTIVATED",
+      "TRAUMATEAMACTIVATEDTIME",
+      "TRAUMATEAMACTIVATIONLEVEL",
+      "URINARYELIMINATION",
+      "VENTILATORACTIVITY"
+    ],
+    "ccl_uar_usage_count": 38,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/72"
+  },
+  {
+    "code_set": 73,
+    "name": "Location Contributor Source",
+    "referenced_by_columns": [
+      "BR_BB_MODEL.MODEL_CD",
+      "CV_PROC_HX.VENDOR_CD",
+      "CV_STEP.VENDOR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "HL7STDSRC",
+      "STDCONTRIBSRC",
+      "PREMIER"
+    ],
+    "ccl_uar_usage_count": 11,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/73"
+  },
+  {
+    "code_set": 79,
+    "name": "Task Status (COMPLETE, PENDING, INPROCESS, OVERDUE, DISCONTINUED)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CANCELED",
+      "COMPLETE",
+      "DELETED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 3
+  },
+  {
+    "code_set": 88,
+    "name": "Position / Personnel Role",
+    "referenced_by_columns": [
+      "APP_PREFS.POSITION_CD",
+      "DCP_CUSTOM_COLS_SORT.POSITION_CD",
+      "DCP_CUSTOM_COLUMNS.POSITION_CD",
+      "PL_SEGMENT_POS_XREF.POSITION_CD",
+      "PREG_BR_CONFIG_HISTORY.POSITION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 89,
+    "name": "Contributor System",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "3M"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 93,
+    "name": "Millennium Code Set 93",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ALLSERVICESECTIONS",
+      "LABORATORY"
+    ],
+    "ccl_uar_usage_count": 3
+  },
+  {
+    "code_set": 97,
+    "name": "Medication Administration Site",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/97",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 103,
+    "name": "Millennium Code Set 103",
+    "referenced_by_columns": [
+      "HIM_EVENT_ALLOCATION.ACTION_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 106,
+    "name": "Millennium Code Set 106",
+    "referenced_by_columns": [
+      "BILL_ITEM.EXT_OWNER_CD",
+      "BR_CONTR_ACT_R.ACTIVITY_TYPE_CD",
+      "WP_TEMPLATE.ACTIVITY_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "PHARMACY"
+    ],
+    "ccl_displaykeys": [
+      "AMBULATORYPROCEDURES",
+      "EVALUATIONANDMANAGEMENT",
+      "PERSONMANAGEMENT",
+      "PHARMACY",
+      "VENTILATOR"
+    ],
+    "ccl_uar_usage_count": 12
+  },
+  {
+    "code_set": 120,
+    "name": "Millennium Code Set 120",
+    "referenced_by_columns": [
+      "LONG_BLOB.COMPRESSION_CD"
+    ],
+    "ccl_meanings": [
+      "OCFCOMP"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 200,
+    "name": "Order Catalog (Procedures, Medications, Labs, Consults)",
+    "referenced_by_columns": [
+      "CHART_ACTIVITY_TEMP.CATALOG_CD",
+      "HF_R_HL7_ISOLATE.CLIENT_ORDER_CODE",
+      "HF_R_HL7_ISOLATE.CLIENT_ORDER_DESC",
+      "HF_R_HL7_ISOLATE.CLIENT_ORDER_DISPLAY",
+      "HF_R_ISOLATE.CLIENT_ORDER_CODE",
+      "HF_R_ISOLATE.CLIENT_ORDER_DESC",
+      "HF_R_ISOLATE.CLIENT_ORDER_DISPLAY",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ORDER_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ORDER_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ORDER_DISPLAY",
+      "MIC_ABN_ORG_RESPONSE_CODE.CATALOG_CD",
+      "MIC_ABN_SUS_RESULT.CATALOG_CD",
+      "MIC_ACT_ANG_SUM_RPT.CATALOG_CD",
+      "MIC_ANG_AUTOMATED.CATALOG_CD",
+      "MIC_ANG_TIMES.CATALOG_CD",
+      "MIC_GROUP_RESPONSE.CATALOG_CD",
+      "MIC_MEDIA_ACTIVITY.CATALOG_CD",
+      "MIC_MEDIA_DEFAULT.CATALOG_CD",
+      "MIC_MEDS_ACTIVITY.CATALOG_CD",
+      "MIC_ORDER_LAB.CATALOG_CD",
+      "MIC_PATHOGEN.CATALOG_CD",
+      "MIC_REF_ANG.CATALOG_CD",
+      "MIC_RPT_PARAMS.CATALOG_CD",
+      "MIC_TASK_LOG.CATALOG_CD",
+      "MIC_VALID_CODED_RESPONSE.CATALOG_CD",
+      "MIC_VALID_ORGANISM.CATALOG_CD",
+      "MIC_VALID_SUS_PANEL.CATALOG_CD",
+      "TRACK_ORD_EVENT_RELTN.CAT_OR_CATTYPE_CD",
+      "TRACK_ORD_TRIGGER.CHILD_CD",
+      "TRACK_ORD_TRIGGER.PARENT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ACTIVITY",
+      "ADMITTOINPATIENT",
+      "CHLORHEXIDINEBATH",
+      "CMPSOINPATIENT",
+      "DAILYWEIGHT",
+      "DIETARYSUPPLEMENTS",
+      "DISCHARGEPATIENT",
+      "GLUCOSEMONITORING",
+      "INCENTIVESPIROMETRYNURSING",
+      "PLACEINOBSERVATION",
+      "RESUSCITATIONSTATUS",
+      "SCDS",
+      "STRICTINTAKEANDOUTPUT",
+      "TRANSFUSEFRESHFROZENPLASMANURSING",
+      "TRANSFUSEPLATELETPRODUCTNURSING",
+      "TRANSFUSEREDBLOODCELLSLEUKOREDUCED",
+      "VENTILATOR",
+      "Zero Hour Chemo"
+    ],
+    "ccl_uar_usage_count": 21,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/200"
+  },
+  {
+    "code_set": 212,
+    "name": "Address Type (HOME, BUSINESS, MAILING, TEMPORARY)",
+    "referenced_by_columns": [
+      "ROI_REQUEST.BILL_TO_ADDRESS_TYPE_CD",
+      "ROI_REQUEST.MAIL_TO_ADDRESS_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "BUSINESS",
+      "EMAIL",
+      "HOME"
+    ],
+    "ccl_displaykeys": [
+      "BUSINESS",
+      "EMAIL",
+      "HOME"
+    ],
+    "ccl_uar_usage_count": 31
+  },
+  {
+    "code_set": 213,
+    "name": "Millennium Code Set 213",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "CURRENT",
+      "PERSONNEL"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 220,
+    "name": "Location Hierarchy (Facility, Building, Nurse Unit, Ambulatory, Room, Bed)",
+    "referenced_by_columns": [
+      "AOAV_FACILITY_PREF.LOC_FACILITY_CD",
+      "CE_MED_ADMIN_IDENT.INV_FILL_LOCATION_CD",
+      "CHARGE_EVENT.PERF_LOC_CD",
+      "CV_DEVICE_LOCATION_R.PERFORMING_LOCATION_CD",
+      "DRC_FACILITY_R.FACILITY_CD",
+      "INTERFACE_CHARGE.PERF_LOC_CD",
+      "LH_CNT_IC_ADV_LTD.LOC_BED_CD",
+      "LH_CNT_IC_ADV_LTD.LOC_FACILITY_CD",
+      "LH_CNT_IC_ADV_LTD.LOC_NURSE_UNIT_CD",
+      "LH_CNT_IC_ADV_LTD.LOC_ROOM_CD",
+      "LH_D_BED.LOC_BED_CD",
+      "LH_D_BUILDING.LOC_BUILDING_CD",
+      "LH_D_EP_MIPS.LOC_NURSE_UNIT_CD",
+      "LH_D_EP_MIPS_S3.LOC_NURSE_UNIT_CD",
+      "LH_D_FACILITY.LOC_FACILITY_CD",
+      "LH_D_NURSE_UNIT.LOC_NURSE_UNIT_CD",
+      "LH_D_ROOM.LOC_ROOM_CD",
+      "ORD_LOC_PHARM_RELTN.LOC_CD",
+      "PHA_ORD_ACT_OBS_ST.DISP_FROM_LOC_CD",
+      "PHA_PRODUCT.LOC_CD1",
+      "PHA_PRODUCT.LOC_CD10",
+      "PHA_PRODUCT.LOC_CD11",
+      "PHA_PRODUCT.LOC_CD12",
+      "PHA_PRODUCT.LOC_CD13",
+      "PHA_PRODUCT.LOC_CD14",
+      "PHA_PRODUCT.LOC_CD15",
+      "PHA_PRODUCT.LOC_CD16",
+      "PHA_PRODUCT.LOC_CD17",
+      "PHA_PRODUCT.LOC_CD18",
+      "PHA_PRODUCT.LOC_CD19",
+      "PHA_PRODUCT.LOC_CD2",
+      "PHA_PRODUCT.LOC_CD20",
+      "PHA_PRODUCT.LOC_CD21",
+      "PHA_PRODUCT.LOC_CD22",
+      "PHA_PRODUCT.LOC_CD23",
+      "PHA_PRODUCT.LOC_CD24",
+      "PHA_PRODUCT.LOC_CD25",
+      "PHA_PRODUCT.LOC_CD26",
+      "PM_RBC_RS_ENCNTR_CHARGE_R.PERF_LOC_CD",
+      "PROCEDURE_CODE_TIER.SERVICE_RESOURCE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "MAINCAMPUS",
+      "INPATIENTREHAB",
+      "NORTHTOWER",
+      "ICU",
+      "MEDSURG",
+      "ED"
+    ],
+    "ccl_uar_usage_count": 9
+  },
+  {
+    "code_set": 221,
+    "name": "Lab / Service Resource Hierarchy",
+    "referenced_by_columns": [
+      "BCE_EVENT_LOG.INSTITUTION_CD",
+      "BCE_EVENT_LOG.LEVEL5_CD",
+      "BCE_EVENT_LOG.SECTION_CD",
+      "BCE_EVENT_LOG.SUBSECTION_CD",
+      "CHARGE.DEPARTMENT_CD",
+      "CHARGE.INSTITUTION_CD",
+      "CHARGE.LEVEL5_CD",
+      "CHARGE.SECTION_CD",
+      "CHARGE.SUBSECTION_CD",
+      "CNT_DCP_INTERP2.SERVICE_RESOURCE_CD",
+      "CNT_EQUATION.SERVICE_RESOURCE_CD",
+      "CR_STATIC_REGION_SR_RELTN.SERVICE_RESOURCE_CD",
+      "DISP_PRIORITY_SR_R.SERV_RES_CD",
+      "FILL_PRINT_ORD_HX.RX_WORKSTATION_CD",
+      "LINE_ITEM.NC_MFR_CD",
+      "MDI_PARAMETER.SERVICE_RESOURCE_CD",
+      "MIC_ABN_ORG_RESPONSE_CODE.SERVICE_RESOURCE_CD",
+      "MIC_ABN_SUS_RESULT.SERVICE_RESOURCE_CD",
+      "MIC_GROUP_RESPONSE.SERVICE_RESOURCE_CD",
+      "MIC_MEDIA_DEFAULT.SERVICE_RESOURCE_CD",
+      "MIC_ORDER_LAB.SERVICE_RESOURCE_CD",
+      "MIC_RPT_PARAMS.SERVICE_RESOURCE_CD",
+      "MIC_TASK_LOG.TASK_LOCATION_CD",
+      "MIC_VALID_CODED_RESPONSE.SERVICE_RESOURCE_CD",
+      "MIC_VALID_ORGANISM.SERVICE_RESOURCE_CD",
+      "MIC_VALID_SUS_PANEL.SERVICE_RESOURCE_CD",
+      "MM_ASN_LOT_DISCREPANCY.MANUFACTURER_CD",
+      "MM_XFI_ASN_LOT.MANUFACTURER_CD",
+      "PHA_ORD_ACT_OBS_ST.DISP_FROM_SR_CD",
+      "PRSNL_SERVICE_RESOURCE_RELTN.SERVICE_RESOURCE_CD",
+      "RX_PENDING_REFILL.DISP_SR_CD",
+      "RX_PENDING_REFILL.FILL_SR_CD",
+      "WORKLOAD.INSTITUTION_CD",
+      "WORKLOAD.PAT_LOC_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 222,
+    "name": "Location Type",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "AMBULATORY",
+      "FACILITY",
+      "NURSEUNIT"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 3,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/222"
+  },
+  {
+    "code_set": 226,
+    "name": "Millennium Code Set 226",
+    "referenced_by_columns": [
+      "CNT_EQUATION.SPECIES_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 231,
+    "name": "Millennium Code Set 231",
+    "referenced_by_columns": [
+      "BR_COLL_CLASS.CODE_VALUE",
+      "BR_COLL_CLASS.DISPLAY_NAME"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 233,
+    "name": "Millennium Code Set 233",
+    "referenced_by_columns": [
+      "CNT_DTA.HISTORY_ACTIVITY_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 235,
+    "name": "Millennium Code Set 235",
+    "referenced_by_columns": [
+      "CNT_RRF_KEY.PATIENT_CONDITION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 236,
+    "name": "Millennium Code Set 236",
+    "referenced_by_columns": [
+      "CNT_RRF.DELTA_CHECK_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 261,
+    "name": "Encounter Status (ACTIVE, DISCHARGED, PREARRIVED, CANCELLED)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "ACTIVE"
+    ],
+    "ccl_displaykeys": [
+      "ACTIVE",
+      "PREADMIT"
+    ],
+    "ccl_uar_usage_count": 3
+  },
+  {
+    "code_set": 263,
+    "name": "Millennium Code Set 263",
+    "referenced_by_columns": [
+      "CV_DATASET.ALIAS_POOL_MEAN"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "DICTATION",
+      "FIN",
+      "MEDITECH",
+      "MRN",
+      "PERSONNELPRIMARYIDENTIFIER",
+      "PHYSICIANDEPARTMENT",
+      "SSN"
+    ],
+    "ccl_uar_usage_count": 16
+  },
+  {
+    "code_set": 278,
+    "name": "Organization Type",
+    "referenced_by_columns": [
+      "BT_COND_CRIT_GRP_RELTN.ORG_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/278"
+  },
+  {
+    "code_set": 282,
+    "name": "Race (Patient Race, HL7 PID-10)",
+    "referenced_by_columns": [
+      "AOAV_PERSON_ENCNTR.AOAV_RACE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ASIAN",
+      "DECLINED",
+      "EASTERNINDIAN",
+      "HISPANIC",
+      "MIDDLEEAST",
+      "MULTIRACIAL",
+      "OTHER",
+      "UNAVAILABLE",
+      "UNKNOWN"
+    ],
+    "ccl_uar_usage_count": 9,
+    "hl7_or_ub04_field": "HL7 PID-10"
+  },
+  {
+    "code_set": 291,
+    "name": "Millennium Code Set 291",
+    "referenced_by_columns": [
+      "SURG_RESOURCE_STATUS.RESOURCE_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 302,
+    "name": "Millennium Code Set 302",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "FREETEXT"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 309,
+    "name": "Millennium Code Set 309",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "CONTRIBUTORSYSTEM"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 319,
+    "name": "Encounter Alias Type (FIN, MRN, VISITID)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "FIN NBR",
+      "MRN"
+    ],
+    "ccl_displaykeys": [
+      "FIN NBR",
+      "FINNBR",
+      "MRN"
+    ],
+    "ccl_uar_usage_count": 64,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/319"
+  },
+  {
+    "code_set": 320,
+    "name": "Millennium Code Set 320",
+    "referenced_by_columns": [
+      "OSM_DEFAULTS.PHYS_ALIAS_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "DOCUPIN",
+      "EXTERNALID",
+      "LICENSENBR",
+      "NPI",
+      "PRSNLID"
+    ],
+    "ccl_displaykeys": [
+      "LICENSENBR",
+      "NATIONALPROVIDERIDENTIFIER",
+      "TAXID"
+    ],
+    "ccl_uar_usage_count": 18
+  },
+  {
+    "code_set": 321,
+    "name": "Millennium Code Set 321",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "HISTORICAL"
+    ],
+    "ccl_uar_usage_count": 49
+  },
+  {
+    "code_set": 331,
+    "name": "Person Personnel Relationship (PCP)",
+    "referenced_by_columns": [
+      "CE_RTE_PRSNL_RELTN.RELTN_TYPE_CD",
+      "PRIVILEGE_DELETION.PPR_CD"
+    ],
+    "ccl_meanings": [
+      "PCP"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 333,
+    "name": "Encounter Personnel Relationship (ATTENDDOC, ADMITDOC, CONSULTDOC, REFERDOC)",
+    "referenced_by_columns": [
+      "EPISODE_PRSNL_RELTN.EPISODE_PRSNL_R_CD",
+      "EPISODE_PRSNL_RELTN_HIST.EPISODE_PRSNL_R_CD",
+      "PSN_PPR_RELTN.PPR_CD"
+    ],
+    "ccl_meanings": [
+      "ADMITDOC",
+      "ATTENDDOC",
+      "CONSULTDOC",
+      "REFERDOC"
+    ],
+    "ccl_displaykeys": [
+      "EDPHYSICIAN",
+      "REFERRINGPHYSICIAN",
+      "SURGEON"
+    ],
+    "ccl_uar_usage_count": 23,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/333"
+  },
+  {
+    "code_set": 334,
+    "name": "Organization Alias Type",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "NATIONALPROVIDERIDENTIFIER"
+    ],
+    "ccl_uar_usage_count": 1,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/334"
+  },
+  {
+    "code_set": 338,
+    "name": "Millennium Code Set 338",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "EMPLOYER",
+      "SCHOOL"
+    ],
+    "ccl_displaykeys": [
+      "EMPLOYER"
+    ],
+    "ccl_uar_usage_count": 7
+  },
+  {
+    "code_set": 339,
+    "name": "Millennium Code Set 339",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "CENSUS"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 340,
+    "name": "Millennium Code Set 340",
+    "referenced_by_columns": [
+      "CNT_RRF_KEY.AGE_FROM_UNITS_CD",
+      "FHX_ACTIVITY.ONSET_AGE_UNIT_CD",
+      "MIC_REQ_RPT.TAT_UNITS_CD",
+      "MIC_TASK.TAT_UNITS_CD",
+      "PW_MAINTENANCE_CRITERIA.TIME_UNIT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 351,
+    "name": "Person Relationship Types",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "DEFAULTGUARANTOR",
+      "DEFGUAR",
+      "FAMILY",
+      "GUARANTOR",
+      "INSURED"
+    ],
+    "ccl_displaykeys": [
+      "DEFAULTGUARANTOR",
+      "EMERGENCYCONTACT",
+      "INSURED"
+    ],
+    "ccl_uar_usage_count": 19,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/351"
+  },
+  {
+    "code_set": 353,
+    "name": "Millennium Code Set 353",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "SUBSCRIBER"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 354,
+    "name": "Millennium Code Set 354",
+    "referenced_by_columns": [
+      "CT_RULESET_TIER.FIN_CLASS_CD",
+      "LH_D_FINANCIAL_CLASS.FINANCIAL_CLASS_CD"
+    ],
+    "ccl_meanings": [
+      "MEDICARE",
+      "SELFPAY"
+    ],
+    "ccl_displaykeys": [
+      "BCBS",
+      "CLIENT",
+      "COMMERCIALCONTRACT",
+      "COMMERCIALNONCONTRACT",
+      "MEDICAID",
+      "MEDICARE",
+      "MEDICAREREPLACEMENT",
+      "EMPLOYEESCOVERAGE",
+      "SELFPAY",
+      "WORKERSCOMPENSATION"
+    ],
+    "ccl_uar_usage_count": 71
+  },
+  {
+    "code_set": 355,
+    "name": "Organization Info Type",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "COMMENT",
+      "TRACKCOMMENT",
+      "USERDEFINED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 3
+  },
+  {
+    "code_set": 356,
+    "name": "Person Info Type",
+    "referenced_by_columns": [
+      "PM_FLX_PROMPT.SUB_TYPE_MEANING"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ACTUALAMTCOLLECTED",
+      "OPPORTUNITYTOCOLLECT",
+      "PAYRESOLUTION",
+      "PREVIOUSPATIENTTYPE"
+    ],
+    "ccl_uar_usage_count": 4
+  },
+  {
+    "code_set": 362,
+    "name": "Millennium Code Set 362",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "GUARANTOR"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 367,
+    "name": "Millennium Code Set 367",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "MEDICARE"
+    ],
+    "ccl_displaykeys": [
+      "SELFPAY"
+    ],
+    "ccl_uar_usage_count": 4
+  },
+  {
+    "code_set": 375,
+    "name": "Millennium Code Set 375",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "SUPERVISOR"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 388,
+    "name": "Procedure Personnel Relation Type",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "ANES",
+      "SURGEON"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/388"
+  },
+  {
+    "code_set": 400,
+    "name": "Vocabulary / Nomenclature Source (ICD-10-CM, SNOMED, CPT4, LOINC)",
+    "referenced_by_columns": [
+      "BT_COND_CRIT_GRP_RELTN.SOURCE_VOCAB_CD",
+      "CLRFCTN_CODED_VALUES.SOURCE_VOCABULARY_CD",
+      "CMT_CONTENT_VERSION.SOURCE_VOCABULARY_CD",
+      "DO_CODE_SYSTEM.SOURCE_VOCABULARY_MEAN",
+      "NOMENCLATURE_LOAD.SOURCE_VOCABULARY_CD",
+      "NOMENCLATURE_LOAD_NS.SOURCE_VOCABULARY_CD",
+      "RC_D_BILL_ITEM_MODIFIER.SOURCE_VOCABULARY_CD",
+      "SI_OID.ENTITY_ID"
+    ],
+    "ccl_meanings": [
+      "ICD10-CM",
+      "ICD9",
+      "MSDRG",
+      "MUL.MMDC"
+    ],
+    "ccl_displaykeys": [
+      "ICD10CM",
+      "ICD10PCS",
+      "ICD9CM",
+      "MSDRG"
+    ],
+    "ccl_uar_usage_count": 13
+  },
+  {
+    "code_set": 401,
+    "name": "Millennium Code Set 401",
+    "referenced_by_columns": [
+      "NOMENCLATURE_LOAD.PRINCIPLE_TYPE_CD",
+      "NOMENCLATURE_LOAD_NS.PRINCIPLE_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "DIAG",
+      "GENFORM",
+      "PROCEDURE"
+    ],
+    "ccl_displaykeys": [
+      "MSDRG",
+      "PROCEDURE"
+    ],
+    "ccl_uar_usage_count": 5
+  },
+  {
+    "code_set": 1000,
+    "name": "Millennium Code Set 1000",
+    "referenced_by_columns": [
+      "MIC_ACT_ANG_SUM_RPT.REPORT_CD",
+      "MIC_GROUP_RESPONSE.TASK_ASSAY_CD",
+      "MIC_REF_ANG_REPORT.REPORT_CD",
+      "MIC_REQ_RPT.TASK_CD",
+      "MIC_RPT_LIMIT.TASK_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1002,
+    "name": "Millennium Code Set 1002",
+    "referenced_by_columns": [
+      "MIC_EVENT_DETAIL.GROUP_BIOCHEM_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1004,
+    "name": "Millennium Code Set 1004",
+    "referenced_by_columns": [
+      "MIC_ABN_SUS_RESULT.SUS_DETAIL_CD",
+      "MIC_EVENT_DETAIL.DETAIL_SUS_CD",
+      "MIC_INTERP.INTERP_TEST_CD",
+      "MIC_REQUIRED_TASK.DETAIL_CD",
+      "MIC_SUS_FIRST_LEVEL_INTERP.SUS_DETAIL_CD",
+      "MIC_SUS_ORDER_DETAIL.DETAIL_SUS_CD",
+      "MIC_VALID_SUS_RESULT.SUS_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1005,
+    "name": "Millennium Code Set 1005",
+    "referenced_by_columns": [
+      "MIC_BIOCHEMICAL_TEST_RESULT.DETAIL_BIO_CD",
+      "MIC_EVENT_DETAIL.DETAIL_BIOCHEM_CD",
+      "MIC_VALID_BIOCHEM_RESULT.TASK_COMPONENT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1010,
+    "name": "Millennium Code Set 1010",
+    "referenced_by_columns": [
+      "MIC_EVENT_DETAIL.PANEL_CD",
+      "MIC_SUS_MED_RESULT.PANEL_MEDICATION_CD",
+      "MIC_SUS_ORDER_DETAIL.PANEL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1011,
+    "name": "Millennium Code Set 1011",
+    "referenced_by_columns": [
+      "EKS_MICRO.ANTIBIOTIC_CD",
+      "EKS_MICRO_MED_R.ANTIBIOTIC_CD",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ABX_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ABX_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ABX_DISPLAY",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ABX_MEANING",
+      "LH_CNT_IC_AR_ORG_MAP.ANTIMICROBIAL_NAME",
+      "LH_D_ANTIBIOTIC.ANTIBIOTIC_CD",
+      "MIC_EVENT_DETAIL.PANEL_MED_CD",
+      "MIC_MEDICATION_RANGE.MEDICATION_CD",
+      "MIC_MEDS_ACTIVITY.MEDICATION_CD",
+      "MIC_MED_TRADE_NAME.TASK_COMPONENT_CD",
+      "MIC_REQUIRED_TASK.ANTIBIOTIC_CD",
+      "MIC_RESULT_FOOTNOTE_R.ANTIBIOTIC_CD",
+      "MIC_SUS_FIRST_LEVEL_INTERP.MEDICATION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1019,
+    "name": "Millennium Code Set 1019",
+    "referenced_by_columns": [
+      "MIC_REPORT_RESPONSE.GROUP_RESPONSE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1021,
+    "name": "Millennium Code Set 1021",
+    "referenced_by_columns": [
+      "CNT_RRF_KEY.ORGANISM_CD",
+      "EXPEDITE_CODED_RESP.CODED_RESPONSE_CD",
+      "HF_F_MICROBIOLOGY.ORGANISM_CODE_VALUE_REF",
+      "HF_F_MICROBIOLOGY.RESPONSE_REF",
+      "HF_R_HL7_ISOLATE.CLIENT_ORGANISM_CODE",
+      "HF_R_HL7_ISOLATE.CLIENT_ORGANISM_DESC",
+      "HF_R_HL7_ISOLATE.CLIENT_ORGANISM_DISPLAY",
+      "HF_R_HL7_ISOLATE.CLIENT_ORGANISM_MEANING",
+      "HF_R_ISOLATE.CLIENT_ORGANISM_CODE",
+      "HF_R_ISOLATE.CLIENT_ORGANISM_DESC",
+      "HF_R_ISOLATE.CLIENT_ORGANISM_DISPLAY",
+      "HF_R_ISOLATE.CLIENT_ORGANISM_MEANING",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ORGANISM_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ORGANISM_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ORGANISM_DISPLAY",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_ORGANISM_MEANING",
+      "LH_CNT_IC_AR_ORG_MAP.ORGANISM_NAME",
+      "LH_CNT_IC_CLUST_ANALYSIS.ORGANISM_CD",
+      "LH_D_ORGANISM.ORGANISM_CD",
+      "MIC_ABN_SUS_RESULT.ORGANISM_CD",
+      "MIC_ORGANISM_DATA.ORGANISM_ID",
+      "MIC_ORGANISM_ID.ID_ORGANISM_CD",
+      "MIC_PATHOGEN.PATHOGEN_CD",
+      "MIC_REQUIRED_TASK.ORGANISM_CD",
+      "MIC_STAT_REPORT_RESPONSE.RESPONSE_CD",
+      "MIC_SUS_FIRST_LEVEL_INTERP.ORGANISM_GROUPING_CD",
+      "MIC_VALID_ORGANISM_MBR.ORGANISM_CD",
+      "MIC_VALID_SUS_PANEL.ORGANISM_GROUPING_CD",
+      "MIC_VALID_SUS_RESULT.ORGANISM_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1022,
+    "name": "Millennium Code Set 1022",
+    "referenced_by_columns": [
+      "MIC_EVENT_DETAIL.QUANTITATION_CD",
+      "MIC_GROUP_RESPONSE_MBR.DETAIL_RESPONSE_CD",
+      "MIC_REF_ANG_REPORT.CODED_RESPONSE_CD",
+      "MIC_REPORT_RESPONSE.RESPONSE_CD",
+      "MIC_VALID_RESPONSE_MBR.CODED_RESPONSE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1023,
+    "name": "Millennium Code Set 1023",
+    "referenced_by_columns": [
+      "MIC_ORGANISM_OBSERVATION.QUANTITATION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1025,
+    "name": "Millennium Code Set 1025",
+    "referenced_by_columns": [
+      "MIC_INTERP_DATA.SUS_RESULT_CD",
+      "MIC_SUS_MED_RESULT.RESULT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1027,
+    "name": "Millennium Code Set 1027",
+    "referenced_by_columns": [
+      "MIC_BIOCHEMICAL_TEST_RESULT.RESULT_CD",
+      "MIC_EVENT_DETAIL.RESULT_CD",
+      "MIC_VALID_BIOCHEM_RESULT.BIO_RESULT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1028,
+    "name": "Body Site Codes",
+    "referenced_by_columns": [
+      "HF_R_HL7_ISOLATE.CLIENT_SITE_CODE",
+      "HF_R_HL7_ISOLATE.CLIENT_SITE_DESC",
+      "HF_R_HL7_ISOLATE.CLIENT_SITE_DISPLAY",
+      "HF_R_HL7_ISOLATE.CLIENT_SITE_MEANING",
+      "HF_R_ISOLATE.CLIENT_SITE_CODE",
+      "HF_R_ISOLATE.CLIENT_SITE_DESC",
+      "HF_R_ISOLATE.CLIENT_SITE_DISPLAY",
+      "HF_R_ISOLATE.CLIENT_SITE_MEANING",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SITE_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SITE_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SITE_DISPLAY",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SITE_MEANING",
+      "LH_D_BODY_SITE.BODY_SITE_CD",
+      "MIC_MEDIA_DEFAULT.BODY_SITE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/1028"
+  },
+  {
+    "code_set": 1031,
+    "name": "Millennium Code Set 1031",
+    "referenced_by_columns": [
+      "MIC_ORDER_LAB.STATUS_CD",
+      "MIC_SUS_ORDER_DETAIL.STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1300,
+    "name": "Millennium Code Set 1300",
+    "referenced_by_columns": [
+      "REPORT_TASK.HOLD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1301,
+    "name": "Millennium Code Set 1301",
+    "referenced_by_columns": [
+      "CASE_SPECIMEN_TYPE_R.CASE_TYPE_CD",
+      "CASE_SPECIMEN_TYPE_R.SPECIMEN_MEANING"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "OTHER"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 1302,
+    "name": "Millennium Code Set 1302",
+    "referenced_by_columns": [
+      "CASE_SPECIMEN.RECEIVED_FIXATIVE_CD",
+      "CASSETTE.FIXATIVE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1303,
+    "name": "Millennium Code Set 1303",
+    "referenced_by_columns": [
+      "PM_TEMPLATE.TEMPLATE_TYPE_CD",
+      "WP_TEMPLATE.TEMPLATE_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1304,
+    "name": "Millennium Code Set 1304",
+    "referenced_by_columns": [
+      "CHARGE_EVENT_ACT.PRIORITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1305,
+    "name": "Millennium Code Set 1305",
+    "referenced_by_columns": [
+      "CASE_REPORT.STATUS_CD",
+      "REPORT_INPROC_STATUS.TRANSCRIBED_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "VERIFIED"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 1306,
+    "name": "Anatomic Pathology Specimen Type Codes",
+    "referenced_by_columns": [
+      "AP_SPECIMEN_PROTOCOL.SPECIMEN_CD",
+      "CASE_SPECIMEN.SPECIMEN_CD",
+      "SPECIMEN_GROUPING_R.SOURCE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "TRANSRXNRPT"
+    ],
+    "ccl_uar_usage_count": 1,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/1306"
+  },
+  {
+    "code_set": 1309,
+    "name": "Cancel Reasons",
+    "referenced_by_columns": [
+      "MIC_CANCEL_REASON.CANCEL_REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/1309"
+  },
+  {
+    "code_set": 1310,
+    "name": "Millennium Code Set 1310",
+    "referenced_by_columns": [
+      "AP_PREFIX_PROC_GRP_R.PROCESSING_GRP_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1311,
+    "name": "Millennium Code Set 1311",
+    "referenced_by_columns": [
+      "REPORT_HISTORY_GROUPING_R.GROUPING_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1312,
+    "name": "Millennium Code Set 1312",
+    "referenced_by_columns": [
+      "AP_PREFIX.SPECIMEN_GROUPING_CD",
+      "SPECIMEN_GROUPING_R.CATEGORY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1313,
+    "name": "Millennium Code Set 1313",
+    "referenced_by_columns": [
+      "AP_FT_EVENT.TERM_REASON_CD",
+      "AP_FT_TERM_PROC.AUTO_TERMINATION_REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1314,
+    "name": "Millennium Code Set 1314",
+    "referenced_by_columns": [
+      "CYTO_ALPHA_SECURITY.DIAGNOSTIC_CATEGORY_CD",
+      "CYTO_SCREENING_EVENT.DIAGNOSTIC_CATEGORY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1315,
+    "name": "Millennium Code Set 1315",
+    "referenced_by_columns": [
+      "PROFICIENCY_EVENT.PROFICIENCY_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1316,
+    "name": "Millennium Code Set 1316",
+    "referenced_by_columns": [
+      "AP_QA_INFO.FLAG_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1317,
+    "name": "Millennium Code Set 1317",
+    "referenced_by_columns": [
+      "AP_FT_EVENT.FOLLOWUP_TYPE_CD",
+      "AP_FT_TYPE.FOLLOWUP_TRACKING_TYPE_CD",
+      "CYTO_ALPHA_SECURITY.FOLLOWUP_TRACKING_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1318,
+    "name": "Millennium Code Set 1318",
+    "referenced_by_columns": [
+      "CASE_SPECIMEN.INADEQUACY_REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1319,
+    "name": "Millennium Code Set 1319",
+    "referenced_by_columns": [
+      "REPORT_QUEUE_R.REPORT_QUEUE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1604,
+    "name": "Millennium Code Set 1604",
+    "referenced_by_columns": [
+      "BB_EXC_CXM_PRODUCT.PRODUCT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1606,
+    "name": "Millennium Code Set 1606",
+    "referenced_by_columns": [
+      "PRODUCT_CATEGORY.PRODUCT_CLASS_CD",
+      "PRODUCT_CLASS.PRODUCT_CLASS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1610,
+    "name": "Millennium Code Set 1610",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "TRANSFUSED"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 1611,
+    "name": "Millennium Code Set 1611",
+    "referenced_by_columns": [
+      "TRANSFUSION_REQUIREMENTS.CODESET"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1613,
+    "name": "Millennium Code Set 1613",
+    "referenced_by_columns": [
+      "TRANSFUSION_REQUIREMENTS.REQUIREMENT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1614,
+    "name": "Millennium Code Set 1614",
+    "referenced_by_columns": [
+      "BB_EXCEPT_CXM.OVERRIDE_REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1630,
+    "name": "Millennium Code Set 1630",
+    "referenced_by_columns": [
+      "BB_EDN_PRODUCT.UNIT_CONDITION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1640,
+    "name": "Millennium Code Set 1640",
+    "referenced_by_columns": [
+      "BR_BB_MODEL_ALIAS.ABORH_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1641,
+    "name": "Millennium Code Set 1641",
+    "referenced_by_columns": [
+      "BB_EXCEPTION.PRODUCT_ABO_CD",
+      "BB_EXC_CXM_PRODUCT.ABO_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1642,
+    "name": "Millennium Code Set 1642",
+    "referenced_by_columns": [
+      "BB_EXCEPTION.PERSON_RH_CD",
+      "BB_EXCEPTION.PRODUCT_RH_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1661,
+    "name": "Millennium Code Set 1661",
+    "referenced_by_columns": [
+      "QUESTION.QUESTION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1901,
+    "name": "Millennium Code Set 1901",
+    "referenced_by_columns": [
+      "CNT_EQUATION_COMPONENT.RESULT_STATUS_CD",
+      "MIC_ACT_ANG_SUM_RPT.REPORT_STATUS_CD",
+      "MIC_BIOCHEMICAL_TEST_RESULT.RESULT_STATUS_CD",
+      "MIC_EVENT_DETAIL.RESULT_STATUS_CD",
+      "MIC_EVENT_LOG.EVENT_STATUS_CD",
+      "MIC_REQUIRED_TASK.STATUS_CD",
+      "MIC_SUS_MED_RESULT.STATUS_CD",
+      "MIC_TASK_LOG.TASK_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 1905,
+    "name": "Millennium Code Set 1905",
+    "referenced_by_columns": [
+      "PLM_TAT_PARAMETER.REP_PRIORITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 2051,
+    "name": "Container Type Codes",
+    "referenced_by_columns": [
+      "MIC_EVENT_DETAIL.MEDIA_CD",
+      "MIC_MEDIA.MEDIA_CD",
+      "MIC_MEDIA_ACTIVITY.MEDIA_CD",
+      "MIC_MEDIA_DEFAULT.MEDIA_CD",
+      "MIC_MEDIA_LOT_RELTN.MEDIA_CD",
+      "MIC_ORGANISM_OBSERVATION.MEDIA_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/2051"
+  },
+  {
+    "code_set": 2052,
+    "name": "General Laboratory Specimen Type Codes",
+    "referenced_by_columns": [
+      "HF_R_HL7_ISOLATE.CLIENT_SPECIMEN_CODE",
+      "HF_R_HL7_ISOLATE.CLIENT_SPECIMEN_DESC",
+      "HF_R_HL7_ISOLATE.CLIENT_SPECIMEN_DISPLAY",
+      "HF_R_HL7_ISOLATE.CLIENT_SPECIMEN_MEANING",
+      "HF_R_ISOLATE.CLIENT_SPECIMEN_CODE",
+      "HF_R_ISOLATE.CLIENT_SPECIMEN_DESC",
+      "HF_R_ISOLATE.CLIENT_SPECIMEN_DISPLAY",
+      "HF_R_ISOLATE.CLIENT_SPECIMEN_MEANING",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SPECIMEN_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SPECIMEN_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SPECIMEN_DISPLAY",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_SPECIMEN_MEANING",
+      "LH_CNT_IC_VAE_EVENT_DTL.SPECIMEN_CD",
+      "LH_D_SOURCE.SOURCE_CD",
+      "MIC_GROUP_RESPONSE.SOURCE_CD",
+      "MIC_VALID_ORGANISM.SOURCE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/2052"
+  },
+  {
+    "code_set": 2053,
+    "name": "Millennium Code Set 2053",
+    "referenced_by_columns": [
+      "CE_SPECIMEN_COLL.COLLECT_METHOD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 2058,
+    "name": "Millennium Code Set 2058",
+    "referenced_by_columns": [
+      "HF_R_HL7_ISOLATE.CLIENT_METHOD_CODE",
+      "HF_R_HL7_ISOLATE.CLIENT_METHOD_DESC",
+      "HF_R_HL7_ISOLATE.CLIENT_METHOD_DISPLAY",
+      "HF_R_HL7_ISOLATE.CLIENT_METHOD_MEANING",
+      "HF_R_ISOLATE.CLIENT_METHOD_CODE",
+      "HF_R_ISOLATE.CLIENT_METHOD_DESC",
+      "HF_R_ISOLATE.CLIENT_METHOD_DISPLAY",
+      "HF_R_ISOLATE.CLIENT_METHOD_MEANING",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_METHOD_CODE",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_METHOD_DESC",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_METHOD_DISPLAY",
+      "HF_R_MICRO_SUSCEPTIBILITY.CLIENT_METHOD_MEANING"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 2225,
+    "name": "Millennium Code Set 2225",
+    "referenced_by_columns": [
+      "PL_CATALOG_SEGMENTS.SEGMENT_TYPE_CD",
+      "PL_SEGMENT_POS_XREF.SEGMENT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 3400,
+    "name": "Millennium Code Set 3400",
+    "referenced_by_columns": [
+      "TASK_SUBACTIVITY.ACTION_REQUEST_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 3401,
+    "name": "Millennium Code Set 3401",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "DELIVERED",
+      "IN PROGRESS"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 4
+  },
+  {
+    "code_set": 3406,
+    "name": "Millennium Code Set 3406",
+    "referenced_by_columns": [
+      "TASK_ACTIVITY_ASSIGNMENT.NOTIFICATION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 3414,
+    "name": "Millennium Code Set 3414",
+    "referenced_by_columns": [
+      "MSG_FYI_FILTER_DTL.FILTER_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4001,
+    "name": "Medication Administration Route",
+    "referenced_by_columns": [
+      "ORDER_TASK_RESPONSE.ROUTE_CD",
+      "RX_MED_ORD_DETAIL_OPT.OPT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4001"
+  },
+  {
+    "code_set": 4002,
+    "name": "Form",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4002",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 4003,
+    "name": "Frequency",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4003",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 4005,
+    "name": "Reason for Medication",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4005",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 4008,
+    "name": "Millennium Code Set 4008",
+    "referenced_by_columns": [
+      "PHA_DISP_OBS_ST.DISP_CATEGORY_CD",
+      "PHA_ORD_ACT_OBS_ST.DISP_CATEGORY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4009,
+    "name": "Order Stop Types",
+    "referenced_by_columns": [
+      "ORDERS.STOP_TYPE_CD",
+      "ORDER_ACTION.STOP_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4009"
+  },
+  {
+    "code_set": 4010,
+    "name": "Millennium Code Set 4010",
+    "referenced_by_columns": [
+      "PHA_ORD_ACT_OBS_ST.ORDER_PRIORITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4016,
+    "name": "Millennium Code Set 4016",
+    "referenced_by_columns": [
+      "OCS_DEF_DOSE_CALC_METHOD.METHOD_MEAN",
+      "PW_DEF_DOSE_CALC_METHOD.METHOD_MEAN"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4031,
+    "name": "Reason for Medication",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4031",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 4038,
+    "name": "Millennium Code Set 4038",
+    "referenced_by_columns": [
+      "PHA_DISP_OBS_ST.DISCONTINUE_TYPE_CD",
+      "PHA_ORD_ACT_OBS_ST.DISCONTINUE_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4062,
+    "name": "Millennium Code Set 4062",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "SYSPKGTYP",
+      "SYSTEM"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 7
+  },
+  {
+    "code_set": 4063,
+    "name": "Millennium Code Set 4063",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "DISPENSE",
+      "OEDEF",
+      "ORDERABLE"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 8
+  },
+  {
+    "code_set": 4500,
+    "name": "Pharmacy Types",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "INPATIENT"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4500"
+  },
+  {
+    "code_set": 4502,
+    "name": "Millennium Code Set 4502",
+    "referenced_by_columns": [
+      "PHA_DISP_OBS_ST.TRACK_NBR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4503,
+    "name": "Millennium Code Set 4503",
+    "referenced_by_columns": [
+      "PHA_PROD_DISP_OBS_ST.TRACK_NBR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4504,
+    "name": "Millennium Code Set 4504",
+    "referenced_by_columns": [
+      "SERV_RES_EXT_PHARM.TRACK_NBR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4505,
+    "name": "Millennium Code Set 4505",
+    "referenced_by_columns": [
+      "PHA_SWITCH_CONN_R.SWITCH_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4507,
+    "name": "Millennium Code Set 4507",
+    "referenced_by_columns": [
+      "DISP_PRIORITY.DISP_SEQ_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4513,
+    "name": "Millennium Code Set 4513",
+    "referenced_by_columns": [
+      "DISP_PRIORITY.DISP_PRIORITY_CD",
+      "DISP_PRIORITY_SR_R.DISP_PRIORITY_CD",
+      "PHA_ORD_ACT_OBS_ST.DISP_PRIORITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4515,
+    "name": "Millennium Code Set 4515",
+    "referenced_by_columns": [
+      "RX_CLAIM_FORMAT.FORMAT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4516,
+    "name": "Millennium Code Set 4516",
+    "referenced_by_columns": [
+      "RX_CLAIM_FORMAT.FORMAT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4517,
+    "name": "Millennium Code Set 4517",
+    "referenced_by_columns": [
+      "RX_CLAIM_FORMAT.FIELD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4518,
+    "name": "Millennium Code Set 4518",
+    "referenced_by_columns": [
+      "RX_CLAIM_FORMAT.SOURCE_FIELD_CD",
+      "RX_CLAIM_SOURCE.SOURCE_FIELD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4519,
+    "name": "Millennium Code Set 4519",
+    "referenced_by_columns": [
+      "RX_CLAIM_VALIDATION.VALIDATION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4520,
+    "name": "Millennium Code Set 4520",
+    "referenced_by_columns": [
+      "RX_CLAIM_VALIDATION.VALIDATION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4521,
+    "name": "Millennium Code Set 4521",
+    "referenced_by_columns": [
+      "RX_CLAIM_SOURCE.SOURCE_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4522,
+    "name": "Millennium Code Set 4522",
+    "referenced_by_columns": [
+      "RX_CLAIM_VALIDATION.VALIDATION_FIELD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4542,
+    "name": "Millennium Code Set 4542",
+    "referenced_by_columns": [
+      "RX_PROTOCOL.PROTOCOL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4550,
+    "name": "Millennium Code Set 4550",
+    "referenced_by_columns": [
+      "SERV_RES_EXT_PHARM.RXNBR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4700,
+    "name": "Millennium Code Set 4700",
+    "referenced_by_columns": [
+      "SUBSTANCE_PROPERTY.PROPERTY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4760,
+    "name": "Millennium Code Set 4760",
+    "referenced_by_columns": [
+      "RX_PREP_INFO.PREP_INFO_CD",
+      "RX_WORKFLOW_STS.PREP_INFO_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 5801,
+    "name": "Millennium Code Set 5801",
+    "referenced_by_columns": [
+      "BILL_ITEM.EXT_SUB_OWNER_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6000,
+    "name": "Catalog Type (PHARMACY, LABORATORY, RADIOLOGY, SURGERY, THERAPIES)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "DIETARY",
+      "GENERAL LAB",
+      "PHARMACY"
+    ],
+    "ccl_displaykeys": [
+      "ADMITTRANSFERDISCHARGE",
+      "PHARMACY"
+    ],
+    "ccl_uar_usage_count": 12,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/6000"
+  },
+  {
+    "code_set": 6003,
+    "name": "Order Action Type (ORDER, MODIFY, CANCEL, DISCONTINUE, COMPLETE)",
+    "referenced_by_columns": [
+      "RXA_WORK_LOAD_OBS_ST.WORK_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "ACTIVATE",
+      "CANCEL",
+      "CANCEL REORD",
+      "COMPLETE",
+      "DISCONTINUE",
+      "MODIFY",
+      "ORDER",
+      "RESUME",
+      "STUDACTIVATE",
+      "SUSPEND",
+      "TRANSFER/CAN",
+      "VOID"
+    ],
+    "ccl_displaykeys": [
+      "COMPLETE",
+      "ORDER",
+      "REVIEW",
+      "STATUSCHANGE"
+    ],
+    "ccl_uar_usage_count": 21
+  },
+  {
+    "code_set": 6004,
+    "name": "Order Status (ORDERED, COMPLETED, DISCONTINUED, CANCELED, INPROCESS)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CANCELED",
+      "COMPLETED",
+      "DELETED",
+      "INPROCESS",
+      "ORDERED"
+    ],
+    "ccl_displaykeys": [
+      "COMPLETED",
+      "DISCONTINUED",
+      "ORDERED"
+    ],
+    "ccl_uar_usage_count": 15
+  },
+  {
+    "code_set": 6006,
+    "name": "Millennium Code Set 6006",
+    "referenced_by_columns": [
+      "HIM_UNSIGNED_ORDERS.LATEST_COMMUNICATION_TYPE_CD",
+      "ORDERS.LATEST_COMMUNICATION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6011,
+    "name": "Millennium Code Set 6011",
+    "referenced_by_columns": [
+      "MLTM_ORDER_CATALOG_LOAD.MNEMONIC_TYPE_MEAN"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6015,
+    "name": "Millennium Code Set 6015",
+    "referenced_by_columns": [
+      "LOG_GROUP_TYPE.EXCEPTION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6022,
+    "name": "Millennium Code Set 6022",
+    "referenced_by_columns": [
+      "DCP_CUSTOM_COLS_SORT.SPREAD_TYPE_CD",
+      "DCP_CUSTOM_COLUMNS.SPREAD_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6023,
+    "name": "Millennium Code Set 6023",
+    "referenced_by_columns": [
+      "BR_PAL_COLUMNS.COLUMN_CD",
+      "DCP_CUSTOM_COLS_SORT.COLUMN_CD",
+      "DCP_CUSTOM_COLUMNS.CUSTOM_COLUMN_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6025,
+    "name": "Millennium Code Set 6025",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "PRN"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 6026,
+    "name": "Millennium Code Set 6026",
+    "referenced_by_columns": [
+      "HIM_TASK_DETAIL.TASK_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "MED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 6034,
+    "name": "Millennium Code Set 6034",
+    "referenced_by_columns": [
+      "TASK_ACTIVITY.TASK_SUBTYPE_CD",
+      "TASK_ACTIVITY_MSG_H.TASK_SUBTYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6043,
+    "name": "Millennium Code Set 6043",
+    "referenced_by_columns": [
+      "WORKING_VIEW_FREQ_INTERVAL.WORKING_VIEW_INTERVAL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 6102,
+    "name": "Dietary Modifiers",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/6102",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 6103,
+    "name": "Beverage Modifiers",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/6103",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 6107,
+    "name": "Dietary Supplements",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/6107",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 6999,
+    "name": "Millennium Code Set 6999",
+    "referenced_by_columns": [
+      "DCP_CF_TRANS_EVENT_CD_R.ASSOCIATION_IDENTIFIER_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 10038,
+    "name": "Millennium Code Set 10038",
+    "referenced_by_columns": [
+      "LH_CNT_IC_ADV_SPEC_EVENT.WOUND_CLASS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 10051,
+    "name": "Millennium Code Set 10051",
+    "referenced_by_columns": [
+      "LH_CNT_IC_ADV_SPEC_EVENT.ASA_SCORE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 11000,
+    "name": "Millennium Code Set 11000",
+    "referenced_by_columns": [
+      "IB_RX_REQ_DRUG.PROD_IDENT_TYPE_CD",
+      "MM_XFI_QOH.ITEM_IDENTIFIER_TYPE",
+      "PHA_PRODUCT.RX_DEVICE1",
+      "PHA_PRODUCT.RX_DEVICE2",
+      "PHA_PRODUCT.RX_DEVICE3",
+      "PHA_PRODUCT.RX_DEVICE4",
+      "PHA_PRODUCT.RX_DEVICE5",
+      "PHA_PRODUCT.RX_MISC1",
+      "PHA_PRODUCT.RX_MISC2",
+      "PHA_PRODUCT.RX_MISC3",
+      "PHA_PRODUCT.RX_MISC4",
+      "PHA_PRODUCT.RX_MISC5"
+    ],
+    "ccl_meanings": [
+      "BRAND_NAME",
+      "CDM",
+      "DESC",
+      "DESC_SHORT",
+      "GENERIC_NAME",
+      "HCPCS",
+      "INNER_NDC",
+      "NDC",
+      "PYXIS",
+      "RX DEVICE1",
+      "RX DEVICE2",
+      "RX DEVICE3",
+      "RX DEVICE4",
+      "RX DEVICE5",
+      "RX MISC1",
+      "RX MISC2",
+      "RX MISC3",
+      "RX MISC4",
+      "RX MISC5"
+    ],
+    "ccl_displaykeys": [
+      "BRANDNAME",
+      "DESCRIPTION",
+      "GENERICNAME",
+      "LAWSON",
+      "MCKESSONINTERFACEID",
+      "NDC",
+      "PYXIS"
+    ],
+    "ccl_uar_usage_count": 40
+  },
+  {
+    "code_set": 11001,
+    "name": "Millennium Code Set 11001",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "ITEM_MANF"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 11020,
+    "name": "Millennium Code Set 11020",
+    "referenced_by_columns": [
+      "MM_XFI_ITEM.STORAGE_REQUIREMENT"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 12022,
+    "name": "Severity",
+    "referenced_by_columns": [
+      "FHX_ACTIVITY.SEVERITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/12022"
+  },
+  {
+    "code_set": 12023,
+    "name": "Millennium Code Set 12023",
+    "referenced_by_columns": [
+      "HEALTH_CONCERN.CONCERNED_PERSON_RELTN_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 12025,
+    "name": "Millennium Code Set 12025",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CANCELED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 12030,
+    "name": "Millennium Code Set 12030",
+    "referenced_by_columns": [
+      "DIAGNOSIS.LIFE_CYCLE_STATUS_CD",
+      "FHX_ACTIVITY.LIFE_CYCLE_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 12033,
+    "name": "Problem Classification",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/12033",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 12039,
+    "name": "Millennium Code Set 12039",
+    "referenced_by_columns": [
+      "FHX_ACTIVITY.COURSE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 12100,
+    "name": "Millennium Code Set 12100",
+    "referenced_by_columns": [
+      "DO_CODE_SYSTEM.CONCEPT_SOURCE_MEAN"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 13016,
+    "name": "Millennium Code Set 13016",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "MANF ITEM"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 13019,
+    "name": "Millennium Code Set 13019",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "BILL CODE",
+      "SRV DIAG",
+      "SUSPENSE"
+    ],
+    "ccl_displaykeys": [
+      "BILLCODE"
+    ],
+    "ccl_uar_usage_count": 4
+  },
+  {
+    "code_set": 13028,
+    "name": "Millennium Code Set 13028",
+    "referenced_by_columns": [
+      "CSOPS_SUMM.CHARGE_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "CR",
+      "DR",
+      "WORKLOADONLY"
+    ],
+    "ccl_displaykeys": [
+      "DEBIT"
+    ],
+    "ccl_uar_usage_count": 17
+  },
+  {
+    "code_set": 13029,
+    "name": "Millennium Code Set 13029",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "LOADED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 13031,
+    "name": "Millennium Code Set 13031",
+    "referenced_by_columns": [
+      "BILL_ORG_PAYOR.BILL_ORG_TYPE_STRING"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 13124,
+    "name": "Millennium Code Set 13124",
+    "referenced_by_columns": [
+      "OMF_PVI_FOLDERS.GROUP_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14002,
+    "name": "Bill Code Schedule",
+    "referenced_by_columns": [
+      "WORKLOAD.WL_CODE_SCHED_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "CDM",
+      "CDMSCHEDPHARM",
+      "CPT",
+      "GCODE",
+      "HCPCS",
+      "MEDICAREONLYHCPCS",
+      "REVENUE"
+    ],
+    "ccl_uar_usage_count": 11,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/14002"
+  },
+  {
+    "code_set": 14003,
+    "name": "Discrete Task Assay (DTA)",
+    "referenced_by_columns": [
+      "SA_REF_ACTION.TASK_ASSAY_CD",
+      "SA_REF_PARAMETER.TASK_ASSAY_CD",
+      "SHX_ELEMENT.TASK_ASSAY_CD",
+      "SHX_RESPONSE.TASK_ASSAY_CD",
+      "SHX_SEC_LBL.TASK_ASSAY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "CLIN REVIEW"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 14005,
+    "name": "Millennium Code Set 14005",
+    "referenced_by_columns": [
+      "CHART_IMAGE_MM_FLDS.CDF_MEANING"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14045,
+    "name": "Surgical Procedure Modifiers",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/14045",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 14066,
+    "name": "Millennium Code Set 14066",
+    "referenced_by_columns": [
+      "ADDITIONAL_AMOUNT.TAX_TYPE_CD",
+      "ADDITIONAL_AMOUNT_DEF.TAX_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14113,
+    "name": "Millennium Code Set 14113",
+    "referenced_by_columns": [
+      "CE_CALCULATION_RESULT.CALCULATION_RESULT_FRMT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14135,
+    "name": "Millennium Code Set 14135",
+    "referenced_by_columns": [
+      "OMF_EXPRESS_DICTIONARY.PRODUCT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14199,
+    "name": "Millennium Code Set 14199",
+    "referenced_by_columns": [
+      "OMF_EXPRESS_DICTIONARY.MODE_CD",
+      "OMF_LEVEL_OPERAND.MODE_CD",
+      "OMF_OPERAND.MODE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14211,
+    "name": "Millennium Code Set 14211",
+    "referenced_by_columns": [
+      "CR_REPORT_REQUEST.RELEASE_REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14229,
+    "name": "Scheduling Appointment Cancellation Reason",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/14229",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 14230,
+    "name": "Millennium Code Set 14230",
+    "referenced_by_columns": [
+      "LH_MU_FX_2_METRICS.APPT_TYPE_CD",
+      "LH_MU_FX_METRICS.APPT_TYPE_CD",
+      "SCH_APPT_OPTION_CONFIG.APPT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14232,
+    "name": "Scheduling Action Type (SCHEDULE, CHECKIN, CHECKOUT, CANCEL, NOSHOW, HOLD)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "APPOINTMENT"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 14233,
+    "name": "Scheduling Appointment State (CONFIRMED, CHECKED IN, CHECKED OUT, CANCELED)",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CONFIRMED",
+      "REQUEST"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 14249,
+    "name": "Scheduling Appointment Type Synonyms",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/14249",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 14250,
+    "name": "Scheduling Resource Roles",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/14250",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 14252,
+    "name": "Millennium Code Set 14252",
+    "referenced_by_columns": [
+      "AP_DIAG_QUERY_PARAM.QUERY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14265,
+    "name": "Millennium Code Set 14265",
+    "referenced_by_columns": [
+      "OMF_AUDIT_CAT_GRID_RELTN.GRID_CD",
+      "OMF_COMP_FACT.GRID_CD",
+      "OMF_COMP_FACT.INDICATOR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14274,
+    "name": "Millennium Code Set 14274",
+    "referenced_by_columns": [
+      "ITEM_INTERVAL_TABLE.INTERVAL_TEMPLATE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14281,
+    "name": "Millennium Code Set 14281",
+    "referenced_by_columns": [
+      "CHART_ORD_SUM_FILTER.FILTER_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "INLAB"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 14287,
+    "name": "Millennium Code Set 14287",
+    "referenced_by_columns": [
+      "SIGN_LINE_FORMAT_DETAIL.DATA_ELEMENT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 14929,
+    "name": "Millennium Code Set 14929",
+    "referenced_by_columns": [
+      "PCS_SUB_CRITERIA.MICRO_TASK_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 15229,
+    "name": "Millennium Code Set 15229",
+    "referenced_by_columns": [
+      "WORKLOAD_CODE.ITEM_FOR_COUNT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 15230,
+    "name": "Millennium Code Set 15230",
+    "referenced_by_columns": [
+      "WORKLOAD_GROUP.BOOK_CD",
+      "WORKLOAD_GROUP.CHAPTER_CD",
+      "WORKLOAD_GROUP.SECTION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 15569,
+    "name": "Millennium Code Set 15569",
+    "referenced_by_columns": [
+      "CLIENT_BATCH.BATCH_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 15751,
+    "name": "Millennium Code Set 15751",
+    "referenced_by_columns": [
+      "DD_SDOC_ATTRIBUTE.TRUTH_STATE_CD",
+      "DD_SDOC_ATTR_MENU_ITEM.TRUTH_STATE_CD",
+      "DD_SDOC_GROUPBY.TRUTH_STATE_CD",
+      "DD_SDOC_ITEM.TRUTH_STATE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 15849,
+    "name": "Millennium Code Set 15849",
+    "referenced_by_columns": [
+      "CNT_ALPHA_RESPONSE.VOCAB_AXIS_CD",
+      "NOMENCLATURE_LOAD.VOCAB_AXIS_CD",
+      "NOMENCLATURE_LOAD_NS.VOCAB_AXIS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 16127,
+    "name": "Scheduling Processing Options",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/16127",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 16153,
+    "name": "Millennium Code Set 16153",
+    "referenced_by_columns": [
+      "SCH_ACTION_DATE.TIME_RESTR_CD",
+      "SCH_QUOTA.TIME_RESTR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 16369,
+    "name": "Millennium Code Set 16369",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "COMPLETE"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 16370,
+    "name": "Millennium Code Set 16370",
+    "referenced_by_columns": [
+      "PAT_ED_FAVORITES.TRACKING_GROUP_CD",
+      "TRACK_ACTION_LINK.TRACKING_GROUP_CD",
+      "TRACK_COLLECTION.TRACKING_GROUP_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 16389,
+    "name": "Millennium Code Set 16389",
+    "referenced_by_columns": [
+      "ACT_PW_COMP.DCP_CLIN_CAT_CD",
+      "MLTM_ORDER_CATALOG_LOAD.DCP_CLIN_CAT_MEAN",
+      "PATHWAY_COMP.DCP_CLIN_CAT_CD",
+      "PW_EVIDENCE_RELTN.DCP_CLIN_CAT_CD"
+    ],
+    "ccl_meanings": [
+      "IVSOLUTIONS"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 16409,
+    "name": "Millennium Code Set 16409",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "ACUITY",
+      "REGSTAT",
+      "SPECIALTY",
+      "TEAM"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 4
+  },
+  {
+    "code_set": 16449,
+    "name": "Millennium Code Set 16449",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "DISPENSEQUANTITY",
+      "POWERPLANACTIVITY",
+      "POWERPLANSCHEDULEDPHASE",
+      "PRIORITY",
+      "ROUTINGPHARMACYID",
+      "SCHONCPRIORITY",
+      "TOTAL REFILLS"
+    ],
+    "ccl_uar_usage_count": 7
+  },
+  {
+    "code_set": 16689,
+    "name": "Millennium Code Set 16689",
+    "referenced_by_columns": [
+      "AP_ACCN_TEMPLATE_DETAIL.TEMPLATE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 16750,
+    "name": "Millennium Code Set 16750",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "PRESCRIPTION"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 3
+  },
+  {
+    "code_set": 16769,
+    "name": "Millennium Code Set 16769",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "FUTURE",
+      "PLANNED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 17436,
+    "name": "Millennium Code Set 17436",
+    "referenced_by_columns": [
+      "SUPPORT_TYPE.SUPPORT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 17441,
+    "name": "Millennium Code Set 17441",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "PRIMARY"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 17649,
+    "name": "Millennium Code Set 17649",
+    "referenced_by_columns": [
+      "PM_LOC_ATTRIB.PARENT_ENTITY_NAME",
+      "PM_LOC_ATTRIB_HIST.PARENT_ENTITY_NAME"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 17909,
+    "name": "Millennium Code Set 17909",
+    "referenced_by_columns": [
+      "OUTCOME_CAT_CRITERIA.OPERATOR_CD",
+      "OUTCOME_CRITERIA.OPERATOR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 18189,
+    "name": "Millennium Code Set 18189",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "PRIMARYEVENTID"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 18269,
+    "name": "Millennium Code Set 18269",
+    "referenced_by_columns": [
+      "CHARGE_EVENT_ACT.SRV_DIAG_CD"
+    ],
+    "ccl_meanings": [
+      "NOCHARGEIND",
+      "NOPHLEBCHRG",
+      "NOPNTONITEM",
+      "NOPNTONTIER",
+      "NOTATCHRGLVL",
+      "NOTATCHRGPNT",
+      "NOTIERFORORG"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 7
+  },
+  {
+    "code_set": 18309,
+    "name": "Millennium Code Set 18309",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "INTERMITTENT"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 18649,
+    "name": "Millennium Code Set 18649",
+    "referenced_by_columns": [
+      "BATCH_TRANS_FILE.TRANS_TYPE_CD"
+    ],
+    "ccl_meanings": [
+      "ADJUSTMENT",
+      "PAYMENT"
+    ],
+    "ccl_displaykeys": [
+      "ADJUSTMENT",
+      "CHARGE",
+      "PAYMENT"
+    ],
+    "ccl_uar_usage_count": 21
+  },
+  {
+    "code_set": 18736,
+    "name": "Account Types",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "A/R"
+    ],
+    "ccl_displaykeys": [
+      "NONARGLONLY",
+      "REVENUE"
+    ],
+    "ccl_uar_usage_count": 4,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/18736"
+  },
+  {
+    "code_set": 18829,
+    "name": "Millennium Code Set 18829",
+    "referenced_by_columns": [
+      "CT_RULESET_TIER.CT_RULESET_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 18934,
+    "name": "Currency Type",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/18934",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 18935,
+    "name": "Millennium Code Set 18935",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CANCELED",
+      "PENDING"
+    ],
+    "ccl_displaykeys": [
+      "SUBMITTED",
+      "TRANSMITTED",
+      "TRANSMITTEDBYCROSSOVER"
+    ],
+    "ccl_uar_usage_count": 12
+  },
+  {
+    "code_set": 18937,
+    "name": "Millennium Code Set 18937",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ADMINISTRATIVEADJUSTMENT",
+      "LABCAPITATION",
+      "REVERSAL"
+    ],
+    "ccl_uar_usage_count": 3
+  },
+  {
+    "code_set": 19009,
+    "name": "Millennium Code Set 19009",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "PSFENABLED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 19189,
+    "name": "Millennium Code Set 19189",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "SERVICE"
+    ],
+    "ccl_displaykeys": [
+      "SERVICE"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 19269,
+    "name": "Millennium Code Set 19269",
+    "referenced_by_columns": [
+      "BB_EXCEPT_CXM.MESSAGE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20320,
+    "name": "Millennium Code Set 20320",
+    "referenced_by_columns": [
+      "TRACK_COLLECTION.COLLECTION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20321,
+    "name": "Millennium Code Set 20321",
+    "referenced_by_columns": [
+      "TRACK_ACTION_LINK.LINK_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20500,
+    "name": "Millennium Code Set 20500",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "PRVROLEASSOC"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 20504,
+    "name": "Millennium Code Set 20504",
+    "referenced_by_columns": [
+      "TRACK_ORD_EVENT_RELTN.ASSOCIATION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20530,
+    "name": "Millennium Code Set 20530",
+    "referenced_by_columns": [
+      "TRACK_PREARRIVAL_FIELD.FIELD_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20531,
+    "name": "Millennium Code Set 20531",
+    "referenced_by_columns": [
+      "PAT_ED_FAVORITES.FAVORITE_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20549,
+    "name": "Millennium Code Set 20549",
+    "referenced_by_columns": [
+      "BATCH_TRANS_FILE.TRANS_SUBTYPE_CD"
+    ],
+    "ccl_meanings": [
+      "COLLECTIONAGENCYPAYMENT",
+      "COM INS PAY",
+      "COPAY",
+      "MEDICAID PAY",
+      "MEDICARE PAY",
+      "PATIENT PAY",
+      "WORK CMP PAY"
+    ],
+    "ccl_displaykeys": [
+      "COPAY",
+      "PATIENTPAYMENT"
+    ],
+    "ccl_uar_usage_count": 11
+  },
+  {
+    "code_set": 20589,
+    "name": "Millennium Code Set 20589",
+    "referenced_by_columns": [
+      "BATCH_TRANS_FILE.PAYMENT_METHOD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20689,
+    "name": "Millennium Code Set 20689",
+    "referenced_by_columns": [
+      "ABSTRACT_FIELD_DEF.CALCULATE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 20849,
+    "name": "Millennium Code Set 20849",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CLIENT",
+      "GENERAL",
+      "PATIENT"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 6
+  },
+  {
+    "code_set": 21749,
+    "name": "Millennium Code Set 21749",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "HCFA_1450"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 21753,
+    "name": "Millennium Code Set 21753",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "837I5010"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 21757,
+    "name": "Millennium Code Set 21757",
+    "referenced_by_columns": [
+      "BT_COND_CRIT_GRP_RELTN.LIMIT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 21758,
+    "name": "Millennium Code Set 21758",
+    "referenced_by_columns": [
+      "BT_COND_CRIT_GRP_RELTN.LIMIT_VAL_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 21849,
+    "name": "Millennium Code Set 21849",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "CLAIM",
+      "PATIENTSTATEMENT"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 21969,
+    "name": "Millennium Code Set 21969",
+    "referenced_by_columns": [
+      "EXPEDITE_FORMAT.ACTIVITY_TYPE_DISP",
+      "EXPEDITE_FORMAT.ACTIVITY_TYPE_MEAN"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 22089,
+    "name": "Millennium Code Set 22089",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "CORRECT REQ"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 22550,
+    "name": "Millennium Code Set 22550",
+    "referenced_by_columns": [
+      "CHART_REQUEST.DIST_RUN_TYPE_CD",
+      "CR_REPORT_REQUEST.DIST_RUN_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 22669,
+    "name": "Millennium Code Set 22669",
+    "referenced_by_columns": [
+      "SIGN_LINE_FORMAT_DETAIL.DATA_ELEMENT_FORMAT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 23169,
+    "name": "Millennium Code Set 23169",
+    "referenced_by_columns": [
+      "INTERFACE_FILE.MAX_FT1"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 23372,
+    "name": "Millennium Code Set 23372",
+    "referenced_by_columns": [
+      "BATCH_TRANS.BATCH_STATUS_CD"
+    ],
+    "ccl_meanings": [
+      "FAILED"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 23549,
+    "name": "Millennium Code Set 23549",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "ORDERDIAG"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 24269,
+    "name": "Millennium Code Set 24269",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "ACTIVE"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 24451,
+    "name": "Benefit Order Status",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "INVALID"
+    ],
+    "ccl_displaykeys": [
+      "CANCELLED",
+      "COMPLETE",
+      "INVALID",
+      "READYTOBILL"
+    ],
+    "ccl_uar_usage_count": 10,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/24451"
+  },
+  {
+    "code_set": 24930,
+    "name": "Millennium Code Set 24930",
+    "referenced_by_columns": [
+      "PW_VARIANCE_RELTN.REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 25069,
+    "name": "Millennium Code Set 25069",
+    "referenced_by_columns": [
+      "SN_RPT_PREFS_REF.RPT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 25089,
+    "name": "Millennium Code Set 25089",
+    "referenced_by_columns": [
+      "CHARGE.PAYOR_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 25095,
+    "name": "Millennium Code Set 25095",
+    "referenced_by_columns": [
+      "BENEFIT_ORDER.COLLECTION_ST_CD",
+      "RC_D_DUNNING_LEVEL.MILL_DUNNING_LEVEL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "COLLECTIONS1",
+      "COLLECTIONS2",
+      "COLLECTIONS3",
+      "PRECOLLECTIONS1",
+      "PRECOLLECTIONS2"
+    ],
+    "ccl_uar_usage_count": 15
+  },
+  {
+    "code_set": 25320,
+    "name": "Millennium Code Set 25320",
+    "referenced_by_columns": [
+      "DIAGNOSIS.ASSERTED_DT_CD",
+      "FHX_ACTIVITY.ONSET_AGE_PREC_CD",
+      "PROBLEM.LIFE_CYCLE_DT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 25632,
+    "name": "Millennium Code Set 25632",
+    "referenced_by_columns": [
+      "CSOPS_SUMM.JOB_NAME_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 25753,
+    "name": "Millennium Code Set 25753",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "REVERSAL"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 26307,
+    "name": "Millennium Code Set 26307",
+    "referenced_by_columns": [
+      "ENCNTR_PLAN_ELIG_BENEFIT.BENEFIT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26310,
+    "name": "Millennium Code Set 26310",
+    "referenced_by_columns": [
+      "RC_D_HEALTH_PLAN.HEALTH_PLAN_PRODUCT_TYPE"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26311,
+    "name": "Millennium Code Set 26311",
+    "referenced_by_columns": [
+      "ENCNTR_PLAN_ELIG_BENEFIT.BENEFIT_QTY_QUAL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26335,
+    "name": "Millennium Code Set 26335",
+    "referenced_by_columns": [
+      "ENCNTR_PLAN_ELIG_BENEFIT.BENEFIT_TIME_PERIOD_QUAL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26379,
+    "name": "Millennium Code Set 26379",
+    "referenced_by_columns": [
+      "RAW_BATCH_TRANS_FILE.TRANS_GROUP_CD_TXT"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26380,
+    "name": "Millennium Code Set 26380",
+    "referenced_by_columns": [
+      "BATCH_TRANS_FILE.CLAIM_FILE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26381,
+    "name": "Millennium Code Set 26381",
+    "referenced_by_columns": [
+      "BATCH_TRANS_FILE.CLAIM_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26398,
+    "name": "Millennium Code Set 26398",
+    "referenced_by_columns": [
+      "RAW_BATCH_TRANS_FILE.TRANS_REASON_CD_TXT"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26399,
+    "name": "Millennium Code Set 26399",
+    "referenced_by_columns": [
+      "ENCNTR_DENIED_DAYS.REMARK_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26673,
+    "name": "Millennium Code Set 26673",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "PAIDINFULL"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 26820,
+    "name": "Millennium Code Set 26820",
+    "referenced_by_columns": [
+      "BLOB_REFERENCE.BLOB_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26821,
+    "name": "Millennium Code Set 26821",
+    "referenced_by_columns": [
+      "CDI_AC_BATCHCLASS_PARENT_R.PARENT_LEVEL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 26941,
+    "name": "Millennium Code Set 26941",
+    "referenced_by_columns": [
+      "STMT_CYCLE_CHILD_RELTN.CHILD_CYCLE_PAYMENT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 27121,
+    "name": "Millennium Code Set 27121",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "HEALTHPLANALIAS",
+      "NATIONALHPIDENTIFIER"
+    ],
+    "ccl_uar_usage_count": 4
+  },
+  {
+    "code_set": 27137,
+    "name": "Health Plan Service Type",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "MEDICAL"
+    ],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 1,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/27137"
+  },
+  {
+    "code_set": 27401,
+    "name": "Millennium Code Set 27401",
+    "referenced_by_columns": [
+      "MESSAGING_AUDIT.ERROR_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 27942,
+    "name": "Millennium Code Set 27942",
+    "referenced_by_columns": [
+      "BB_UPLOAD_LONG_TEXT_R.ACTION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 27980,
+    "name": "Millennium Code Set 27980",
+    "referenced_by_columns": [
+      "PAT_ED_FOLLOWUP_FAVORITES.WHEN_WITHIN_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 28200,
+    "name": "PFT Bill Alias Type",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/28200",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 28240,
+    "name": "Millennium Code Set 28240",
+    "referenced_by_columns": [
+      "PM_TYPE_PARAMS.TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 28382,
+    "name": "Millennium Code Set 28382",
+    "referenced_by_columns": [
+      "CCR_CONTENT.CONTENT_TYPE_CD",
+      "CCR_SECTION.CONTENT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 28600,
+    "name": "Millennium Code Set 28600",
+    "referenced_by_columns": [
+      "PN_RECOVERY.RECOVERY_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 28682,
+    "name": "Millennium Code Set 28682",
+    "referenced_by_columns": [
+      "PBS_AUTHORITY.AUTHORITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 28960,
+    "name": "Millennium Code Set 28960",
+    "referenced_by_columns": [
+      "PCS_HIERARCHY_QUEUE_RELTN.REVIEW_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 28961,
+    "name": "Millennium Code Set 28961",
+    "referenced_by_columns": [
+      "PCS_HIERARCHY.PRODUCT_TYPE_CD",
+      "PCS_QUEUE_ASSIGNMENT.REVIEW_TYPE_CD",
+      "PCS_REVIEW_CRITERIA.PRODUCT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29161,
+    "name": "Millennium Code Set 29161",
+    "referenced_by_columns": [
+      "PCS_CRITERIA.CRITERIA_TYPE_CD",
+      "PCS_QUEUE_ASSIGNMENT.REVIEW_STATUS_CD",
+      "PCS_REVIEW_HISTORY.REVIEW_STATUS_CD",
+      "PCS_REVIEW_ITEM.REVIEW_STATUS_CD",
+      "PCS_SUB_CRITERIA.CRITERIA_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29223,
+    "name": "Millennium Code Set 29223",
+    "referenced_by_columns": [
+      "CMT_CROSS_MAP_LOAD.MAP_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29244,
+    "name": "Millennium Code Set 29244",
+    "referenced_by_columns": [
+      "PCS_FILTER_ITEM.FILTER_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29445,
+    "name": "Millennium Code Set 29445",
+    "referenced_by_columns": [
+      "ENCNTR_LEGAL_REVIEW_R.DECISION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29520,
+    "name": "Millennium Code Set 29520",
+    "referenced_by_columns": [
+      "SI_RESULT_SET_ORDER_RELTN.ENTRY_MODE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29700,
+    "name": "Millennium Code Set 29700",
+    "referenced_by_columns": [
+      "ACT_PW_COMP.DCP_CLIN_SUB_CAT_CD",
+      "PATHWAY_COMP.DCP_CLIN_SUB_CAT_CD",
+      "PW_EVIDENCE_RELTN.DCP_CLIN_SUB_CAT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29746,
+    "name": "Millennium Code Set 29746",
+    "referenced_by_columns": [
+      "CMT_CONCEPT_EXTENSION.EXTENSION_TYPE_MEAN",
+      "CMT_CONCEPT_EXT_CUST.EXTENSION_TYPE_MEAN"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 29753,
+    "name": "Millennium Code Set 29753",
+    "referenced_by_columns": [
+      "CONCEPT_CKI_ENTITY_R.RELTN_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 30186,
+    "name": "Millennium Code Set 30186",
+    "referenced_by_columns": [
+      "PW_VARIANCE_RELTN.ACTION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 30200,
+    "name": "Result Source",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/30200",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 30280,
+    "name": "Millennium Code Set 30280",
+    "referenced_by_columns": [
+      "HM_EXPECT_SAT_HIST.ENTRY_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 30281,
+    "name": "Millennium Code Set 30281",
+    "referenced_by_columns": [
+      "HM_EXPECT_MOD.MODIFIER_TYPE_CD",
+      "HM_EXPECT_MOD_HIST.MODIFIER_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 30283,
+    "name": "Millennium Code Set 30283",
+    "referenced_by_columns": [
+      "HM_EXPECT_SERIES.PRIORITY_MEANING",
+      "HM_EXPECT_SERIES_HIST.PRIORITY_MEANING"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 30440,
+    "name": "Expire Reasons",
+    "referenced_by_columns": [
+      "HM_EXPECT_MOD.MODIFIER_REASON_CD",
+      "HM_EXPECT_MOD_HIST.MODIFIER_REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0,
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/30440"
+  },
+  {
+    "code_set": 30741,
+    "name": "Millennium Code Set 30741",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "MEDICAID",
+      "NOTINSURED",
+      "UNDERINSURED",
+      "UNIQUESTATEPROGRAM"
+    ],
+    "ccl_uar_usage_count": 4
+  },
+  {
+    "code_set": 66500,
+    "name": "Millennium Code Set 66500",
+    "referenced_by_columns": [
+      "INVTN_INVITATION.TRACKING_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 100056,
+    "name": "Millennium Code Set 100056",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "CPMPHYSICIANNOTESHOLDCLAIM"
+    ],
+    "ccl_uar_usage_count": 1
+  },
+  {
+    "code_set": 100123,
+    "name": "Beverage Consistency",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/100123",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 100197,
+    "name": "Diet Consistency",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/100197",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 254550,
+    "name": "Millennium Code Set 254550",
+    "referenced_by_columns": [
+      "CE_EVENT_ACTION_MODIFIER.ACTION_TYPE_MODIFIER_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 254591,
+    "name": "Millennium Code Set 254591",
+    "referenced_by_columns": [
+      "CDS_BATCH_HIST.CDS_BATCH_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 254914,
+    "name": "Millennium Code Set 254914",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "DONOTRESUSCITATE",
+      "DONOTRESUSCITATEANDDONOTINTUBATE"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 255090,
+    "name": "Millennium Code Set 255090",
+    "referenced_by_columns": [
+      "TASK_ACTIVITY.CHARTED_BY_AGENT_CD",
+      "TASK_CHARTING_AGENT_R.CHARTING_AGENT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 255431,
+    "name": "Millennium Code Set 255431",
+    "referenced_by_columns": [
+      "CE_RESULT_SET_LINK.ENTRY_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 367571,
+    "name": "Millennium Code Set 367571",
+    "referenced_by_columns": [
+      "CR_REPORT_REQUEST_ACTIVITY.REPORT_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 400806,
+    "name": "Millennium Code Set 400806",
+    "referenced_by_columns": [
+      "AOAV_CONDITION.AOAV_COMP_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4000160,
+    "name": "Millennium Code Set 4000160",
+    "referenced_by_columns": [
+      "CE_INTAKE_OUTPUT_RESULT.IO_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4000360,
+    "name": "Millennium Code Set 4000360",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [
+      "DICOM",
+      "ECG"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 4000601,
+    "name": "Millennium Code Set 4000601",
+    "referenced_by_columns": [
+      "DA_FOLDER_REPORT_RELTN.REPORT_SERVICE_CD",
+      "DA_QUERY.REPORT_SERVICE_CD",
+      "DA_REPORT.REPORT_SERVICE_CD",
+      "EXPLORER_MENU.REPORT_SERVICE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4001970,
+    "name": "Void Order Reasons",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4001970",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 4001984,
+    "name": "Millennium Code Set 4001984",
+    "referenced_by_columns": [
+      "TOC_DEFAULT_VIEW.TOC_FILTER_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002001,
+    "name": "Millennium Code Set 4002001",
+    "referenced_by_columns": [
+      "DI_CLIENT_CONFIG.EDC_SERVICE_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002009,
+    "name": "Millennium Code Set 4002009",
+    "referenced_by_columns": [
+      "LH_E_PCM_2022_METRICS.PRESENT_ON_ADMISSION_DESC",
+      "LH_E_PCM_2023_METRICS.PRESENT_ON_ADMISSION_DESC",
+      "LH_E_PCM_2023_METRICS.PRESENT_ON_ADMISSION_YOE_DESC",
+      "LH_E_PCM_2024_METRICS.PRESENT_ON_ADMISSION_DESC",
+      "LH_E_PCM_2024_METRICS.PRESENT_ON_ADMISSION_YOE_DESC",
+      "LH_E_PCM_2025_METRICS.PRESENT_ON_ADMISSION_DESC",
+      "LH_E_PCM_2025_METRICS.PRESENT_ON_ADMISSION_YOE_DESC",
+      "LH_E_PCM_2026_METRICS.PRESENT_ON_ADMISSION_DESC",
+      "LH_E_PCM_2026_METRICS.PRESENT_ON_ADMISSION_YOE_DESC"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002034,
+    "name": "Millennium Code Set 4002034",
+    "referenced_by_columns": [],
+    "ccl_meanings": [
+      "IME BILLING"
+    ],
+    "ccl_displaykeys": [
+      "COBBILLING"
+    ],
+    "ccl_uar_usage_count": 2
+  },
+  {
+    "code_set": 4002045,
+    "name": "Millennium Code Set 4002045",
+    "referenced_by_columns": [
+      "TRACKING_AUDIT.AUDIT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002119,
+    "name": "Millennium Code Set 4002119",
+    "referenced_by_columns": [
+      "LH_E_PC_2016_METRICS.CLASS_CSECTION_PROC_CS_IND",
+      "LH_E_PC_2016_METRICS.CSECTION_PROC_CS_IND"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002165,
+    "name": "Millennium Code Set 4002165",
+    "referenced_by_columns": [
+      "SHX_CATEGORY_REF.CATEGORY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002169,
+    "name": "Millennium Code Set 4002169",
+    "referenced_by_columns": [
+      "SHX_ELEMENT.INPUT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002187,
+    "name": "Millennium Code Set 4002187",
+    "referenced_by_columns": [
+      "PM_FLX_FORM.FLX_FORM_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002267,
+    "name": "Millennium Code Set 4002267",
+    "referenced_by_columns": [
+      "PFT_QUEUE_ITEM_WF_HIST.ITEM_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002311,
+    "name": "Millennium Code Set 4002311",
+    "referenced_by_columns": [
+      "MDI_PARAMETER.MDI_PARAMETER_CD",
+      "MDI_PARAMETER.MDI_PARAMETER_DEF"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002313,
+    "name": "Millennium Code Set 4002313",
+    "referenced_by_columns": [
+      "PATHWAY.CYCLE_LABEL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002352,
+    "name": "Millennium Code Set 4002352",
+    "referenced_by_columns": [
+      "BT_COND_CRIT_RELTN.BT_SUB_CRITERIA_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002375,
+    "name": "Millennium Code Set 4002375",
+    "referenced_by_columns": [
+      "DIAGNOSIS.LATERALITY_CD",
+      "PROBLEM.LATERALITY_CD",
+      "PROCEDURE.LATERALITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002390,
+    "name": "Millennium Code Set 4002390",
+    "referenced_by_columns": [
+      "SI_INTEROP_METADATA.FORMAT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002472,
+    "name": "Millennium Code Set 4002472",
+    "referenced_by_columns": [
+      "DA_FOLDER_REPORT_RELTN.VIEWER_MODE_CD",
+      "DA_REPORT.VIEWER_MODE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002563,
+    "name": "Millennium Code Set 4002563",
+    "referenced_by_columns": [
+      "ENCNTR_PLAN_ELIG_BENEFIT.INFO_SOURCE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002584,
+    "name": "Millennium Code Set 4002584",
+    "referenced_by_columns": [
+      "ENCNTR_CARE_MGMT_COMM.CORRESPONDENCE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002585,
+    "name": "Millennium Code Set 4002585",
+    "referenced_by_columns": [
+      "ENCNTR_CARE_MGMT_COMM.DOCUMENT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002611,
+    "name": "Millennium Code Set 4002611",
+    "referenced_by_columns": [
+      "CDI_FORM_ACTIVITY.REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002623,
+    "name": "Millennium Code Set 4002623",
+    "referenced_by_columns": [
+      "PFT_QUEUE_ITEM_WF_HIST.ACCOUNTABLE_ENTITY_CD",
+      "PFT_QUEUE_ITEM_WF_HIST.IDENTIFIER_ENTITY_CD",
+      "PFT_QUEUE_ITEM_WF_HIST.RESPONSIBLE_ENTITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002640,
+    "name": "Correspondence Status",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4002640",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 4002659,
+    "name": "Millennium Code Set 4002659",
+    "referenced_by_columns": [
+      "SI_DOCUMENT_METADATA.DOC_ACTION_STATUS_CD",
+      "SI_EXT_REGISTRY_RESPONSE.CONSOLIDATION_STATUS_CD",
+      "SI_INTEROP_METADATA.DOC_ACTION_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002660,
+    "name": "Millennium Code Set 4002660",
+    "referenced_by_columns": [
+      "SI_XDOC_METADATA.DOC_RETR_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002695,
+    "name": "Millennium Code Set 4002695",
+    "referenced_by_columns": [
+      "ORDER_RECON.RECON_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002763,
+    "name": "Millennium Code Set 4002763",
+    "referenced_by_columns": [
+      "CV_STEP.MODALITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4002853,
+    "name": "Millennium Code Set 4002853",
+    "referenced_by_columns": [
+      "WORKFLOW_TASK_PAUSED.QUEUE_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003033,
+    "name": "Millennium Code Set 4003033",
+    "referenced_by_columns": [
+      "LH_CNT_WL_RATING_HIST.RATING_REASON_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003106,
+    "name": "Vaccine Group",
+    "fhir_r4_system_url": "https://fhir.cerner.com/{EHR_source_ID}/codeSet/4003106",
+    "referenced_by_columns": [],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "provenance": "Oracle_Health_Reference_Downloads_2026-11-03:terminology_reference/proprietary_codes_r4.html"
+  },
+  {
+    "code_set": 4003137,
+    "name": "Millennium Code Set 4003137",
+    "referenced_by_columns": [
+      "LH_CNT_IC_ADV_SPEC_EVENT.INFECTION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003139,
+    "name": "Millennium Code Set 4003139",
+    "referenced_by_columns": [
+      "LH_CNT_IC_ADV_SPEC_EVENT.DETECTED_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003149,
+    "name": "Millennium Code Set 4003149",
+    "referenced_by_columns": [
+      "LH_CNT_IC_ADV_SURG_DATA.NHSN_PROC_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003364,
+    "name": "Millennium Code Set 4003364",
+    "referenced_by_columns": [
+      "RX_CLAIM_AUTH_ALERT_LOG.ALERT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003478,
+    "name": "Millennium Code Set 4003478",
+    "referenced_by_columns": [
+      "LH_CNT_WL_FACTOR_STATUS.FACTOR_STATUS_CD",
+      "LH_CNT_WL_FACTOR_STATUS_H.FACTOR_STATUS_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003482,
+    "name": "Millennium Code Set 4003482",
+    "referenced_by_columns": [
+      "LH_CNT_WL_FACTOR_DETAIL.DETAIL_TYPE_CD",
+      "LH_CNT_WL_FACTOR_DETAIL_H.DETAIL_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4003507,
+    "name": "Millennium Code Set 4003507",
+    "referenced_by_columns": [
+      "PIE_RECORD_COMPLIANCE.DATA_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4014000,
+    "name": "Millennium Code Set 4014000",
+    "referenced_by_columns": [
+      "SCH_ACTIVITY.ACTIVITY_CD",
+      "SCH_BASE_SCHEDULE_ACTIVITY.ACTIVITY_CD",
+      "SCH_UNIT_ACTIVITY.ACTIVITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4018001,
+    "name": "Millennium Code Set 4018001",
+    "referenced_by_columns": [
+      "SCH_UNIT_ACTIVITY.LOCATION_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4018002,
+    "name": "Millennium Code Set 4018002",
+    "referenced_by_columns": [
+      "ENCNTR_FLEX_HIST.TREATMENT_PHASE_CD",
+      "ENCOUNTER.TREATMENT_PHASE_CD",
+      "SCH_UNIT_PHASE_SCHEDULE.PHASE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4064000,
+    "name": "Millennium Code Set 4064000",
+    "referenced_by_columns": [
+      "PFT_TRANS_DIST_CONFIG.DISTRIBUTION_METHOD_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4124000,
+    "name": "Millennium Code Set 4124000",
+    "referenced_by_columns": [
+      "RCA_RULE_SERVICE_PARAM.DATA_TYPE_CD",
+      "RCA_RULE_SERVICE_RESULT.DATA_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4270007,
+    "name": "Millennium Code Set 4270007",
+    "referenced_by_columns": [
+      "HEALTH_CONCERN.CATEGORY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4296005,
+    "name": "Millennium Code Set 4296005",
+    "referenced_by_columns": [
+      "RXA_SUSPEND_ACT_LOG_DTL.ACTIVITY_DTL_CD",
+      "RXA_SUSPEND_ACT_LOG_DTL.REASON_TXT"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4300005,
+    "name": "Millennium Code Set 4300005",
+    "referenced_by_columns": [
+      "PRSNL_COMMENT.COMMENT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4504006,
+    "name": "Millennium Code Set 4504006",
+    "referenced_by_columns": [
+      "PROT_CRPC_BILLING.PROT_RES_ACCNT_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4636007,
+    "name": "Millennium Code Set 4636007",
+    "referenced_by_columns": [
+      "RXA_SUSPEND_ACT_LOG.SUSPEND_STATUS_DETAIL_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4636013,
+    "name": "Millennium Code Set 4636013",
+    "referenced_by_columns": [
+      "CR_DESTINATION_XREF.DESTINATION_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4644007,
+    "name": "Millennium Code Set 4644007",
+    "referenced_by_columns": [
+      "ORD_LOC_PHARM_RELTN.PHARM_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4644010,
+    "name": "Millennium Code Set 4644010",
+    "referenced_by_columns": [
+      "AOAV_FACILITY_PREF.PREF_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4646006,
+    "name": "Millennium Code Set 4646006",
+    "referenced_by_columns": [
+      "REACTION.SEVERITY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4760259,
+    "name": "Millennium Code Set 4760259",
+    "referenced_by_columns": [
+      "PROCEDURE.CATEGORY_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  },
+  {
+    "code_set": 4772128,
+    "name": "Millennium Code Set 4772128",
+    "referenced_by_columns": [
+      "MARS_REPORT.REPORT_TYPE_CD"
+    ],
+    "ccl_meanings": [],
+    "ccl_displaykeys": [],
+    "ccl_uar_usage_count": 0
+  }
+]

@@ -1,0 +1,1441 @@
+[
+  {
+    "id": "powerforms_assessments",
+    "name": "PowerForms & Discrete Clinical Assessments (IRF-PAI, FIM, CARE, Nursing Admission, Screenings)",
+    "keywords": [
+      "powerform",
+      "form",
+      "assessment",
+      "screening",
+      "fim",
+      "care tool",
+      "irf-pai",
+      "nursing history",
+      "fall risk",
+      "braden",
+      "phq-9",
+      "ciwa",
+      "dcp_forms"
+    ],
+    "definition_tables": [
+      {
+        "table": "DCP_FORMS_REF",
+        "key_columns": [
+          "DCP_FORMS_REF_ID",
+          "DESCRIPTION",
+          "DEFINITION",
+          "EVENT_SET_NAME"
+        ],
+        "role": "Master catalog of PowerForm definitions"
+      },
+      {
+        "table": "DCP_FORMS_DEF",
+        "key_columns": [
+          "DCP_FORMS_DEF_ID",
+          "DCP_FORMS_REF_ID",
+          "DCP_SECTION_REF_ID",
+          "SECTION_SEQ"
+        ],
+        "role": "Bridges a PowerForm to its ordered sections"
+      },
+      {
+        "table": "DCP_SECTION_REF",
+        "key_columns": [
+          "DCP_SECTION_REF_ID",
+          "DESCRIPTION",
+          "DEFINITION"
+        ],
+        "role": "Section header definition within a PowerForm"
+      },
+      {
+        "table": "DCP_INPUT_REF",
+        "key_columns": [
+          "DCP_INPUT_REF_ID",
+          "DCP_SECTION_REF_ID",
+          "INPUT_TYPE",
+          "MERGE_NAME",
+          "MERGE_UID"
+        ],
+        "role": "Individual control/prompt on a PowerForm section; MERGE_UID links to DISCRETE_TASK_ASSAY.TASK_ASSAY_CD"
+      },
+      {
+        "table": "DISCRETE_TASK_ASSAY",
+        "key_columns": [
+          "TASK_ASSAY_CD",
+          "MNEMONIC",
+          "DESCRIPTION",
+          "EVENT_CD",
+          "DEFAULT_RESULT_TYPE_CD"
+        ],
+        "role": "Discrete Task Assay (DTA, Code Set 14003) mapped 1-to-1 to CLINICAL_EVENT.EVENT_CD (Code Set 72)"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "DCP_FORMS_ACTIVITY",
+        "key_columns": [
+          "DCP_FORMS_ACTIVITY_ID",
+          "DCP_FORMS_REF_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "FORM_DT_TM",
+          "FORM_STATUS_CD",
+          "LAST_ACTIVITY_DT_TM"
+        ],
+        "role": "One row per charted PowerForm instance on an encounter"
+      },
+      {
+        "table": "DCP_FORMS_ACTIVITY_COMP",
+        "key_columns": [
+          "DCP_FORMS_ACTIVITY_COMP_ID",
+          "DCP_FORMS_ACTIVITY_ID",
+          "PARENT_ENTITY_NAME",
+          "PARENT_ENTITY_ID",
+          "COMPONENT_CD"
+        ],
+        "role": "Links DCP_FORMS_ACTIVITY to the root CLINICAL_EVENT row (where PARENT_ENTITY_NAME='CLINICAL_EVENT', PARENT_ENTITY_ID=EVENT_ID, and COMPONENT_CD [CS 18189] = 'PRIMARY EVENT ID')"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CLINICAL_EVENT.RESULT_VAL",
+        "ccl_type": "vc",
+        "when_used": "Numeric scores, short text answers, and calculated totals (EVENT_CLASS_CD in {NUM, TXT, COUNT}, Code Set 53)"
+      },
+      {
+        "table_column": "CE_CODED_RESULT.NOMENCLATURE_ID -> NOMENCLATURE.SOURCE_STRING",
+        "ccl_type": "f8 -> vc",
+        "when_used": "Multi-select checkboxes, radio buttons, and alpha nomenclature responses on a PowerForm"
+      },
+      {
+        "table_column": "CE_DATE_RESULT.RESULT_DT_TM",
+        "ccl_type": "dq8",
+        "when_used": "Date/time picker controls inside a PowerForm"
+      },
+      {
+        "table_column": "CE_STRING_RESULT.STRING_RESULT_TEXT",
+        "ccl_type": "vc",
+        "when_used": "Long free-text comment controls inside a PowerForm"
+      }
+    ],
+    "join_pattern_sql": "DCP_FORMS_REF dfr -> DCP_FORMS_ACTIVITY dfa (on dfr.dcp_forms_ref_id = dfa.dcp_forms_ref_id) -> DCP_FORMS_ACTIVITY_COMP dfac (on dfa.dcp_forms_activity_id = dfac.dcp_forms_activity_id and dfac.parent_entity_name = 'CLINICAL_EVENT') -> CLINICAL_EVENT ce_root (on ce_root.event_id = dfac.parent_entity_id and ce_root.valid_until_dt_tm >= 31-DEC-2100) -> CLINICAL_EVENT ce_sec (on ce_sec.parent_event_id = ce_root.event_id and ce_sec.valid_until_dt_tm >= 31-DEC-2100) -> CLINICAL_EVENT ce_fld (on ce_fld.parent_event_id = ce_sec.event_id and ce_fld.valid_until_dt_tm >= 31-DEC-2100)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Clinical Events",
+      "fields": [
+        "Enc Id",
+        "CE Event Id",
+        "CE Event",
+        "CE Result Value",
+        "CE Result Units",
+        "CE Event End Dt Tm",
+        "CE Performed Prsnl Name",
+        "CE Result Status",
+        "CE Valid Until Dt/Tm"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00",
+        "CE Result Status in (Auth (Verified), Modified, Altered)"
+      ]
+    }
+  },
+  {
+    "id": "interactive_view_flowsheets",
+    "name": "InteractiveView (IView) Flowsheets, Vital Signs, Lines/Drains/Airways & Therapy Minutes",
+    "keywords": [
+      "iview",
+      "interactive view",
+      "flowsheet",
+      "vital signs",
+      "vitals",
+      "blood pressure",
+      "heart rate",
+      "temperature",
+      "spo2",
+      "pain score",
+      "dynamic group",
+      "wound",
+      "line",
+      "drain",
+      "therapy minutes"
+    ],
+    "definition_tables": [
+      {
+        "table": "WORKING_VIEW",
+        "key_columns": [
+          "WORKING_VIEW_ID",
+          "DISPLAY_NAME",
+          "POSITION_CD",
+          "LOCATION_CD"
+        ],
+        "role": "Defines the IView navigator bands visible for a clinical role/location"
+      },
+      {
+        "table": "WORKING_VIEW_SECTION",
+        "key_columns": [
+          "WORKING_VIEW_SECTION_ID",
+          "WORKING_VIEW_ID",
+          "EVENT_SET_NAME",
+          "DISPLAY_NAME"
+        ],
+        "role": "Sections within an IView band"
+      },
+      {
+        "table": "WORKING_VIEW_ITEM",
+        "key_columns": [
+          "WORKING_VIEW_ITEM_ID",
+          "WORKING_VIEW_SECTION_ID",
+          "PRIMITIVE_EVENT_SET_NAME"
+        ],
+        "role": "Individual flowsheet rows linked to V500_EVENT_SET_CODE / V500_EVENT_CODE (Code Set 72)"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "CLINICAL_EVENT",
+        "key_columns": [
+          "CLINICAL_EVENT_ID",
+          "EVENT_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "EVENT_CD",
+          "EVENT_END_DT_TM",
+          "CE_DYNAMIC_LABEL_ID"
+        ],
+        "role": "Stores every charted IView cell observation"
+      },
+      {
+        "table": "CE_DYNAMIC_LABEL",
+        "key_columns": [
+          "CE_DYNAMIC_LABEL_ID",
+          "LABEL_NAME",
+          "LABEL_STATUS_CD",
+          "CREATE_DT_TM"
+        ],
+        "role": "Groups multi-instance dynamic flowsheets (e.g., 'PIV #1 Left Forearm', 'Pressure Injury Sacrum')"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CLINICAL_EVENT.RESULT_VAL",
+        "ccl_type": "vc",
+        "when_used": "Flowsheet cell value (numeric or text)"
+      },
+      {
+        "table_column": "CLINICAL_EVENT.RESULT_UNITS_CD",
+        "ccl_type": "f8 (CS 54)",
+        "when_used": "Flowsheet measurement unit"
+      },
+      {
+        "table_column": "CE_DYNAMIC_LABEL.LABEL_NAME",
+        "ccl_type": "vc",
+        "when_used": "Dynamic group instance label (wound/line/drain identifier)"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> CLINICAL_EVENT ce (on ce.encntr_id = e.encntr_id and ce.valid_until_dt_tm >= 31-DEC-2100) LEFT JOIN CE_DYNAMIC_LABEL cdl (on cdl.ce_dynamic_label_id = ce.ce_dynamic_label_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Clinical Events",
+      "fields": [
+        "Enc Id",
+        "CE Event",
+        "CE Result Value",
+        "CE Result Units",
+        "CE Event End Dt Tm",
+        "CE Result Status",
+        "CE Valid Until Dt/Tm"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00",
+        "CE Result Status = Auth (Verified)"
+      ]
+    }
+  },
+  {
+    "id": "intake_and_output_2g",
+    "name": "Intake & Output (I&O 2G Fluid Balance, Oral/IV Intake, Urine/Drain Output)",
+    "keywords": [
+      "intake",
+      "output",
+      "i&o",
+      "fluid balance",
+      "urine output",
+      "emesis",
+      "tube feeding",
+      "iv fluid volume",
+      "ce_intake_output_result"
+    ],
+    "definition_tables": [
+      {
+        "table": "V500_EVENT_CODE",
+        "key_columns": [
+          "EVENT_CD",
+          "EVENT_CD_DISP",
+          "EVENT_SET_NAME"
+        ],
+        "role": "Identifies the fluid/route reference event code (Code Set 72)"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "CE_INTAKE_OUTPUT_RESULT",
+        "key_columns": [
+          "CE_IO_RESULT_ID",
+          "EVENT_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "IO_TYPE_FLAG",
+          "IO_VOLUME",
+          "IO_START_DT_TM",
+          "IO_END_DT_TM",
+          "REFERENCE_EVENT_CD",
+          "VALID_UNTIL_DT_TM"
+        ],
+        "role": "Dedicated high-speed I&O volume table; IO_TYPE_FLAG: 1 = Intake, 2 = Output"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CE_INTAKE_OUTPUT_RESULT.IO_VOLUME",
+        "ccl_type": "f8",
+        "when_used": "Measured fluid volume in milliliters (mL)"
+      },
+      {
+        "table_column": "CE_INTAKE_OUTPUT_RESULT.IO_TYPE_FLAG",
+        "ccl_type": "i4",
+        "when_used": "1 = Intake, 2 = Output"
+      },
+      {
+        "table_column": "CE_INTAKE_OUTPUT_RESULT.REFERENCE_EVENT_CD",
+        "ccl_type": "f8 (CS 72)",
+        "when_used": "Specific intake/output source (e.g., Foley Catheter, PO Fluid, IV Infused)"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> CE_INTAKE_OUTPUT_RESULT cio (on cio.encntr_id = e.encntr_id and cio.valid_until_dt_tm >= 31-DEC-2100) -> CLINICAL_EVENT ce (on ce.event_id = cio.event_id and ce.valid_until_dt_tm >= 31-DEC-2100)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Clinical Events",
+      "fields": [
+        "Enc Id",
+        "CE Event",
+        "CE Result Value",
+        "CE Result Units",
+        "CE Event End Dt Tm",
+        "CE Valid Until Dt/Tm"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00",
+        "CE Result Status = Auth (Verified)"
+      ]
+    }
+  },
+  {
+    "id": "dynamic_documentation_notes_blobs",
+    "name": "Dynamic Documentation, PowerNotes, Discharge Summaries & Narrative Clinical Documents (SCD / CE_BLOB)",
+    "keywords": [
+      "note",
+      "powernote",
+      "dynamic documentation",
+      "progress note",
+      "discharge summary",
+      "h&p",
+      "history and physical",
+      "consult note",
+      "therapy note",
+      "narrative",
+      "blob",
+      "ce_blob",
+      "scd_story",
+      "rtf",
+      "html"
+    ],
+    "definition_tables": [
+      {
+        "table": "SCD_STORY",
+        "key_columns": [
+          "SCD_STORY_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "EVENT_ID",
+          "TITLE",
+          "STORY_TYPE_CD",
+          "STORY_COMPLETION_STATUS_CD"
+        ],
+        "role": "Header table for structured PowerNotes and Dynamic Documentation stories"
+      },
+      {
+        "table": "SCR_TERM",
+        "key_columns": [
+          "SCR_TERM_ID",
+          "CONCEPT_CKI",
+          "DISPLAY"
+        ],
+        "role": "Structured clinical documentation taxonomy terms"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "CLINICAL_EVENT",
+        "key_columns": [
+          "EVENT_ID",
+          "PARENT_EVENT_ID",
+          "ENCNTR_ID",
+          "EVENT_CD",
+          "EVENT_CLASS_CD",
+          "EVENT_TITLE_TEXT",
+          "PERFORMED_PRSNL_ID",
+          "VERIFIED_DT_TM"
+        ],
+        "role": "Document header and section rows where EVENT_CLASS_CD (CS 53) in {'DOC', 'MDOC', 'ATTACHMENT'}"
+      },
+      {
+        "table": "CE_BLOB_RESULT",
+        "key_columns": [
+          "EVENT_ID",
+          "STORAGE_CD",
+          "FORMAT_CD",
+          "BLOB_HANDLE",
+          "VALID_UNTIL_DT_TM"
+        ],
+        "role": "Document metadata specifying format (CS 23: RTF, HTML, XML, PDF, ASCII) and storage location"
+      },
+      {
+        "table": "CE_BLOB",
+        "key_columns": [
+          "EVENT_ID",
+          "BLOB_SEQ_NUM",
+          "BLOB_CONTENTS",
+          "BLOB_LENGTH",
+          "COMPRESSION_CD",
+          "VALID_UNTIL_DT_TM"
+        ],
+        "role": "Actual binary/text document body; if COMPRESSION_CD (CS 120) = OCFCOMP, decompress in CCL via uar_ocf_uncompress()"
+      },
+      {
+        "table": "SCD_PARAGRAPH",
+        "key_columns": [
+          "SCD_PARAGRAPH_ID",
+          "SCD_STORY_ID",
+          "PARAGRAPH_CLASS_CD"
+        ],
+        "role": "Paragraphs within a structured PowerNote"
+      },
+      {
+        "table": "SCD_SENTENCE",
+        "key_columns": [
+          "SCD_SENTENCE_ID",
+          "SCD_PARAGRAPH_ID",
+          "SCD_STORY_ID"
+        ],
+        "role": "Sentences within a structured PowerNote"
+      },
+      {
+        "table": "SCD_TERM",
+        "key_columns": [
+          "SCD_TERM_ID",
+          "SCD_SENTENCE_ID",
+          "SCR_TERM_ID",
+          "TRUTH_STATE_CD",
+          "EVENT_ID"
+        ],
+        "role": "Discrete structured findings clicked inside a PowerNote"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CE_BLOB.BLOB_CONTENTS",
+        "ccl_type": "vc / raw blob",
+        "when_used": "Full narrative note text (RTF/HTML/XHTML); decompress with uar_ocf_uncompress() when COMPRESSION_CD = OCFCOMP"
+      },
+      {
+        "table_column": "CLINICAL_EVENT.EVENT_TITLE_TEXT",
+        "ccl_type": "vc",
+        "when_used": "Custom note title entered by the authoring provider"
+      },
+      {
+        "table_column": "SCD_TERM.TRUTH_STATE_CD",
+        "ccl_type": "f8",
+        "when_used": "Present/Absent/Unknown state of a structured PowerNote term"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> CLINICAL_EVENT ce_doc (on ce_doc.encntr_id = e.encntr_id and ce_doc.event_class_cd in (DOC, MDOC)) -> CE_BLOB_RESULT cbr (on cbr.event_id = ce_doc.event_id) -> CE_BLOB cb (on cb.event_id = cbr.event_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Clinical Events",
+      "fields": [
+        "Enc Id",
+        "CE Event Id",
+        "CE Event",
+        "CE Event Title Text",
+        "CE Performed Prsnl Name",
+        "CE Verified Dt Tm",
+        "CE Result Status",
+        "CE Valid Until Dt/Tm"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00",
+        "CE Result Status = Auth (Verified)"
+      ]
+    }
+  },
+  {
+    "id": "order_entry_formats_and_details",
+    "name": "Order Entry Format Forms (OE_FORMAT) & Captured Order Detail Prompts (ORDER_DETAIL)",
+    "keywords": [
+      "order form",
+      "order detail",
+      "oe_format",
+      "order prompt",
+      "indication",
+      "isolation",
+      "diet",
+      "frequency",
+      "route",
+      "dose",
+      "specimen",
+      "consult reason",
+      "order comment",
+      "orders",
+      "order_detail"
+    ],
+    "definition_tables": [
+      {
+        "table": "ORDER_CATALOG",
+        "key_columns": [
+          "CATALOG_CD",
+          "PRIMARY_MNEMONIC",
+          "CATALOG_TYPE_CD",
+          "ACTIVITY_TYPE_CD",
+          "OE_FORMAT_ID"
+        ],
+        "role": "Master catalog of orderable items (Code Set 200) and their assigned Order Entry Format"
+      },
+      {
+        "table": "ORDER_ENTRY_FORMAT",
+        "key_columns": [
+          "OE_FORMAT_ID",
+          "OE_FORMAT_NAME",
+          "ACTION_TYPE_CD"
+        ],
+        "role": "Defines the order form layout presented when ordering (Code Set 6003 = ORDER)"
+      },
+      {
+        "table": "OE_FORMAT_FIELDS",
+        "key_columns": [
+          "OE_FORMAT_ID",
+          "OE_FIELD_ID",
+          "LABEL_TEXT",
+          "GROUP_SEQ",
+          "FIELD_SEQ",
+          "ACCEPT_FLAG"
+        ],
+        "role": "Specific prompt fields placed on an Order Entry Format"
+      },
+      {
+        "table": "ORDER_ENTRY_FIELDS",
+        "key_columns": [
+          "OE_FIELD_ID",
+          "DESCRIPTION",
+          "FIELD_TYPE_FLAG",
+          "CODESET",
+          "OE_FIELD_MEANING_ID"
+        ],
+        "role": "Field definition and validation Code Set for an order prompt"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "ORDERS",
+        "key_columns": [
+          "ORDER_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "CATALOG_CD",
+          "CATALOG_TYPE_CD",
+          "ORDER_MNEMONIC",
+          "ORDER_STATUS_CD",
+          "ORIG_ORDER_DT_TM",
+          "CLINICAL_DISPLAY_LINE"
+        ],
+        "role": "One row per placed order"
+      },
+      {
+        "table": "ORDER_DETAIL",
+        "key_columns": [
+          "ORDER_ID",
+          "ACTION_SEQUENCE",
+          "DETAIL_SEQUENCE",
+          "OE_FIELD_ID",
+          "OE_FIELD_MEANING",
+          "OE_FIELD_MEANING_ID",
+          "OE_FIELD_DISPLAY_VALUE",
+          "OE_FIELD_VALUE",
+          "OE_FIELD_DT_TM_VALUE"
+        ],
+        "role": "Stores every discrete answer entered into the Order Entry Format prompts"
+      },
+      {
+        "table": "ORDER_COMMENT",
+        "key_columns": [
+          "ORDER_ID",
+          "ACTION_SEQUENCE",
+          "COMMENT_TYPE_CD",
+          "LONG_TEXT_ID"
+        ],
+        "role": "Links an order to free-text comments stored in LONG_TEXT"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "ORDER_DETAIL.OE_FIELD_DISPLAY_VALUE",
+        "ccl_type": "vc",
+        "when_used": "Human-readable answer to an order prompt (e.g., 'BID', 'PO', '10 mg', 'Contact Isolation', 'Eval and Treat')"
+      },
+      {
+        "table_column": "ORDER_DETAIL.OE_FIELD_VALUE",
+        "ccl_type": "f8",
+        "when_used": "Numeric value or underlying CODE_VALUE of the order prompt answer"
+      },
+      {
+        "table_column": "ORDER_DETAIL.OE_FIELD_DT_TM_VALUE",
+        "ccl_type": "dq8",
+        "when_used": "Date/time value answered on an order prompt (e.g., Requested Start Date/Time)"
+      },
+      {
+        "table_column": "ORDERS.CLINICAL_DISPLAY_LINE",
+        "ccl_type": "vc",
+        "when_used": "Full formatted summary string of all Order Entry Format answers"
+      },
+      {
+        "table_column": "LONG_TEXT.LONG_TEXT",
+        "ccl_type": "vc",
+        "when_used": "Order comment text joined via ORDER_COMMENT.LONG_TEXT_ID"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> ORDERS o (on o.encntr_id = e.encntr_id and o.active_ind = 1) -> ORDER_DETAIL od (on od.order_id = o.order_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Orders",
+      "fields": [
+        "Enc Id",
+        "Ord Order Id",
+        "Ord Mnemonic",
+        "Ord Detail Display",
+        "Ord Status",
+        "Ord Orig Order Dt/Tm"
+      ],
+      "mandatory_filters": [
+        "Enc Active Ind = 1"
+      ]
+    }
+  },
+  {
+    "id": "cpdi_interactive_and_scanned_forms",
+    "name": "CPDI / Cerner Document Imaging Interactive & eSignature Forms (CDI_FORM)",
+    "keywords": [
+      "cpdi",
+      "cdi",
+      "scanned form",
+      "esignature",
+      "consent form",
+      "document imaging",
+      "cdi_form",
+      "cdi_form_activity"
+    ],
+    "definition_tables": [
+      {
+        "table": "CDI_FORM",
+        "key_columns": [
+          "CDI_FORM_ID",
+          "FORM_NAME",
+          "FORM_DESC",
+          "EVENT_CD"
+        ],
+        "role": "CPDI interactive/eSignature form configuration"
+      },
+      {
+        "table": "CDI_FORM_FIELD",
+        "key_columns": [
+          "CDI_FORM_FIELD_ID",
+          "CDI_FORM_ID",
+          "FIELD_NAME",
+          "FIELD_TYPE_FLAG",
+          "PARENT_ENTITY_VAR_CD"
+        ],
+        "role": "Interactive field definition on a CPDI form"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "CDI_FORM_ACTIVITY",
+        "key_columns": [
+          "CDI_FORM_ACTIVITY_ID",
+          "CDI_FORM_ID",
+          "PARENT_ENTITY_NAME",
+          "PARENT_ENTITY_ID",
+          "FORM_STATUS_CD",
+          "COMPLETION_DT_TM"
+        ],
+        "role": "Tracks completion status of a CPDI form for a person or encounter"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CDI_FORM_ACTIVITY.FORM_STATUS_CD",
+        "ccl_type": "f8",
+        "when_used": "Completion status of the interactive/scanned form"
+      },
+      {
+        "table_column": "CE_BLOB_RESULT.BLOB_HANDLE",
+        "ccl_type": "vc",
+        "when_used": "External optical/CAMM handle for the rendered PDF/TIFF image"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> CDI_FORM_ACTIVITY cfa (on cfa.parent_entity_id = e.encntr_id and cfa.parent_entity_name = 'ENCOUNTER') -> CDI_FORM cf (on cf.cdi_form_id = cfa.cdi_form_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Clinical Events",
+      "fields": [
+        "Enc Id",
+        "CE Event",
+        "CE Result Status",
+        "CE Event End Dt Tm"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00"
+      ]
+    }
+  },
+  {
+    "id": "mar_bcma_medication_administration",
+    "name": "Medication Administration Record (MAR) & Barcode Medication Administration (BCMA)",
+    "keywords": [
+      "mar",
+      "bcma",
+      "medication administration",
+      "med admin",
+      "barcode",
+      "dose given",
+      "missed dose",
+      "late dose",
+      "infusion",
+      "iv drip",
+      "med_admin_event",
+      "ce_med_result"
+    ],
+    "definition_tables": [
+      {
+        "table": "ORDER_CATALOG",
+        "key_columns": [
+          "CATALOG_CD",
+          "PRIMARY_MNEMONIC"
+        ],
+        "role": "Medication catalog item (Code Set 200, Catalog Type = PHARMACY in Code Set 6000)"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "MED_ADMIN_EVENT",
+        "key_columns": [
+          "MED_ADMIN_EVENT_ID",
+          "EVENT_ID",
+          "ORDER_ID",
+          "EVENT_TYPE_CD",
+          "BEG_DT_TM",
+          "SCHEDULED_DT_TM",
+          "POSITIVE_PATIENT_IDENT_IND",
+          "POSITIVE_MED_IDENT_IND",
+          "PRSNL_ID",
+          "NURSE_UNIT_CD"
+        ],
+        "role": "BCMA administration audit log (scan indicators, scheduled vs performed time, event type in CS 4002)"
+      },
+      {
+        "table": "CE_MED_RESULT",
+        "key_columns": [
+          "EVENT_ID",
+          "ADMIN_DOSAGE",
+          "DOSAGE_UNIT_CD",
+          "ADMIN_ROUTE_CD",
+          "ADMIN_SITE_CD",
+          "INFUSION_RATE",
+          "INFUSION_UNIT_CD",
+          "IV_EVENT_CD"
+        ],
+        "role": "Medication dose, route, site, and IV rate payload linked to CLINICAL_EVENT.EVENT_ID"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CE_MED_RESULT.ADMIN_DOSAGE",
+        "ccl_type": "f8",
+        "when_used": "Numeric medication dose administered"
+      },
+      {
+        "table_column": "CE_MED_RESULT.DOSAGE_UNIT_CD",
+        "ccl_type": "f8 (CS 54)",
+        "when_used": "Dose unit (mg, mcg, mL, units)"
+      },
+      {
+        "table_column": "CE_MED_RESULT.ADMIN_ROUTE_CD",
+        "ccl_type": "f8 (CS 4001)",
+        "when_used": "Route of administration (PO, IV, IM, SubQ)"
+      },
+      {
+        "table_column": "MED_ADMIN_EVENT.POSITIVE_PATIENT_IDENT_IND",
+        "ccl_type": "i4",
+        "when_used": "1 = Patient wristband barcode scanned"
+      },
+      {
+        "table_column": "MED_ADMIN_EVENT.POSITIVE_MED_IDENT_IND",
+        "ccl_type": "i4",
+        "when_used": "1 = Medication barcode scanned"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> ORDERS o (on o.encntr_id = e.encntr_id) -> MED_ADMIN_EVENT mae (on mae.order_id = o.order_id) -> CLINICAL_EVENT ce (on ce.event_id = mae.event_id and ce.valid_until_dt_tm >= 31-DEC-2100) -> CE_MED_RESULT cmr (on cmr.event_id = ce.event_id and cmr.valid_until_dt_tm >= 31-DEC-2100)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Medication Administration / Clinical Events",
+      "fields": [
+        "Enc Id",
+        "Med Adm Event Id",
+        "Med Adm Dt/Tm",
+        "Med Adm MedScan Ind",
+        "Med Adm PtScan Ind",
+        "CE Med Admin Dosage",
+        "CE Med Dosage Unit"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00",
+        "CE Result Status in (Auth (Verified), Modified)"
+      ]
+    }
+  },
+  {
+    "id": "rehab_therapy_productivity_and_charges",
+    "name": "Rehabilitation Therapy Productivity, Treatment Minutes & Billed CPT Units (PT / OT / SLP)",
+    "keywords": [
+      "rehab",
+      "therapy",
+      "physical therapy",
+      "occupational therapy",
+      "speech therapy",
+      "pt",
+      "ot",
+      "slp",
+      "treatment minutes",
+      "therapy charges",
+      "cpt",
+      "units lost",
+      "lh_cnt_rehab_event"
+    ],
+    "definition_tables": [
+      {
+        "table": "BILL_ITEM",
+        "key_columns": [
+          "BILL_ITEM_ID",
+          "EXT_DESCRIPTION",
+          "EXT_PARENT_REFERENCE_ID"
+        ],
+        "role": "Chargemaster item definition"
+      },
+      {
+        "table": "V500_EVENT_CODE",
+        "key_columns": [
+          "EVENT_CD",
+          "EVENT_CD_DISP"
+        ],
+        "role": "Therapy treatment minutes and evaluation DTAs (Code Set 72)"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "CLINICAL_EVENT",
+        "key_columns": [
+          "EVENT_ID",
+          "ENCNTR_ID",
+          "EVENT_CD",
+          "RESULT_VAL",
+          "EVENT_END_DT_TM",
+          "PERFORMED_PRSNL_ID"
+        ],
+        "role": "Charted therapy treatment minutes and evaluation observations"
+      },
+      {
+        "table": "LH_CNT_REHAB_EVENT",
+        "key_columns": [
+          "LH_CNT_REHAB_EVENT_ID",
+          "EVENT_ID",
+          "EVAL_EVENT_FLAG",
+          "MISSED_IND",
+          "PERFORM_PRSNL_ID",
+          "EVENT_END_DT_TM"
+        ],
+        "role": "Bedrock-configured rehab productivity event summary (EVAL_EVENT_FLAG: 1=Eval, 2=Re-eval; MISSED_IND: 1=Units lost)"
+      },
+      {
+        "table": "CHARGE",
+        "key_columns": [
+          "CHARGE_ITEM_ID",
+          "ENCNTR_ID",
+          "ORDER_ID",
+          "SERVICE_DT_TM",
+          "CHARGE_DESCRIPTION",
+          "ITEM_QUANTITY",
+          "ITEM_EXTENDED_PRICE",
+          "PROCESS_FLG"
+        ],
+        "role": "Posted clinical/therapy charges and unit quantities"
+      },
+      {
+        "table": "CHARGE_MOD",
+        "key_columns": [
+          "CHARGE_MOD_ID",
+          "CHARGE_ITEM_ID",
+          "FIELD6",
+          "FIELD1_ID"
+        ],
+        "role": "CPT/HCPCS procedure code (FIELD6) and therapy modifiers (GP, GO, GN)"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CLINICAL_EVENT.RESULT_VAL",
+        "ccl_type": "vc (numeric minutes)",
+        "when_used": "Charted therapy minutes for PT/OT/SLP treatment"
+      },
+      {
+        "table_column": "CHARGE.ITEM_QUANTITY",
+        "ccl_type": "f8",
+        "when_used": "Billed CPT unit count"
+      },
+      {
+        "table_column": "CHARGE.ITEM_EXTENDED_PRICE",
+        "ccl_type": "f8",
+        "when_used": "Gross charge amount"
+      },
+      {
+        "table_column": "CHARGE_MOD.FIELD6",
+        "ccl_type": "vc",
+        "when_used": "CPT / HCPCS code string"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> CLINICAL_EVENT ce (on ce.encntr_id = e.encntr_id and ce.valid_until_dt_tm >= 31-DEC-2100) + ENCOUNTER e -> CHARGE c (on c.encntr_id = e.encntr_id and c.active_ind = 1) LEFT JOIN CHARGE_MOD cm (on cm.charge_item_id = c.charge_item_id and cm.active_ind = 1)",
+    "da2_mapping": {
+      "domain": "CWC Encounter (two separate datasets joined in BIRT on Enc Id to prevent CE x Charge cross-join)",
+      "sub_entity": "Clinical Events + Charges",
+      "fields": [
+        "Enc Id",
+        "Enc Encounter Number",
+        "CE Event",
+        "CE Result Value",
+        "CE Event End Dt Tm",
+        "Chg Charge Item Id",
+        "Chg Description",
+        "Chg Quantity",
+        "Chg Service Dt Tm"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00",
+        "CE Result Status = Auth (Verified)"
+      ]
+    }
+  },
+  {
+    "id": "revcycle_patient_accounting_outputs",
+    "name": "Patient Accounting / Revenue Cycle Billing, Payments, Adjustments & GL Output (CWF)",
+    "keywords": [
+      "revenue",
+      "billing",
+      "payment",
+      "adjustment",
+      "write-off",
+      "general ledger",
+      "gl",
+      "benefit order",
+      "pft_encntr",
+      "claim",
+      "balance",
+      "ar",
+      "cwf"
+    ],
+    "definition_tables": [
+      {
+        "table": "HEALTH_PLAN",
+        "key_columns": [
+          "HEALTH_PLAN_ID",
+          "PLAN_NAME",
+          "FINANCIAL_CLASS_CD",
+          "PLAN_TYPE_CD"
+        ],
+        "role": "Payer health plan catalog"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "PFT_ENCNTR",
+        "key_columns": [
+          "PFT_ENCNTR_ID",
+          "ENCNTR_ID",
+          "ACCT_ID",
+          "BALANCE",
+          "AR_BALANCE",
+          "BILL_STATUS_CD"
+        ],
+        "role": "Patient Financial Transaction (ProFit) encounter account record"
+      },
+      {
+        "table": "BENEFIT_ORDER",
+        "key_columns": [
+          "BENEFIT_ORDER_ID",
+          "PFT_ENCNTR_ID",
+          "BO_STATUS_CD"
+        ],
+        "role": "Payer benefit order slice on a financial encounter"
+      },
+      {
+        "table": "BO_HP_RELTN",
+        "key_columns": [
+          "BO_HP_RELTN_ID",
+          "BENEFIT_ORDER_ID",
+          "HEALTH_PLAN_ID",
+          "TOTAL_CHARGE_AMT",
+          "TOTAL_PAY_AMT",
+          "TOTAL_ADJ_AMT"
+        ],
+        "role": "Benefit Order health plan totals for charges, payments, and adjustments"
+      },
+      {
+        "table": "TRANS_LOG",
+        "key_columns": [
+          "ACTIVITY_ID",
+          "ACCT_ID",
+          "PFT_ENCNTR_ID",
+          "TRANS_TYPE_CD",
+          "TRANS_SUB_TYPE_CD",
+          "TRANS_TOTAL_AMOUNT",
+          "POST_DT_TM"
+        ],
+        "role": "Financial transaction ledger for payments, adjustments, and write-offs"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "BO_HP_RELTN.TOTAL_CHARGE_AMT",
+        "ccl_type": "f8",
+        "when_used": "Total charges on the Benefit Order"
+      },
+      {
+        "table_column": "BO_HP_RELTN.TOTAL_PAY_AMT",
+        "ccl_type": "f8",
+        "when_used": "Total payments posted"
+      },
+      {
+        "table_column": "BO_HP_RELTN.TOTAL_ADJ_AMT",
+        "ccl_type": "f8",
+        "when_used": "Total contractual and non-contractual adjustments"
+      },
+      {
+        "table_column": "PFT_ENCNTR.BALANCE",
+        "ccl_type": "f8",
+        "when_used": "Current encounter account balance"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> PFT_ENCNTR pe (on pe.encntr_id = e.encntr_id and pe.active_ind = 1) -> BENEFIT_ORDER bo (on bo.pft_encntr_id = pe.pft_encntr_id) -> BO_HP_RELTN bhr (on bhr.benefit_order_id = bo.benefit_order_id) -> HEALTH_PLAN hp (on hp.health_plan_id = bhr.health_plan_id)",
+    "da2_mapping": {
+      "domain": "CWF GS Revenue / CWF GS Payments / CWF GS Adjustments / CWF GS GL",
+      "sub_entity": "Benefit Order / Financial Transaction",
+      "fields": [
+        "Enc Id",
+        "Account Number",
+        "BO Total Charges",
+        "BO Total Payments",
+        "BO Total Adjustments",
+        "HP Plan Name",
+        "HP Financial Class"
+      ],
+      "mandatory_filters": [
+        "Join to CWC Encounter in BIRT on Enc Id or FIN if clinical attributes are needed"
+      ]
+    }
+  },
+  {
+    "id": "clinical_tasks_and_overdue_inbox",
+    "name": "Clinical Care Tasks, Nursing Inbox & Overdue Task Tracking (TASK_ACTIVITY)",
+    "keywords": [
+      "task",
+      "overdue task",
+      "nursing task",
+      "care task",
+      "inbox",
+      "task_activity",
+      "order_task",
+      "prn task",
+      "scheduled task"
+    ],
+    "definition_tables": [
+      {
+        "table": "ORDER_TASK",
+        "key_columns": [
+          "REFERENCE_TASK_ID",
+          "TASK_DESCRIPTION",
+          "TASK_TYPE_CD",
+          "OVERDUE_MIN",
+          "OVERDUE_UNITS"
+        ],
+        "role": "Catalog of clinical task definitions and configured overdue timers"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "TASK_ACTIVITY",
+        "key_columns": [
+          "TASK_ID",
+          "ORDER_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "REFERENCE_TASK_ID",
+          "TASK_STATUS_CD",
+          "TASK_STATUS_REASON_CD",
+          "TASK_CLASS_CD",
+          "TASK_TYPE_CD",
+          "SCHEDULED_DT_TM",
+          "TASK_DT_TM"
+        ],
+        "role": "Holds values of specific tasks generated from the order server; SCHEDULED_DT_TM is when the task becomes overdue"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "TASK_ACTIVITY.TASK_STATUS_CD",
+        "ccl_type": "f8 (CS 79)",
+        "when_used": "Task status: Complete, Pending, Overdue, In Process, Discontinued, Canceled"
+      },
+      {
+        "table_column": "TASK_ACTIVITY.TASK_STATUS_REASON_CD",
+        "ccl_type": "f8",
+        "when_used": "Documented reason when task is marked Not Done or Canceled"
+      },
+      {
+        "table_column": "TASK_ACTIVITY.SCHEDULED_DT_TM",
+        "ccl_type": "dq8",
+        "when_used": "Timestamp when the task is due / flips to Overdue"
+      },
+      {
+        "table_column": "TASK_ACTIVITY.TASK_CLASS_CD",
+        "ccl_type": "f8 (CS 6025)",
+        "when_used": "Distinguishes PRN vs Scheduled vs Continuous tasks"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> TASK_ACTIVITY ta (on ta.encntr_id = e.encntr_id and ta.active_ind = 1) -> ORDER_TASK ot (on ot.reference_task_id = ta.reference_task_id) LEFT JOIN ORDERS o (on o.order_id = ta.order_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Task Activity",
+      "fields": [
+        "Enc Id",
+        "Task Atv Id",
+        "Task Atv Status",
+        "Task AtvStatus Reason",
+        "Task Atv Class",
+        "Task Atv Scheduled Dt/Tm",
+        "Task Atv Performed Dt/Tm"
+      ],
+      "mandatory_filters": [
+        "Enc Active Ind = 1"
+      ]
+    }
+  },
+  {
+    "id": "scheduling_appointments_and_actions",
+    "name": "Scheduling Appointments, Resource Slots, Check-In/Out & Cancel/No-Show Reasons (SCH_APPT / SCH_EVENT_ACTION)",
+    "keywords": [
+      "appointment",
+      "schedule",
+      "scheduling",
+      "no show",
+      "no-show",
+      "cancel reason",
+      "check in",
+      "check out",
+      "slot",
+      "sch_appt",
+      "sch_event",
+      "sch_event_action"
+    ],
+    "definition_tables": [
+      {
+        "table": "SCH_EVENT",
+        "key_columns": [
+          "SCH_EVENT_ID",
+          "APPT_TYPE_CD",
+          "APPT_SYNONYM_CD",
+          "SCH_STATE_CD",
+          "RECUR_TYPE_FLAG"
+        ],
+        "role": "Master appointment event header and appointment type (Code Set 14230)"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "SCH_APPT",
+        "key_columns": [
+          "SCH_APPT_ID",
+          "SCH_EVENT_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "ROLE_MEANING",
+          "BEG_DT_TM",
+          "END_DT_TM",
+          "DURATION",
+          "SCH_STATE_CD",
+          "APPT_LOCATION_CD"
+        ],
+        "role": "Participant/resource slot rows; filter ROLE_MEANING = PATIENT for the patient row and ROLE_MEANING = RESOURCE for the provider/room row"
+      },
+      {
+        "table": "SCH_EVENT_ACTION",
+        "key_columns": [
+          "SCH_ACTION_ID",
+          "SCH_EVENT_ID",
+          "SCH_ACTION_CD",
+          "ACTION_MEANING",
+          "SCH_REASON_CD",
+          "ACTION_DT_TM",
+          "ACTION_PRSNL_ID"
+        ],
+        "role": "Chronological action log (Schedule, Check-In, Check-Out, Cancel, No-Show, Hold) and reason code"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "SCH_APPT.SCH_STATE_CD",
+        "ccl_type": "f8 (CS 14233)",
+        "when_used": "Current appointment state (Confirmed, Checked In, Checked Out, Canceled, No Show)"
+      },
+      {
+        "table_column": "SCH_EVENT_ACTION.SCH_ACTION_CD",
+        "ccl_type": "f8 (CS 14232)",
+        "when_used": "Specific scheduling action performed"
+      },
+      {
+        "table_column": "SCH_EVENT_ACTION.SCH_REASON_CD",
+        "ccl_type": "f8 (CS 14229)",
+        "when_used": "Cancellation, reschedule, or no-show reason"
+      },
+      {
+        "table_column": "SCH_APPT.BEG_DT_TM",
+        "ccl_type": "dq8",
+        "when_used": "Appointment start timestamp"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> SCH_APPT sa (on sa.encntr_id = e.encntr_id and sa.role_meaning = 'PATIENT') -> SCH_EVENT se (on se.sch_event_id = sa.sch_event_id) -> SCH_EVENT_ACTION sea (on sea.sch_event_id = se.sch_event_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter / Scheduling",
+      "sub_entity": "Scheduling Appointment / Scheduling Event Action",
+      "fields": [
+        "Enc Id",
+        "Sch App Id",
+        "Sch App Begin Dt/Tm",
+        "Sch App End Dt/Tm",
+        "Sch App Duration",
+        "Sch App State",
+        "Sch Ev Appt Type",
+        "Sch Ev Act Action",
+        "Sch Ev Act Reason",
+        "Sch Ev Act Dt/Tm"
+      ],
+      "mandatory_filters": [
+        "Filter role to Patient to avoid duplicating rows per Resource slot"
+      ]
+    }
+  },
+  {
+    "id": "powerplans_care_pathways_and_outcomes",
+    "name": "PowerPlans, Care Pathways, Care Goals & Outcome Activity (PATHWAY / OUTCOME_ACTIVITY)",
+    "keywords": [
+      "powerplan",
+      "care plan",
+      "pathway",
+      "goal",
+      "outcome",
+      "interdisciplinary plan",
+      "act_pw_comp",
+      "outcome_activity"
+    ],
+    "definition_tables": [
+      {
+        "table": "OUTCOME_CATALOG",
+        "key_columns": [
+          "OUTCOME_CATALOG_ID",
+          "DESCRIPTION",
+          "EVENT_CD",
+          "OUTCOME_TYPE_CD"
+        ],
+        "role": "Catalog of patient care goals and expected outcomes"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "PATHWAY",
+        "key_columns": [
+          "PATHWAY_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "DESCRIPTION",
+          "PW_STATUS_CD",
+          "ORDER_DT_TM",
+          "START_DT_TM"
+        ],
+        "role": "Initiated PowerPlan or Care Pathway instance on an encounter"
+      },
+      {
+        "table": "ACT_PW_COMP",
+        "key_columns": [
+          "ACT_PW_COMP_ID",
+          "PATHWAY_ID",
+          "PARENT_ENTITY_NAME",
+          "PARENT_ENTITY_ID",
+          "COMP_STATUS_CD"
+        ],
+        "role": "Individual orders, outcomes, and interventions inside a PowerPlan"
+      },
+      {
+        "table": "OUTCOME_ACTIVITY",
+        "key_columns": [
+          "OUTCOME_ACTIVITY_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "OUTCOME_CATALOG_ID",
+          "EVENT_CD",
+          "OUTCOME_STATUS_CD",
+          "TARGET_DT_TM"
+        ],
+        "role": "Active patient care goal / outcome tracking"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "PATHWAY.PW_STATUS_CD",
+        "ccl_type": "f8",
+        "when_used": "PowerPlan status (Initiated, Planned, Discontinued, Completed)"
+      },
+      {
+        "table_column": "OUTCOME_ACTIVITY.OUTCOME_STATUS_CD",
+        "ccl_type": "f8",
+        "when_used": "Care goal status (Met, Not Met, Ongoing)"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> PATHWAY pw (on pw.encntr_id = e.encntr_id and pw.active_ind = 1) -> ACT_PW_COMP apc (on apc.pathway_id = pw.pathway_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Orders / Clinical Events",
+      "fields": [
+        "Enc Id",
+        "CE Event",
+        "CE Result Value",
+        "CE Event End Dt Tm"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00"
+      ]
+    }
+  },
+  {
+    "id": "radiology_and_pathology_diagnostic_reports",
+    "name": "Radiology & Anatomic Pathology Diagnostic Reports (RAD_REPORT / PATHOLOGY_CASE / CE_BLOB)",
+    "keywords": [
+      "radiology",
+      "radnet",
+      "x-ray",
+      "ct",
+      "mri",
+      "ultrasound",
+      "impression",
+      "dictation",
+      "pathology",
+      "biopsy",
+      "specimen",
+      "rad_report",
+      "pathology_case"
+    ],
+    "definition_tables": [
+      {
+        "table": "ORDER_CATALOG",
+        "key_columns": [
+          "CATALOG_CD",
+          "PRIMARY_MNEMONIC",
+          "CATALOG_TYPE_CD"
+        ],
+        "role": "Radiology / Pathology exam catalog item"
+      }
+    ],
+    "activity_tables": [
+      {
+        "table": "RAD_REPORT",
+        "key_columns": [
+          "RAD_REPORT_ID",
+          "ORDER_ID",
+          "EVENT_ID",
+          "FINAL_DT_TM",
+          "DICTATED_DT_TM"
+        ],
+        "role": "Radiology exam report header linked to ORDERS and CLINICAL_EVENT"
+      },
+      {
+        "table": "PATHOLOGY_CASE",
+        "key_columns": [
+          "CASE_ID",
+          "ENCNTR_ID",
+          "PERSON_ID",
+          "ACCESSION_NBR",
+          "CASE_COLLECT_DT_TM",
+          "MAIN_REPORT_COMPLETE_DT_TM"
+        ],
+        "role": "Anatomic pathology case header"
+      },
+      {
+        "table": "CE_BLOB",
+        "key_columns": [
+          "EVENT_ID",
+          "BLOB_CONTENTS",
+          "COMPRESSION_CD"
+        ],
+        "role": "Finalized radiology impression/findings narrative text"
+      }
+    ],
+    "payload_columns": [
+      {
+        "table_column": "CE_BLOB.BLOB_CONTENTS",
+        "ccl_type": "vc / blob",
+        "when_used": "Dictated radiology or pathology report text"
+      },
+      {
+        "table_column": "RAD_REPORT.FINAL_DT_TM",
+        "ccl_type": "dq8",
+        "when_used": "Timestamp when radiologist finalized the report"
+      },
+      {
+        "table_column": "PATHOLOGY_CASE.ACCESSION_NBR",
+        "ccl_type": "vc",
+        "when_used": "Pathology specimen accession number"
+      }
+    ],
+    "join_pattern_sql": "ENCOUNTER e -> ORDERS o (on o.encntr_id = e.encntr_id) -> RAD_REPORT rr (on rr.order_id = o.order_id) -> CLINICAL_EVENT ce (on ce.event_id = rr.event_id) -> CE_BLOB cb (on cb.event_id = ce.event_id)",
+    "da2_mapping": {
+      "domain": "CWC Encounter",
+      "sub_entity": "Orders / Clinical Events",
+      "fields": [
+        "Enc Id",
+        "Ord Order Id",
+        "Ord Mnemonic",
+        "CE Event",
+        "CE Verified Dt Tm",
+        "CE Result Status"
+      ],
+      "mandatory_filters": [
+        "CE Valid Until Dt/Tm >= 12/31/2100 00:00:00",
+        "CE Result Status = Auth (Verified)"
+      ]
+    }
+  }
+]
