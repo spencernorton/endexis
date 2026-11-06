@@ -30,6 +30,12 @@
    - Populates `<property name="com.cerner.discern.da2.display.names.set">1</property>`, `<structure name="cachedMetaData">`, `<list-property name="resultSet">` with exact `DA_ELEMENT.ELEMENT_UUID` mappings, `<xml-property name="queryText">`, and `<ex-property><name>defaultRuntimePrompts</name>` XML.
    - Supports both single-domain ODA reports and multi-domain `<joint-data-set>` reports joined on `Enc Id` (`ENCNTR_ID`), with `try { ... } catch (e) {}` guards around `reportContext` calls inside `beforeOpen` and `onFetch` so DA2's design-time `__bm_beforeOpen()` validator accepts the upload without errors.
 
+## What's New in `v1.1.0`
+
+- **Portable CPU & Edge Quantization (`GGUF` + `Ollama`)**: Published 8-bit (`endexis-qwen3-0.6b-dpo-q8_0.gguf`, `610 MB`) and 4-bit (`endexis-qwen3-0.6b-dpo-q4_k_m.gguf`, `379 MB`) GGUF checkpoints plus an `Ollama` `Modelfile` to [`NorviTech/endexis-qwen3-0.6b-dpo-merged`](https://huggingface.co/NorviTech/endexis-qwen3-0.6b-dpo-merged), and added OpenAI-compatible `/v1/chat/completions` (`llama-server`, `Ollama`, `vLLM`) fallback to `LocalNeuralCompiler`.
+- **Zero-PHI Declarative Tenant Profile (`.endexis.toml` & `endexis init-discover`)**: Added `endexis init` and `endexis init-discover <code_set_220.csv>` CLI commands and `TenantConfig.from_file()` to auto-discover `.endexis.toml` profiles (`owner_group_display`, `utc_timezone_index`, and Code Set 220 Facility, Building, Nurse Unit, Room, and Bed overrides).
+- **Synthetic Millennium V500 / DA2 SQLite Execution Harness (`endexis verify-sql`)**: Added `discern_intelligence.sql_execution_harness` (`create_synthetic_v500_connection`, `execute_and_verify_ejs_sql`) and expanded clinical subject areas across **MAR / Medication Administration** (`V500.MED_ADMIN_EVENT`), **Perioperative / Surgical Cases** (`V500.SURGICAL_CASE`), and **ICD-10 Diagnoses & Problems** (`V500.DIAGNOSIS`, `V500.PROBLEM`).
+
 ## Installation & Quick Start
 
 ```bash

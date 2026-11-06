@@ -991,3 +991,106 @@ def test_release_audit_safetensors_and_canary_verification(tmp_path: Path) -> No
     dirty_st.write_bytes(struct.pack("<Q", len(header_json)) + header_json + dirty_tok.encode("ascii") + b"\x00" * 8)
     dirty_res = audit_safetensors_weights(dirty_st)
     assert not dirty_res["safetensors_clean"]
+
+
+def test_phase3_endexis_toml_profile_and_code_set_220_discovery(tmp_path: Path) -> None:
+    from discern_intelligence.cli import main as cli_main
+    from discern_intelligence.schemas import TenantConfig
+
+    toml_file = tmp_path / ".endexis.toml"
+    assert cli_main([
+        "init",
+        "--out",
+        str(toml_file),
+        "--owner-group",
+        "NORTHWEST_CLINICAL_DA2",
+        "--tenancy",
+        "communityworks",
+        "--utc-timezone-index",
+        "62",
+        "--facility",
+        "Northwest Regional Medical Center",
+        "--facility-code-value",
+        "77001100",
+    ]) == 0
+    loaded = TenantConfig.from_file(toml_file)
+    assert loaded.owner_group_display == "NORTHWEST_CLINICAL_DA2"
+    assert loaded.utc_timezone_index == 62
+    assert loaded.facility_display == "Northwest Regional Medical Center"
+    assert loaded.get_location_overrides("Enc Loc Facility")["Northwest Regional Medical Center"] == "77001100"
+
+    # Test Code Set 220 CSV discovery via init-discover
+    csv_export = tmp_path / "code_set_220.csv"
+    csv_export.write_text(
+        "CODE_SET,CODE_VALUE,CDF_MEANING,DISPLAY,ACTIVE_IND\n"
+        "220,91001,FACILITY,Summit Medical Campus,1\n"
+        "220,91002,BUILDING,Summit East Tower,1\n"
+        "220,91003,NURSEUNIT,4 East Telemetry,1\n"
+        "220,91004,ROOM,Room 412,1\n"
+        "220,91005,BED,Bed B,1\n",
+        encoding="utf-8",
+    )
+    discovered_toml = tmp_path / "discovered.endexis.toml"
+    assert cli_main([
+        "init-discover",
+        str(csv_export),
+        "--out",
+        str(discovered_toml),
+        "--owner-group",
+        "SUMMIT_HEALTH_DA2",
+        "--utc-timezone-index",
+        "58",
+    ]) == 0
+    disc_cfg = TenantConfig.from_file(discovered_toml)
+    assert disc_cfg.owner_group_display == "SUMMIT_HEALTH_DA2"
+    assert disc_cfg.utc_timezone_index == 58
+    assert disc_cfg.get_location_overrides("Enc Loc Facility")["Summit Medical Campus"] == "91001"
+    assert disc_cfg.get_location_overrides("Enc Loc Building")["Summit East Tower"] == "91002"
+    assert disc_cfg.get_location_overrides("Enc Loc Nurse Unit")["4 East Telemetry"] == "91003"
+    assert disc_cfg.get_location_overrides("Enc Loc Room")["Room 412"] == "91004"
+    assert disc_cfg.get_location_overrides("Enc Loc Bed")["Bed B"] == "91005"
+
+    # Verify custom utc_timezone_index flows into generated EJS V500 SQL
+    bundle = DA2ReportGenerator(tenant_config=disc_cfg).generate(
+        "Active inpatient encounter census with FIN, MRN, and nurse unit",
+        report_name="Summit_Census",
+        tenant_config=disc_cfg,
+    )
+    assert "cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, 58)" in bundle.queries[0].ejs_v500_sql
+
+
+def test_phase4_sqlite_v500_execution_harness_and_expanded_subject_areas() -> None:
+    from discern_intelligence.cli import main as cli_main
+    from discern_intelligence.sql_execution_harness import (
+        create_synthetic_v500_connection,
+        execute_and_verify_ejs_sql,
+    )
+
+    gen = DA2ReportGenerator()
+    conn = create_synthetic_v500_connection()
+    try:
+        requests_and_names = [
+            ("Active inpatient encounter census with FIN, MRN, Nurse Unit, and Admit Date", "Census_Check"),
+            ("C-SSRS adult completed suicide risk screening responses", "CSSRS_Screening_Check"),
+            ("Rehab therapy minutes by discipline PT OT SLP", "Rehab_Minutes_Check"),
+            ("Active Sepsis Lactate orders and lab results", "Sepsis_Orders_Check"),
+            ("Patient account payments and charges by bill item", "Charges_Check"),
+            ("Inpatient MAR medication administration dosage and start time", "MAR_Med_Admin_Check"),
+            ("Perioperative surgical case start time and case number", "Periop_Surg_Case_Check"),
+            ("Inpatient ICD-10 diagnosis priority and diagnosis display", "ICD10_Diag_Check"),
+        ]
+        for req_text, rpt_name in requests_and_names:
+            bundle = gen.generate(req_text, report_name=rpt_name)
+            assert bundle.verification.is_valid, f"Bundle verification failed for {rpt_name}: {bundle.verification.errors}"
+            for q in bundle.queries:
+                exec_res = execute_and_verify_ejs_sql(q.ejs_v500_sql, conn=conn)
+                assert exec_res["executed"], f"SQLite execution failed for {q.query_name}: {exec_res['error']}"
+                assert exec_res["non_empty"], f"Empty result set for {q.query_name}"
+                assert exec_res["fanout_safe"], f"Fan-out detected for {q.query_name}: {exec_res}"
+    finally:
+        conn.close()
+
+    assert cli_main([
+        "verify-sql",
+        "Active inpatient encounter census with FIN, MRN, Nurse Unit, and Admit Date",
+    ]) == 0

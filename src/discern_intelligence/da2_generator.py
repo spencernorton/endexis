@@ -1448,6 +1448,7 @@ class DA2ReportGenerator:
         elements: list[dict[str, Any]],
         is_active_census: bool,
     ) -> str:
+        tz_idx = int(getattr(self._tenant_config, "utc_timezone_index", 54) or 54)
         select_exprs = [
             "  CWC_ENCOUNTER.ENCNTR_ID AS Enc_Id",
             "  CWC_ENC_FUNC.GET_FIN_NBR(CWC_ENCOUNTER.ENCNTR_ID) AS Enc_FIN",
@@ -1455,8 +1456,8 @@ class DA2ReportGenerator:
             "  CWC_PERSON.NAME_FULL_FORMATTED AS Person_Name_Full",
             "  omf_get_cv_display(CWC_ENCOUNTER.LOC_FACILITY_CD) AS Enc_Loc_Facility",
             "  omf_get_cv_display(CWC_ENCOUNTER.LOC_NURSE_UNIT_CD) AS Enc_Loc_Nurse_Unit",
-            "  cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, 54) AS Enc_Admit_Dt_Tm",
-            "  cclsql_utc_cnvt(CWC_ENCOUNTER.DISCH_DT_TM, 1, 54) AS Enc_Discharge_Dt_Tm",
+            f"  cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, {tz_idx}) AS Enc_Admit_Dt_Tm",
+            f"  cclsql_utc_cnvt(CWC_ENCOUNTER.DISCH_DT_TM, 1, {tz_idx}) AS Enc_Discharge_Dt_Tm",
         ]
         from_clauses = [
             "V500.ENCOUNTER CWC_ENCOUNTER",
@@ -1467,15 +1468,19 @@ class DA2ReportGenerator:
             "CWC_ENCOUNTER.ACTIVE_IND = 1",
         ]
 
+        q_up = q_name.upper()
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in elements)
         has_orders = any(e["da2_field_name"].startswith("Order ") for e in elements)
         has_chg = any(e["da2_field_name"].startswith(("Chg ", "BO ", "Rev ")) for e in elements) or domain == "CWF GS Revenue"
+        has_mar = any("MED_ADMIN" in q_up or "MAR_" in q_up or e["da2_field_name"].startswith("Med Admin") for e in elements)
+        has_surg = any("SURG" in q_up or "PERIOP" in q_up or e["da2_field_name"].startswith("Surg ") for e in elements)
+        has_diag = any("DIAG" in q_up or "ICD10" in q_up or e["da2_field_name"].startswith("Diag ") for e in elements)
 
         if has_ce:
             select_exprs.extend([
                 "  omf_get_cv_display(CWC_CLINICAL_EVENT.EVENT_CD) AS CE_Event",
                 "  CWC_CLINICAL_EVENT.RESULT_VAL AS CE_Result_Value",
-                "  cclsql_utc_cnvt(CWC_CLINICAL_EVENT.EVENT_END_DT_TM, 1, 54) AS CE_Event_End_Dt_Tm",
+                f"  cclsql_utc_cnvt(CWC_CLINICAL_EVENT.EVENT_END_DT_TM, 1, {tz_idx}) AS CE_Event_End_Dt_Tm",
                 "  omf_get_cv_display(CWC_CLINICAL_EVENT.RESULT_STATUS_CD) AS CE_Result_Status",
             ])
             from_clauses.append("V500.CLINICAL_EVENT CWC_CLINICAL_EVENT")
@@ -1503,12 +1508,45 @@ class DA2ReportGenerator:
                 "  CWC_CHARGE.CHARGE_DESCRIPTION AS Chg_Bill_Item_Desc",
                 "  CWC_CHARGE.ITEM_QUANTITY AS Chg_Item_Quantity",
                 "  CWC_CHARGE.ITEM_EXTENDED_PRICE AS Chg_Item_Extended_Price",
-                "  cclsql_utc_cnvt(CWC_CHARGE.SERVICE_DT_TM, 1, 54) AS Chg_Service_Dt_Tm",
+                f"  cclsql_utc_cnvt(CWC_CHARGE.SERVICE_DT_TM, 1, {tz_idx}) AS Chg_Service_Dt_Tm",
             ])
             from_clauses.append("V500.CHARGE CWC_CHARGE")
             where_clauses.extend([
                 "CWC_ENCOUNTER.ENCNTR_ID = CWC_CHARGE.ENCNTR_ID",
                 "CWC_CHARGE.ACTIVE_IND = 1",
+            ])
+
+        if has_mar:
+            select_exprs.extend([
+                "  CWC_MED_ADMIN_EVENT.ADMIN_DOSAGE AS Med_Admin_Dosage",
+                f"  cclsql_utc_cnvt(CWC_MED_ADMIN_EVENT.BEG_DT_TM, 1, {tz_idx}) AS Med_Admin_Beg_Dt_Tm",
+            ])
+            from_clauses.append("V500.MED_ADMIN_EVENT CWC_MED_ADMIN_EVENT")
+            where_clauses.extend([
+                "CWC_ENCOUNTER.ENCNTR_ID = CWC_MED_ADMIN_EVENT.ENCNTR_ID",
+                "CWC_MED_ADMIN_EVENT.ACTIVE_IND = 1",
+            ])
+
+        if has_surg:
+            select_exprs.extend([
+                "  CWC_SURGICAL_CASE.SURG_CASE_NBR_FORMATTED AS Surg_Case_Number",
+                f"  cclsql_utc_cnvt(CWC_SURGICAL_CASE.SURG_START_DT_TM, 1, {tz_idx}) AS Surg_Start_Dt_Tm",
+            ])
+            from_clauses.append("V500.SURGICAL_CASE CWC_SURGICAL_CASE")
+            where_clauses.extend([
+                "CWC_ENCOUNTER.ENCNTR_ID = CWC_SURGICAL_CASE.ENCNTR_ID",
+                "CWC_SURGICAL_CASE.ACTIVE_IND = 1",
+            ])
+
+        if has_diag:
+            select_exprs.extend([
+                "  CWC_DIAGNOSIS.DIAG_DISPLAY AS Diag_Display",
+                "  CWC_DIAGNOSIS.DIAG_PRIORITY AS Diag_Priority",
+            ])
+            from_clauses.append("V500.DIAGNOSIS CWC_DIAGNOSIS")
+            where_clauses.extend([
+                "CWC_ENCOUNTER.ENCNTR_ID = CWC_DIAGNOSIS.ENCNTR_ID",
+                "CWC_DIAGNOSIS.ACTIVE_IND = 1",
             ])
 
         if is_active_census:

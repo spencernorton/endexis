@@ -75,7 +75,7 @@ class LocalNeuralCompiler:
         }
 
     def query_neural_endpoint(self, prompt: str, n: int = 4, max_new_tokens: int = 180) -> dict[str, Any] | None:
-        """Queries the local or remote neural endpoint for Best-of-N (`N=4`) candidates."""
+        """Queries the local or remote neural endpoint (/v1/compile or OpenAI-compatible GGUF /v1/chat/completions)."""
         payload_str = json.dumps({"prompt": prompt, "n": n, "max_new_tokens": max_new_tokens})
         try:
             req = urllib.request.Request(
@@ -87,6 +87,40 @@ class LocalNeuralCompiler:
                 res = json.loads(resp.read().decode("utf-8"))
                 res["transport"] = "http_direct"
                 return res
+        except Exception:
+            pass
+
+        # Fallback to OpenAI-compatible /v1/chat/completions (llama.cpp llama-server, Ollama, vLLM)
+        try:
+            chat_payload = json.dumps({
+                "model": self.model_id,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are Endexis (endexis), a tenant-agnostic Cerner Millennium V500, Discern Analytics 2.0 (DA2), CCL, and BIRT 4.4.2 clinical report compiler.",
+                    },
+                    {"role": "user", "content": f"{prompt} /no_think"},
+                ],
+                "temperature": 0.0,
+                "max_tokens": max_new_tokens,
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                f"{self.endpoint_url}/v1/chat/completions",
+                data=chat_payload,
+                headers={"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=15.0) as resp:
+                chat_res = json.loads(resp.read().decode("utf-8"))
+                choices = chat_res.get("choices") or []
+                if choices:
+                    content = choices[0].get("message", {}).get("content", "")
+                    return {
+                        "best_completion": content,
+                        "candidates": [content],
+                        "transport": "openai_compatible_gguf_http",
+                        "latency_ms": 0.0,
+                        "vram_allocated_mb": 0.0,
+                    }
         except Exception:
             pass
 
