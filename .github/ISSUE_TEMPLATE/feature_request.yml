@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose an improvement to the compiler, model tooling or documentation.
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: What are you trying to do?
+      description: Describe the reporting workflow using synthetic data and public schemas.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What output or behavior would help?
+    validations:
+      required: true
