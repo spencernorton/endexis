@@ -36,14 +36,17 @@ python -m pip install .
 endexis --help
 ```
 
-Try the schema interpreter or compile a synthetic reporting request.
+Try the schema interpreter or compile a synthetic inpatient census request.
 
 ```sh
-endexis interpret "Show active inpatient encounters with a Morse Fall Scale score"
-endexis compile-ccl "Active inpatient encounters with charted Morse Fall Scale results" \
-  --name cust_r_morse_fall_v1 \
-  --out morse_fall.prg
+request='List active inpatient encounters with their nurse unit'
+endexis interpret "$request"
+endexis compile-ccl "$request" --name cust_r_census_demo --out inpatient_census.prg
+endexis verify-sql "$request"
 ```
+
+The [census walkthrough](https://norvitech.com/endexis/compile-ccl-and-da2-reports/)
+also shows how to build the DA2 and BIRT files and check the synthetic SQLite result.
 
 ## What you can build
 
