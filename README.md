@@ -28,7 +28,7 @@ Use Python 3.11 or later. Install the [current release](https://github.com/spenc
 from source in a virtual environment.
 
 ```sh
-git clone --branch v1.0.0 https://github.com/spencernorton/endexis.git
+git clone --branch v2.0.0 https://github.com/spencernorton/endexis.git
 cd endexis
 python -m venv .venv
 . .venv/bin/activate

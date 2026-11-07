@@ -63,7 +63,7 @@ pipeline_tag: text-generation
   - Defaults `owner_group_display` to `"TENANT_OWNER_GROUP"` and contains zero hardcoded `Logical Domain ID` or facility filters.
   - Users can specify `--owner-group`, `--facility`, or `--tenant-config` at runtime to target any authorized DA2 environment.
 - **Zero PHI & Zero Client/Regional Data**:
-  - Trained exclusively on sanitized, synthetic, and public schema metadata (`2,600` DA2 elements, `6,458` coded value mappings, `214` V500 tables, `363` Code Sets, `4,486` SFT examples, and `185` contrastive DPO pairs).
+  - Trained exclusively on sanitized, synthetic, and public schema metadata (`2,606` DA2 elements, `6,458` coded value mappings, `230` V500 tables, `363` Code Sets, `4,501` SFT examples, and `189` contrastive DPO pairs).
   - Audited across text, JSON/JSONL corpora, binary `.safetensors` headers/strings, and behavioral canary prompts.
 - **Neuro-Symbolic Verifier-Guided Best-of-N (`N=4`) Routing**:
   - Pairs neural candidate generation with deterministic XML, SQL, CCL, and BIRT 4.4.2 static verifiers (`100.0%` `Pass@1` and `Acc@1` across all 6 zero-leakage holdout evaluation dimensions).

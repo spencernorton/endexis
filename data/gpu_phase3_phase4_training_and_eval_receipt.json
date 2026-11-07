@@ -9,124 +9,124 @@
     "trainable_pct": 1.665
   },
   "gpu_tenancy_safety": {
-    "peak_pytorch_vram_mb": 4274.59,
-    "pre_training_free_vram_mb": 13664,
-    "post_training_free_vram_mb": 8603,
+    "peak_pytorch_vram_mb": 4276.62,
+    "pre_training_free_vram_mb": 13451,
+    "post_training_free_vram_mb": 8400,
     "active_plex_transcodes_during_run": 0
   },
   "progression_metrics": {
     "pre_training_base": {
-      "val_sft_loss": 4.0934,
-      "val_perplexity": 59.9457,
-      "dpo_preference_accuracy": 0.9167,
-      "dpo_mean_logprob_margin": 0.9158
+      "val_sft_loss": 4.6966,
+      "val_perplexity": 109.5739,
+      "dpo_preference_accuracy": 0.5026,
+      "dpo_mean_logprob_margin": -0.1594
     },
     "post_stage1_sft": {
-      "val_sft_loss": 0.3237,
-      "val_perplexity": 1.3823,
+      "val_sft_loss": 0.1881,
+      "val_perplexity": 1.207,
       "dpo_preference_accuracy": 1.0,
-      "dpo_mean_logprob_margin": 4.2182
+      "dpo_mean_logprob_margin": 4.6072
     },
     "post_stage2_dpo": {
-      "val_sft_loss": 0.3414,
-      "val_perplexity": 1.407,
+      "val_sft_loss": 0.2039,
+      "val_perplexity": 1.2262,
       "dpo_preference_accuracy": 1.0,
-      "dpo_mean_logprob_margin": 20.2495
+      "dpo_mean_logprob_margin": 23.7499
     }
   },
   "sft_loss_curve": [
     {
       "step": 60,
-      "train_loss": 0.6931
+      "train_loss": 0.6827
     },
     {
       "step": 120,
-      "train_loss": 0.476
+      "train_loss": 0.1538
     },
     {
       "step": 180,
-      "train_loss": 0.0139
+      "train_loss": 0.0081
     },
     {
       "step": 240,
-      "train_loss": 0.5771
+      "train_loss": 0.0893
     },
     {
       "step": 300,
-      "train_loss": 0.0346
+      "train_loss": 0.2296
     },
     {
       "step": 360,
-      "train_loss": 0.3901
+      "train_loss": 0.1589
     },
     {
       "step": 420,
-      "train_loss": 0.2789
+      "train_loss": 0.4913
     },
     {
       "step": 480,
-      "train_loss": 0.3474
+      "train_loss": 0.4574
     },
     {
       "step": 540,
-      "train_loss": 0.228
+      "train_loss": 0.2583
     },
     {
       "step": 600,
-      "train_loss": 0.3102
+      "train_loss": 0.1209
     },
     {
       "step": 660,
-      "train_loss": 0.0822
+      "train_loss": 0.3063
     },
     {
       "step": 720,
-      "train_loss": 0.0443
+      "train_loss": 0.4746
     },
     {
-      "step": 740,
-      "train_loss": 0.1096
+      "step": 742,
+      "train_loss": 0.0553
     }
   ],
   "dpo_loss_curve": [
     {
       "epoch": 1,
-      "dpo_loss": 0.351
+      "dpo_loss": 0.3087
     },
     {
       "epoch": 2,
-      "dpo_loss": 0.0477
+      "dpo_loss": 0.0326
     }
   ],
   "checkpoints": {
     "stage1_sft": {
       "saved_tensors": 392,
-      "mean_tensor_l2_norm": 11.0218,
+      "mean_tensor_l2_norm": 11.0175,
       "adapter_path": "checkpoints/stage1_sft/adapters.safetensors"
     },
     "stage2_dpo": {
       "saved_tensors": 392,
-      "mean_tensor_l2_norm": 11.0221,
+      "mean_tensor_l2_norm": 11.0177,
       "adapter_path": "checkpoints/stage2_dpo/adapters.safetensors"
     }
   },
   "best_of_4_holdout_reasoning_traces": [
     {
       "query_id": "cwf_gs_adjustments_transaction_detail_extract",
-      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain=cwf_gs_adjustments. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on CWF_GS_ADJUSTMENT (join key ENCNTR_ID / PERSON_ID / ORG_ID); prevent 1-to-many child-view Cartesian fan-out via inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC) or BIRT <joint-data-set>.\n3. Business View (<BV>) & Sub-Entity: Resolve sub-entity='CWF Adjustment' (\n</reasoning>"
+      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWF GS Adjustments'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join-Explosion Guardrails: Anchor grain on CWF GS AdjustMENTS (join key ENCNTR_ID / PERSON_ID / ORG_ID); isolate 1-to-many child sub-entities via inline_ind='1', inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC), or BIRT <joint-data-set> on Enc Id.\n3. Business View (<BV>) & Temporal\n</reasoning>"
     },
     {
       "query_id": "bed_board_resuscitation_status_all_inpatients",
-      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on V500.ENCOUNTER (join key ENCNTR_ID / PERSON_ID / ORG_ID); prevent 1-to-many child-view Cartesian fan-out via inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC) or BIRT <joint-data-set>.\n3. Business View (<BV>) & Sub-Entity: Resolve sub-entity='CWC Encounter, CWC\n</reasoning>"
+      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join-Explosion Guardrails: Anchor grain on ENCOUNTER.ADMITMENT_TYPE_CD (join key ENCNTR_ID / PERSON_ID / ORG_ID); isolate 1-to-many child sub-entities via inline_ind='1', inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC), or BIRT <joint-data-set> on Enc Id.\n3. Business View (<BV>) & Temp\n</reasoning>"
     },
     {
       "query_id": "outpatient_scheduling_and_slot_utilization",
-      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain=cwc Encounter. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on V500.ENCOUNTER (join key ENCNTR_ID / PERSON_ID / ORG_ID); prevent 1-to-many child-view Cartesian fan-out via inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC) or BIRT <joint-data-set>.\n3. Business View (<BV>) & Sub-Entity: Resolve sub-entity='CWC Encounter, CWC Encounter\n</reasoning>"
+      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join-Explosion Guardrails: Anchor grain on ENCOUNTER, PERSON, CLINICAL_EVENT, PRSNL (join key ENCNTR_ID / PERSON_ID / ORG_ID); isolate 1-to-many child sub-entities via inline_ind='1', inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC), or BIRT <joint-data-set> on Enc Id.\n3. Business View\n</reasoning>"
     },
     {
       "query_id": "encounter_charges_with_ndc_and_duplicate_charge_audit",
-      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join Graph: Anchor grain on V500.ENCOUNTER (join key ENCNTR_ID / PERSON_ID / ORG_ID); prevent 1-to-many child-view Cartesian fan-out via inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC) or BIRT <joint-data-set>.\n3. Business View (<BV>) & Sub-Entity: Resolve sub-entity='CWC Encounter, CWC\n</reasoning>"
+      "best_of_4_reasoning_trace": "<reasoning>\n1. Tenancy & Surface: Target tenancy=communityworks_or_continuum (multi-tenant DA2 + BIRT); domain='CWC Encounter'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).\n2. Entity Grain & Join-Explosion Guardrails: Anchor grain on ENCOUNTER.CATALOG_TYPE_CD (join key ENCNTR_ID / PERSON_ID / ORG_ID); isolate 1-to-many child sub-entities via inline_ind='1', inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC), or BIRT <joint-data-set> on Enc Id.\n3. Business View (<BV>) & Temporal/\n</reasoning>"
     }
   ],
-  "wall_time_seconds": 173.81
+  "wall_time_seconds": 217.9
 }

@@ -14,10 +14,11 @@ from .forms_mapper import FormsAndOutputResolver
 from .interpreter import MillenniumInterpreter
 from .neural_compiler import LocalNeuralCompiler
 from .schemas import DEFAULT_OWNER_GROUP_DISPLAY, TenantConfig
+from .sql_execution_harness import execute_and_verify_ejs_sql
 
 
 def _build_tenant_config(args: argparse.Namespace) -> TenantConfig:
-    base = TenantConfig.from_json(args.tenant_config) if getattr(args, "tenant_config", None) else TenantConfig()
+    base = TenantConfig.from_file(getattr(args, "tenant_config", None))
     return TenantConfig.resolve_for_request(
         request_text=getattr(args, "request", ""),
         base_config=base,
@@ -75,6 +76,25 @@ def main(argv: list[str] | None = None) -> int:
 
     p_eval = sub.add_parser("evaluate", help="Run the deterministic verification and zero-leakage holdout evaluation suite")
     p_eval.add_argument("--data-dir", default=None, help="Optional corpus directory override")
+
+    p_init = sub.add_parser("init", help="Write a zero-PHI declarative .endexis.toml tenant profile")
+    p_init.add_argument("--out", default=".endexis.toml", help="Output path (.endexis.toml or tenant.json)")
+    p_init.add_argument("--owner-group", default=DEFAULT_OWNER_GROUP_DISPLAY, help="Tenant DA2 owner_group_display")
+    p_init.add_argument("--tenancy", default="communityworks", help="Tenancy mode (communityworks, continuum, standalone_rho)")
+    p_init.add_argument("--utc-timezone-index", type=int, default=54, help="Millennium UTC timezone index (default: 54)")
+    p_init.add_argument("--facility", default=None, help="Optional primary facility display name")
+    p_init.add_argument("--facility-code-value", default=None, help="Optional primary facility CODE_VALUE")
+
+    p_disc = sub.add_parser("init-discover", help="Build .endexis.toml from an exported Millennium Code Set 220 CSV/JSON file")
+    p_disc.add_argument("export_file", help="Path to exported Code Set 220 CSV or JSON file")
+    p_disc.add_argument("--out", default=".endexis.toml", help="Output path (.endexis.toml or tenant.json)")
+    p_disc.add_argument("--owner-group", default=DEFAULT_OWNER_GROUP_DISPLAY, help="Tenant DA2 owner_group_display")
+    p_disc.add_argument("--tenancy", default="communityworks", help="Tenancy mode")
+    p_disc.add_argument("--utc-timezone-index", type=int, default=54, help="Millennium UTC timezone index (default: 54)")
+
+    p_vsql = sub.add_parser("verify-sql", help="Compile a request to EJS V500 SQL and execute it in the synthetic V500 SQLite harness")
+    p_vsql.add_argument("request", help="Natural language clinical/financial analytics request")
+    p_vsql.add_argument("--tenant-config", default=None, help="Optional path to .endexis.toml or tenant.json")
 
     args = parser.parse_args(argv)
 
@@ -180,6 +200,51 @@ def main(argv: list[str] | None = None) -> int:
         rep = run_full_evaluation_suite(Path(args.data_dir) if args.data_dir else None)
         print(json.dumps(rep, indent=2))
         return 0 if rep["zero_leakage_verification"]["zero_leakage_passed"] else 1
+
+    if args.cmd == "init":
+        cfg = TenantConfig(
+            owner_group_display=args.owner_group,
+            tenancy=args.tenancy,
+            utc_timezone_index=args.utc_timezone_index,
+            facility_display=args.facility,
+            facility_code_value=args.facility_code_value,
+            facility_overrides={args.facility: str(args.facility_code_value)} if (args.facility and args.facility_code_value) else {},
+        )
+        out_p = Path(args.out)
+        if out_p.suffix.lower() == ".json":
+            out_p.write_text(json.dumps(cfg.to_dict(), indent=2) + "\n", encoding="utf-8")
+        else:
+            out_p.write_text(cfg.to_toml(), encoding="utf-8")
+        print(f"Wrote tenant configuration to {out_p}")
+        return 0
+
+    if args.cmd == "init-discover":
+        cfg = TenantConfig.discover_from_export_file(
+            args.export_file,
+            owner_group_display=args.owner_group,
+            tenancy=args.tenancy,
+            utc_timezone_index=args.utc_timezone_index,
+        )
+        out_p = Path(args.out)
+        if out_p.suffix.lower() == ".json":
+            out_p.write_text(json.dumps(cfg.to_dict(), indent=2) + "\n", encoding="utf-8")
+        else:
+            out_p.write_text(cfg.to_toml(), encoding="utf-8")
+        print(f"Discovered Code Set 220 locations and wrote tenant profile to {out_p}")
+        return 0
+
+    if args.cmd == "verify-sql":
+        tcfg = _build_tenant_config(args)
+        bundle = DA2ReportGenerator(tenant_config=tcfg).generate(
+            args.request,
+            tenancy=tcfg.tenancy,
+            owner_group_display=tcfg.owner_group_display,
+            facility_display=tcfg.facility_display,
+            tenant_config=tcfg,
+        )
+        exec_rep = execute_and_verify_ejs_sql(bundle.queries[0].ejs_v500_sql)
+        print(json.dumps(exec_rep, indent=2))
+        return 0 if (exec_rep["executed"] and exec_rep["non_empty"] and exec_rep["fanout_safe"]) else 1
 
     return 0
 

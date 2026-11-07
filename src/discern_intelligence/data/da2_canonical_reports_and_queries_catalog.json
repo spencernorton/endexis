@@ -16655,9 +16655,9 @@
         "Order Catalog Type (Code Set 6000)": {
           "Pharmacy": "2516"
         },
-        "Order Status (Code Set 6004)": {
-          "Ordered": "2550",
-          "Discontinued": "2545"
+        "Order Status Not In (Code Set 6004)": {
+          "Canceled": "2542",
+          "Voided": "2553"
         }
       }
     },

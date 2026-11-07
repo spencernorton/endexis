@@ -151,11 +151,11 @@ def synthesize_structured_reasoning(row: dict[str, Any], teacher_override: str |
 
     steps = [
         f"1. Tenancy & Surface: Target tenancy={tenancy}; domain='{domain}'. Multi-tenant CommunityWorks/Continuum requires DA2 Domain Query + BIRT 4.4.2 (.rptdesign); Standalone/RHO additionally permits custom CCL (.prg).",
-        f"2. Entity Grain & Join Graph: Anchor grain on {v500_target} (join key ENCNTR_ID / PERSON_ID / ORG_ID); prevent 1-to-many child-view Cartesian fan-out via inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC) or BIRT <joint-data-set>.",
-        f"3. Business View (<BV>) & Sub-Entity: Resolve sub-entity='{subentity}' (UUID={bv_uuid}).",
-        f"4. DA2 Element UUID & Physical V500 Column: Link DA_ELEMENT='{elem_name}' (UUID={elem_uuid}) -> physical target {v500_target}.",
-        f"5. Code Set & Live CODE_VALUE Binding: Code Set={code_set if code_set is not None else 'N/A (non-coded or multi-column)'}; live CODE_VALUE bindings={json.dumps(cv_preview)}.",
-        f"6. Safety Guardrails: {guardrails}",
+        f"2. Entity Grain & Join-Explosion Guardrails: Anchor grain on {v500_target} (join key ENCNTR_ID / PERSON_ID / ORG_ID); isolate 1-to-many child sub-entities via inline_ind='1', inline scalar functions (CWC_ENC_FUNC / CWC_PER_FUNC), or BIRT <joint-data-set> on Enc Id.",
+        f"3. Business View (<BV>) & Temporal/Identifier Disambiguation: Resolve sub-entity='{subentity}' (UUID={bv_uuid}) and exact target {v500_target} (rejecting row-housekeeping UPDT_DT_TM and non-anchor timestamps).",
+        f"4. DA2 Element UUID & Precision Pruning: Select pruned DA_ELEMENT='{elem_name}' (UUID={elem_uuid}, 0 deprecated CWF UUIDs) -> physical target {v500_target}.",
+        f"5. Code Set, Operators, Runtime Prompts & CODE_VALUE Binding: Code Set={code_set if code_set is not None else 'N/A (non-coded or multi-column)'}; live CODE_VALUE bindings={json.dumps(cv_preview)} (preserving Discontinued=2545 on MAR audits via Order Status Not In 2542, 2553).",
+        f"6. Safety Guardrails & Output Verification Invariants: {guardrails}",
     ]
     if teacher_override:
         steps.append(f"7. Teacher Synthesis Note: {teacher_override}")
@@ -250,7 +250,17 @@ def main() -> int:
         if line.strip()
     ]
 
-    holdout_prompts = {r["prompt"].strip() for r in holdout_val_rows} | {r["prompt"].strip() for r in holdout_query_rows}
+    adv_v2_path = data_dir / "eval_adversarial_v2.jsonl"
+    adv_v2_rows = [
+        json.loads(line)
+        for line in adv_v2_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ] if adv_v2_path.exists() else []
+    holdout_prompts = (
+        {r["prompt"].strip() for r in holdout_val_rows}
+        | {r["prompt"].strip() for r in holdout_query_rows}
+        | {r["prompt"].strip() for r in adv_v2_rows}
+    )
     holdout_query_ids = {r["query_id"] for r in holdout_query_rows}
 
     # 1. Distill high-value teacher reasoning traces via GE API (`nt-fast` & `nt-heavy`)
@@ -412,6 +422,52 @@ def main() -> int:
                 "checked_invariants": b.verification.checked_invariants,
             },
         })
+
+
+    # 2d. Add Precision Temporal Anchor, Identifier Disambiguation & 10-Domain Routing SFT examples
+    v2_precision_sft_specs = [
+        (
+            "In Discern Analytics 2.0 (CWC Encounter), disambiguate the exact temporal anchor and order status filter for a historical MAR / PRN medication administration audit.",
+            {
+                "da2_domain": "CWC Encounter",
+                "selected_temporal_element": "CE Med Admin Start Dt/Tm (c16d4eb8-f7c0-4a8e-9b2a-3f5c8d1e2a3b) -> MED_ADMIN_EVENT.BEG_DT_TM",
+                "rejected_temporal_elements": ["Order Orig Order Dt/Tm -> ORDERS.ORIG_ORDER_DT_TM", "Order Update Dt/Tm -> ORDERS.UPDT_DT_TM"],
+                "mandatory_order_status_filter": "Order Status Not In (Canceled=2542, Voided=2553) [Code Set 6004]",
+                "value_semantics_and_guardrails": "Never filter Order Status Not In (Discontinued=2545) on MAR audits, which silently erases valid historical doses administered before the order was discontinued.",
+            },
+        ),
+        (
+            "In Discern Analytics 2.0 (CWC Encounter), disambiguate clinical observation timestamp vs verification timestamp vs row update timestamp on V500.CLINICAL_EVENT.",
+            {
+                "da2_domain": "CWC Encounter",
+                "selected_temporal_element": "CE End Dt/Tm (4433e8b0-5947-4f79-b4aa-c32c8ec30c45) -> CLINICAL_EVENT.EVENT_END_DT_TM",
+                "secondary_timestamps": {
+                    "CE Performed Dt/Tm": "CLINICAL_EVENT.PERFORMED_DT_TM (charting/documentation time)",
+                    "CE Verified Dt/Tm": "CLINICAL_EVENT.VERIFIED_DT_TM (signature/auth time)",
+                },
+                "rejected_temporal_elements": ["CLINICAL_EVENT.UPDT_DT_TM (row housekeeping timestamp)"],
+                "mandatory_filters": ["CE Result Status In (Auth (Verified)=25, Modified=34, Altered=35) [CS 8]", "CE Valid Until Dt/Tm >= 2100-12-31"],
+            },
+        ),
+        (
+            "In Discern Analytics 2.0, disambiguate patient MRN (Code Set 4) vs encounter FIN (Code Set 319) vs internal Millennium surrogate keys.",
+            {
+                "da2_domain": "CWC Encounter",
+                "person_mrn": "Person MRN (12db87ba-4466-4682-8f6c-28adf9a8c8d3) -> PERSON_ALIAS.ALIAS (Code Set 4 MRN, CWC_PER_FUNC.GET_MRN)",
+                "encounter_fin": "Enc FIN (a73734e5-28c6-4b74-a5b6-783bc168f274) -> ENCNTR_ALIAS.ALIAS (Code Set 319 FIN NBR, CWC_ENC_FUNC.GET_FIN_NBR)",
+                "surrogate_join_keys": ["Enc Id (5ef4381c-6344-43c4-81b5-2c18cd6bcb70) -> ENCOUNTER.ENCNTR_ID", "Person Id -> PERSON.PERSON_ID"],
+                "value_semantics_and_guardrails": "Use Enc Id (ENCNTR_ID) for cross-query/BIRT joins and CWC_ENC_FUNC.GET_FIN_NBR / CWC_PER_FUNC.GET_MRN for display identifiers without 1:N alias fan-out.",
+            },
+        ),
+    ]
+    for inst_txt, resp_dict in v2_precision_sft_specs:
+        if inst_txt.strip() not in holdout_prompts:
+            extra_sft_rows.append({
+                "task": "disambiguate_temporal_and_identifier_precision",
+                "provenance": "phase2_v2_precision_disambiguation",
+                "instruction": inst_txt,
+                "response": resp_dict,
+            })
 
     # Combine base SFT rows (removing any previously appended phase2 rows if re-run) + extra_sft_rows
     core_sft_rows = [r for r in base_sft_rows if not str(r.get("provenance", "")).startswith("phase2_")]
@@ -752,6 +808,86 @@ def main() -> int:
     ]
     extra_dpo_rows.extend(live_da2_dpo_pairs)
     extra_dpo_rows.extend(birt_adv_dpo_pairs)
+
+    v2_precision_dpo_pairs = [
+        {
+            "scenario_id": "phase2_dpo_v2_trap_1_mar_admin_vs_order_date_and_discontinued_status",
+            "failure_mode": "mar_discontinued_order_filter_and_order_date_confusion",
+            "provenance": "phase2_v2_precision_dpo",
+            "prompt": "Build an inpatient MAR opioid/PRN medication administration audit over the last 7 days without dropping doses given under later-discontinued orders.",
+            "chosen": {
+                "da2_domain": "CWC Encounter",
+                "temporal_anchor": "CE Med Admin Start Dt/Tm (MED_ADMIN_EVENT.BEG_DT_TM)",
+                "order_status_filter": "CWC_ORDERS.ORDER_STATUS_CD NOT IN (2542, 2553) /* Not In Canceled, Voided; preserves Discontinued 2545 */",
+                "guardrail": "Anchor MAR time windows on MED_ADMIN_EVENT.BEG_DT_TM and filter Order Status Not In (Canceled=2542, Voided=2553) so historical doses under discontinued orders are preserved.",
+            },
+            "rejected": {
+                "antipattern": "Filtering MAR queries on ORDERS.ORIG_ORDER_DT_TM or excluding ORDER_STATUS_CD 2545 (Discontinued) via NOT IN (2542, 2545, 2553), which silently erases historical PRN administrations",
+                "broken_filters": [
+                    "CWC_ORDERS.ORDER_STATUS_CD NOT IN (2542, 2545, 2553)",
+                    "CWC_ORDERS.ORIG_ORDER_DT_TM >= SYSDATE - 7",
+                ],
+            },
+        },
+        {
+            "scenario_id": "phase2_dpo_v2_trap_2_clinical_event_end_vs_updt_dt_tm",
+            "failure_mode": "housekeeping_updt_dt_tm_filter_and_unverified_result_status",
+            "provenance": "phase2_v2_precision_dpo",
+            "prompt": "Filter documented clinical event results by clinical observation timestamp and verified result status in V500.CLINICAL_EVENT.",
+            "chosen": {
+                "da2_domain": "CWC Encounter",
+                "temporal_anchor": "CE End Dt/Tm (4433e8b0-5947-4f79-b4aa-c32c8ec30c45 -> CLINICAL_EVENT.EVENT_END_DT_TM)",
+                "mandatory_predicates": [
+                    "CWC_CLINICAL_EVENT.VALID_UNTIL_DT_TM >= TO_DATE('2100-12-31 00:00:00', 'YYYY-MM-DD HH24:MI:SS')",
+                    "CWC_CLINICAL_EVENT.RESULT_STATUS_CD IN (25, 34, 35)",
+                ],
+                "guardrail": "Always filter clinical events on EVENT_END_DT_TM (never UPDT_DT_TM) with RESULT_STATUS_CD IN (25, 34, 35) and VALID_UNTIL_DT_TM >= 2100-12-31.",
+            },
+            "rejected": {
+                "antipattern": "Filtering V500.CLINICAL_EVENT on row-housekeeping UPDT_DT_TM or omitting RESULT_STATUS_CD IN (25, 34, 35), which leaks In Error (28) and superseded draft rows",
+                "broken_filters": [
+                    "WHERE CWC_CLINICAL_EVENT.UPDT_DT_TM >= SYSDATE - 7",
+                ],
+            },
+        },
+        {
+            "scenario_id": "phase2_dpo_v2_trap_3_admitting_diagnosis_outer_join_vs_inner_join",
+            "failure_mode": "inner_join_diagnosis_drops_same_day_admissions",
+            "provenance": "phase2_v2_precision_dpo",
+            "prompt": "Include admitting ICD-10 diagnosis display on an active inpatient encounter census without dropping newly admitted same-day patients whose diagnosis is not yet coded.",
+            "chosen": {
+                "da2_domain": "CWC Encounter",
+                "from_join": "V500.ENCOUNTER CWC_ENCOUNTER LEFT OUTER JOIN V500.DIAGNOSIS CWC_DIAGNOSIS ON CWC_ENCOUNTER.ENCNTR_ID = CWC_DIAGNOSIS.ENCNTR_ID AND CWC_DIAGNOSIS.ACTIVE_IND = 1",
+                "guardrail": "Use LEFT OUTER JOIN V500.DIAGNOSIS (DA2 joinType='3' / Oracle (+)) on active census queries so encounters with NULL admitting diagnosis are preserved.",
+            },
+            "rejected": {
+                "antipattern": "Inner-joining V500.DIAGNOSIS on an active inpatient census query, which silently drops same-day admissions lacking a coded diagnosis row",
+                "broken_filters": [
+                    "WHERE CWC_ENCOUNTER.ENCNTR_ID = CWC_DIAGNOSIS.ENCNTR_ID AND CWC_DIAGNOSIS.ACTIVE_IND = 1",
+                ],
+            },
+        },
+        {
+            "scenario_id": "phase2_dpo_v2_trap_4_charge_service_vs_posted_and_test_patient_prefix_exclusion",
+            "failure_mode": "charge_posted_vs_service_date_and_missing_test_patient_prefix_exclusion",
+            "provenance": "phase2_v2_precision_dpo",
+            "prompt": "Extract therapy bill item charges by clinical service date while excluding ZZ test patients.",
+            "chosen": {
+                "da2_domain": "CWC Encounter",
+                "temporal_anchor": "Chg Service Dt/Tm (9452e25e-98ec-4820-b40c-b95fbc94935e -> CHARGE.SERVICE_DT_TM)",
+                "test_patient_filter": "CWC_PERSON.NAME_LAST_KEY < 'ZZ'",
+                "guardrail": "Use CHARGE.SERVICE_DT_TM for date of service (not POSTED_DT_TM) and enforce CWC_PERSON.NAME_LAST_KEY < 'ZZ' to exclude test patients.",
+            },
+            "rejected": {
+                "antipattern": "Filtering therapy productivity by CHARGE.POSTED_DT_TM (billing batch post date) and omitting CWC_PERSON.NAME_LAST_KEY < 'ZZ'",
+                "broken_filters": [
+                    "WHERE CWC_CHARGE.POSTED_DT_TM >= SYSDATE - 7",
+                ],
+            },
+        },
+    ]
+    extra_dpo_rows.extend(v2_precision_dpo_pairs)
+
 
     all_dpo_candidates = core_dpo_rows + extra_dpo_rows
     enriched_dpo: list[dict[str, Any]] = []
