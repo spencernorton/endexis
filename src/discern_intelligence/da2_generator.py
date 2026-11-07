@@ -76,9 +76,22 @@ DEPRECATED_CWC_UUIDS: set[str] = {
 
 LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Account Number': ('Enc Financial Num', '1a4ee2f6-2ed1-48b3-9d79-974352b9fabf', '3'),
+    'Acct Guarantor Name': ('Person Name Full Format', '12b363ca-f0d2-4a5d-afe3-3225de181f5f', '3'),
+    'Adj Amount': ('F Chg Billing Amount', '91bda8db-c505-4887-bf0a-dca32a4d7cea', '1'),
+    'Adj Credit GL Number': ('Chg Rev Code', 'c437b586-9b66-47d5-8971-0e75b47e4156', '3'),
+    'Adj Debit GL Number': ('F Chg Rev Code', '9af50981-51fa-4e64-a740-a8a049c1b48e', '3'),
+    'Adj Post Dt': ('Chg Posted Dt/Tm', 'f34d0bfe-074f-4268-8275-ef17de249e1c', '2'),
+    'Adj Post Prsnl': ('Chg Posted Prsnl Name', '4ad0ef60-56ba-4f82-89ee-090d58bf5bbe', '3'),
+    'Adj Trans Reason': ('F Chg Status', '30aadfd4-ba16-4e13-a56d-b0de02c4882b', '3'),
+    'Adj Trans Sub Type': ('Chg Type', '59016b19-0636-4cb9-bbff-af3ea84d1a5e', '3'),
+    'AdjTrans Alias': ('Chg Activity Type', '07e4d357-ed1c-46fb-acb3-84ce2957db36', '3'),
     'Alg Nom Mnemonic': ('Alg Nom Mnemonic', '972e740d-30fd-4158-930a-7a626210074b', '3'),
     'Alg Nom Source String': ('Alg Nom Source String', '84d6dcd5-c84e-46bf-ae37-25283e317714', '3'),
-    'Alg Substance Type': ('Alg Substance Type', 'a0cd3c4c-e83e-4f11-9792-194b49566222', '3'),
+    'Alg Substance Type': ('Alg Substance Type', 'a0cd3c4c-e83e-4f11-9792-194b49566222', '1'),
+    'B I Bill Item Id': ('Chg Bill Item Id', '72213f9c-5239-4e7d-b122-e18af4fa7ace', '3'),
+    'B I Ext Description': ('Chg Description', '3f56ba91-86c6-4081-909a-36ca011066c6', '3'),
+    'BIM Key6': ('Chg M Field 6', '0c4a6eda-82ba-4d97-935d-914f2fc63711', '3'),
+    'BO HP Plan Name': ('HP Plan Name', '8ed4dcd1-cebe-4186-bfb9-284d6f0aceba', '3'),
     'BO Total Adjustments': ('Chg Gross Price', '13b57072-8981-431b-9881-64c2dda7efca', '3'),
     'BO Total Charges': ('F Chg Billing Amount', '91bda8db-c505-4887-bf0a-dca32a4d7cea', '1'),
     'BO Total Payments': ('Chg Item Price', '07112aeb-0932-4898-a6be-fe9b5ddf048c', '1'),
@@ -103,8 +116,8 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'CE DTA Code': ('CE DTA Code', '9ec30058-221d-457a-888b-502330786fa1', '3'),
     'CE Enc Id': ('CE Enc Id', 'df42ea7b-26d8-4a8a-9b09-9a861e3a8c44', '3'),
     'CE End Dt/Tm': ('CE End Dt/Tm', '4433e8b0-5947-4f79-b4aa-c32c8ec30c45', '2'),
-    'CE Entry Mode': ('CE Entry Mode', 'b6cd3329-6665-4dea-8e2a-6398444b97e9', '3'),
-    'CE Event': ('CE Event', 'f01d0cc1-f599-46be-b816-ecd82fffbb0e', '3'),
+    'CE Entry Mode': ('CE Entry Mode', 'b6cd3329-6665-4dea-8e2a-6398444b97e9', '1'),
+    'CE Event': ('CE Event', 'f01d0cc1-f599-46be-b816-ecd82fffbb0e', '1'),
     'CE Event CV': ('CE Event CV', '41142ba4-b325-44f4-84a7-9d4f1bc33323', '3'),
     'CE Event Class': ('CE Event Class', 'f3b9fd18-8372-44ea-b36e-b6043708d05f', '3'),
     'CE Event End Dt Tm': ('CE End Dt/Tm', '4433e8b0-5947-4f79-b4aa-c32c8ec30c45', '2'),
@@ -113,11 +126,15 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'CE Event Tag': ('CE Event Tag', '0be2e3a3-84d9-4f2a-aad7-a302fa9297d9', '3'),
     'CE Event Tag Flag': ('CE Event Tag Flag', '8a1d7263-26b7-42bd-a05a-14a05bd120f7', '1'),
     'CE Event Title': ('CE Event Title', '3aea7feb-ce08-4dc6-92e2-ebe8fa04d94d', '3'),
+    'CE Event Title Text': ('CE Event Title', '3aea7feb-ce08-4dc6-92e2-ebe8fa04d94d', '3'),
     'CE Expiration Dt/Tm': ('CE Expiration Dt/Tm', '8601193e-e141-4afc-98b4-da2b2066e32a', '2'),
     'CE Id': ('CE Id', '05a1f88d-6a33-4190-86ac-704249934924', '3'),
     'CE Lbl Id': ('CE Lbl Id', '5dbdff00-e8dc-4c53-b01e-f2423d89e304', '3'),
     'CE Lbl Name': ('CE Lbl Name', '48d3ee6b-4c06-4302-a52c-acfea5bceb8c', '3'),
+    'CE Med Admin Dosage': ('CE Result Value', '155eec27-4c56-4cff-a4ee-861aa3335814', '3'),
+    'CE Med Admin Dose': ('CE Result Value', '155eec27-4c56-4cff-a4ee-861aa3335814', '3'),
     'CE Med Admin Start Dt/Tm': ('CE Med Admin Start Dt/Tm', '056e4e00-7257-45e7-a531-335c8c14e608', '2'),
+    'CE Med Dosage Unit': ('CE Result Units', '3d18ca87-7efd-487a-9121-0e5072f25f7a', '3'),
     'CE Normal High': ('CE Normal High', '6d355f1d-37d7-4b4f-aad5-fc3f1e9114bb', '3'),
     'CE Normal Low': ('CE Normal Low', '3f57c99f-da37-4ce8-9305-aae3fec7288d', '3'),
     'CE Normalcy': ('CE Normalcy', 'bdd1ea0a-8f01-4cfc-9af8-e54acf26e9b6', '3'),
@@ -130,7 +147,7 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'CE Publish Flag': ('CE Publish Flag', 'd7970051-e354-4a5b-b10c-6d1e23f41982', '1'),
     'CE Record Status': ('CE Record Status', 'bae19651-b71d-4301-88a2-1e32cc837361', '3'),
     'CE Reference Nbr': ('CE Reference Nbr', '16128032-41b3-4542-b5cf-b5618a11c8e1', '3'),
-    'CE Relationship': ('CE Relationship', 'a2112338-e3a1-48ff-9a94-eeafc838e39c', '3'),
+    'CE Relationship': ('CE Relationship', 'a2112338-e3a1-48ff-9a94-eeafc838e39c', '1'),
     'CE Resource': ('CE Resource', '7a2f218d-fc7a-4cf5-b28f-7983a6d0586a', '3'),
     'CE Result Status': ('CE Result Status', '7ccf3fe5-568a-4015-82e0-fd370a98426e', '3'),
     'CE Result Units': ('CE Result Units', '3d18ca87-7efd-487a-9121-0e5072f25f7a', '3'),
@@ -158,6 +175,7 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Chg CPT': ('Chg CPT', 'b5e8a288-44ac-4f95-9140-667d840260d7', '3'),
     'Chg Charge Item Id': ('Chg Bill Item Id', '72213f9c-5239-4e7d-b122-e18af4fa7ace', '3'),
     'Chg Description': ('Chg Description', '3f56ba91-86c6-4081-909a-36ca011066c6', '3'),
+    'Chg E Collect Priority': ('Chg E Collect Priority', '90747a07-546d-4050-871e-e369e10a7ec7', '1'),
     'Chg Enc Id': ('Chg Enc Id', 'a3314a9e-d7f5-4802-9da9-3f4d1c3c1de3', '1'),
     'Chg Financial Class': ('Chg Financial Class', 'b77029b5-d43e-4e88-9377-ebad171532e6', '3'),
     'Chg Gross Price': ('Chg Gross Price', '13b57072-8981-431b-9881-64c2dda7efca', '3'),
@@ -181,14 +199,23 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Chg Service Dt Tm': ('Chg Service Dt/Tm', '9452e25e-98ec-4820-b40c-b95fbc94935e', '2'),
     'Chg Service Dt/Tm': ('Chg Service Dt/Tm', '9452e25e-98ec-4820-b40c-b95fbc94935e', '2'),
     'Chg Type': ('Chg Type', '59016b19-0636-4cb9-bbff-af3ea84d1a5e', '3'),
+    'Cod Act Status': ('Dx Active Ind', 'bc370ab9-991f-4c61-b844-e9a79f730bcd', '1'),
+    'Cred Renewal Dt/Tm': ('Prsnl End Eff Dt/Tm', '3560a0d6-208c-48ea-af57-16acfffdd115', '2'),
     'DRG Nom Source Code': ('DRG Nom Source Code', '5ca8e00a-2046-414c-af3a-cd6dbe6f56f0', '3'),
+    'Diag ICD Code': ('Dx Nom Source Code', '5872bfb7-f446-46a9-b871-c1e686773b3b', '3'),
+    'Diag Type': ('Dx Type', '197c4634-1052-4c0e-abb3-22d244f28529', '1'),
+    'Diagnosis Display': ('Dx Nom Source String', '804f1c07-f444-4e5b-98e2-ad315f6fde50', '3'),
     'Dx 1 Desc': ('Dx 1 Desc', '3498d870-dbc9-4b1b-9491-cbd69f07ffdc', '3'),
     'Dx Active Ind': ('Dx Active Ind', 'bc370ab9-991f-4c61-b844-e9a79f730bcd', '1'),
     'Dx Beg Eff Dt/Tm': ('Dx Beg Eff Dt/Tm', 'f1ce8cf5-45e9-48ed-b688-bb123b322f49', '2'),
+    'Dx Enc Id': ('Dx Enc Id', 'b1fb31ad-ae4c-45d3-a374-f28284da308d', '3'),
+    'Dx End Eff Dt/Tm': ('Dx End Eff Dt/Tm', '6002bafa-9f63-4824-bbb0-1176a93c0358', '2'),
     'Dx Nom Source Code': ('Dx Nom Source Code', '5872bfb7-f446-46a9-b871-c1e686773b3b', '3'),
     'Dx Nom Source String': ('Dx Nom Source String', '804f1c07-f444-4e5b-98e2-ad315f6fde50', '3'),
+    'Dx Nom Source Vocab': ('Dx Nom Source Vocab', '1ae0777a-e08b-41ef-8bc2-89a34963cf7f', '3'),
     'Dx Presnt on Admit': ('Dx Presnt on Admit', 'd26f4155-ea18-47f7-b815-9b249cadf129', '3'),
     'Dx Priority': ('Dx Priority', 'bde8c505-bbd4-4fa4-a9c3-7f91a7fb8155', '1'),
+    'Dx Prsnl Name': ('Dx Prsnl Name', '21d0adcc-4ddb-4fd3-a722-c54e53d9e236', '3'),
     'Dx Type': ('Dx Type', '197c4634-1052-4c0e-abb3-22d244f28529', '1'),
     'Dx Update Dt/Tm': ('Dx Update Dt/Tm', 'b2e14346-5995-4a72-ab2a-daabcb2cf22d', '2'),
     'Enc Active Ind': ('Enc Active Ind', '94d02e70-2821-4f5e-bc46-8eae179502cf', '1'),
@@ -208,7 +235,7 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Enc Disch Disposition': ('Enc Discharge Disp', 'f57ac62e-4dec-444f-8d2e-19534accc068', '3'),
     'Enc Disch Dt Tm': ('Enc Discharge Dt/Tm', '1d44a53e-cba7-4ddf-80c4-d86205e30e0d', '2'),
     'Enc Discharge Disp': ('Enc Discharge Disp', 'f57ac62e-4dec-444f-8d2e-19534accc068', '3'),
-    'Enc Discharge Dt': ('Enc Discharge Dt', 'f2fccf23-964c-4fc6-82b2-a76fdd55e793', '3'),
+    'Enc Discharge Dt': ('Enc Discharge Dt', 'f2fccf23-964c-4fc6-82b2-a76fdd55e793', '2'),
     'Enc Discharge Dt/Tm': ('Enc Discharge Dt/Tm', '1d44a53e-cba7-4ddf-80c4-d86205e30e0d', '2'),
     'Enc Discharge Loc': ('Enc Discharge Loc', '9cb0ccff-d16e-46ce-8bc1-028a6c8d9c7f', '3'),
     'Enc Encounter Number': ('Enc Financial Num', '1a4ee2f6-2ed1-48b3-9d79-974352b9fabf', '3'),
@@ -218,7 +245,7 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Enc Hx Activity Dt/Tm': ('Enc Hx Activity Dt/Tm', 'fc4d494a-1652-4838-b490-c248dffa4763', '2'),
     'Enc Hx Loc Nurse Unit': ('Enc Hx Loc Nurse Unit', 'd05fb4fc-eaf2-4b1e-ab59-9ab6fe37b995', '3'),
     'Enc Id': ('Enc Id', '5ef4381c-6344-43c4-81b5-2c18cd6bcb70', '3'),
-    'Enc Info Hx Sub Type': ('Enc Info Hx Sub Type', 'c34563d2-e297-4a48-994d-32fdbc2b1cec', '3'),
+    'Enc Info Hx Sub Type': ('Enc Info Hx Sub Type', 'c34563d2-e297-4a48-994d-32fdbc2b1cec', '1'),
     'Enc Info Sub Type': ('Enc Info Sub Type', 'c560bb7e-28ba-4659-8202-654628d07549', '1'),
     'Enc Info Type': ('Enc Info Type', '94935763-369b-4f35-9e7b-82a9f5928b17', '3'),
     'Enc Info Value': ('Enc Info Value', '272ade7e-1de7-4888-a4d3-6297e19a113c', '3'),
@@ -228,25 +255,40 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Enc Loc Facility': ('Enc Loc Facility', 'b09f6eab-aa80-4110-a4af-3dcbbd00384b', '3'),
     'Enc Loc Nurse Unit': ('Enc Loc Nurse Unit', '75267dc7-d5c6-437b-aa34-98e46bbc5db1', '3'),
     'Enc Loc Room': ('Enc Loc Room', 'e52b4716-00f9-42ab-8a04-8ba1e9ea1ece', '3'),
+    'Enc Medical Service': ('Enc Medical Service', 'd803b34d-3519-4096-9309-24ae60c669ab', '1'),
+    'Enc Pl Active Ind': ('Enc Pl Active Ind', 'ca14ff95-a828-4b65-9bd2-bfc67d2f80b8', '1'),
+    'Enc Pl Enc Id': ('Enc Pl Enc Id', '8eca97fe-98fc-44d2-82a2-67096cd65841', '3'),
+    'Enc Pl End Eff Dt/Tm': ('Enc Pl End Eff Dt/Tm', 'bb4354a4-6166-49c3-9834-23f7cf7ea059', '2'),
+    'Enc Pl Relationship Type': ('Enc Pl Relationship Type', 'd68ba34b-7554-43ba-9d7c-6bdd97054578', '1'),
     'Enc Prsnl Reltn Name': ('Enc Attending Phys', 'beb01385-36a9-4371-93e2-68056229e216', '3'),
     'Enc Prsnl Reltn Type': ('Enc Medical Service', 'd803b34d-3519-4096-9309-24ae60c669ab', '3'),
-    'Enc Registration Dt': ('Enc Registration Dt', 'b52cf234-3ec7-4343-a9d8-db77b7354bd7', '3'),
+    'Enc Reason for Visit': ('Enc Reason for Visit', 'd83803b9-5ce4-4c86-8aa4-d1a359237a8c', '3'),
+    'Enc Registration Dt': ('Enc Registration Dt', 'b52cf234-3ec7-4343-a9d8-db77b7354bd7', '2'),
     'Enc Registration Dt/Tm': ('Enc Registration Dt/Tm', '42ee9a32-031f-495d-962a-5f04376e071a', '2'),
     'Enc Status': ('Enc Status', '7161959f-72cd-46bb-b6f6-2b177edd0469', '3'),
     'Enc Type': ('Enc Type', '10b02c36-ff84-47d6-a825-ea142281a547', '3'),
+    'Enc Type Class': ('Enc Type Class', '95fb940f-0306-4bab-89c8-6959a08df978', '1'),
     'F Chg Billing Amount': ('F Chg Billing Amount', '91bda8db-c505-4887-bf0a-dca32a4d7cea', '1'),
     'F Chg Billing Qty': ('Chg Item Quantity', '9c7440d4-51a5-4dd1-ac0c-a8bf799fb074', '1'),
     'F Chg CPT': ('F Chg CPT', '1b06b900-6fc5-45bd-afec-2b444bd6bf00', '3'),
     'F Chg Item Id': ('F Chg Item Id', '3e53617f-4e0a-43ec-85f4-8004411a4324', '3'),
     'F Chg Rev Code': ('F Chg Rev Code', '9af50981-51fa-4e64-a740-a8a049c1b48e', '3'),
     'F Chg Status': ('F Chg Status', '30aadfd4-ba16-4e13-a56d-b0de02c4882b', '3'),
+    'F Enc Recur Seq': ('Enc Type', '10b02c36-ff84-47d6-a825-ea142281a547', '3'),
+    'F Enc inpatient Admit Dt/Tm': ('Enc Inpatient Admit Dt/Tm', '5f44f766-2da4-4cff-b050-7bfb5159b6b8', '2'),
+    'GL Post Dt': ('Chg Posted Dt/Tm', 'f34d0bfe-074f-4268-8275-ef17de249e1c', '2'),
+    'GL Trans Amount': ('F Chg Billing Amount', '91bda8db-c505-4887-bf0a-dca32a4d7cea', '1'),
     'HP E R Active Ind': ('HP E R Active Ind', 'df3ceed8-1823-4bc0-ab0a-528467d3b48f', '1'),
-    'HP E R Enc Id': ('HP E R Enc Id', '4e63ebac-00d0-48ce-bac5-31f252348654', '3'),
+    'HP E R Beg Eff Dt/Tm': ('HP E R Beg Eff Dt/Tm', 'b8a883b4-a99d-4083-9507-6952eb3d4b1d', '2'),
+    'HP E R Enc Id': ('HP E R Enc Id', '4e63ebac-00d0-48ce-bac5-31f252348654', '1'),
+    'HP E R End Eff Dt/Tm': ('HP E R End Eff Dt/Tm', 'df3ce658-90cb-446c-9b3c-c9576d2afa08', '2'),
     'HP E R Per Id': ('HP E R Per Id', '0f470d62-06d1-42b8-9ac2-7c05949370fc', '3'),
     'HP E R Priority Seq': ('HP E R Priority Seq', '776ef628-3223-4db6-822e-b14aaa0d3e1a', '1'),
+    'HP E R Sub Per Name': ('HP E R Sub Per Name', 'f48885f5-3a00-4caf-88fa-5dcd915c4506', '3'),
     'HP E R Verify Status': ('HP E R Verify Status', '1da61840-ec3d-482e-97cb-58579b4b00dd', '1'),
     'HP Financial Class': ('HP Financial Class', 'c41e96b7-6f7f-41da-b6b6-1312ae27fc10', '3'),
     'HP Plan Category': ('HP Plan Category', '17ef99d2-c481-4dbd-83f2-e33cb50e2339', '3'),
+    'HP Plan Class': ('HP Plan Class', '3eb2b4b3-e160-4853-be4e-02c831182a4d', '3'),
     'HP Plan Description': ('HP Plan Description', 'a5fa556d-be32-4ff5-962c-31eb5e21346b', '3'),
     'HP Plan Name': ('HP Plan Name', '8ed4dcd1-cebe-4186-bfb9-284d6f0aceba', '3'),
     'HP Plan Name Key': (
@@ -258,40 +300,68 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'HP1 Plan Name': ('HP1 Plan Name', '564e2840-fce9-45f9-9257-75d189e344f4', '3'),
     'HP1 Plan Type': ('HP1 Plan Type', 'dc31faf2-c529-4feb-9b30-18e69310569b', '1'),
     'Med Adm Beg Dt/Tm': ('Med Adm Beg Dt/Tm', '6f7e20c9-73db-4529-8507-2cb0b490bf06', '2'),
-    'Med Adm Event Id': ('Med Adm Event Id', '919ff389-29bb-423a-a886-c4a4ac8a356e', '1'),
+    'Med Adm Dt/Tm': ('Med Adm Beg Dt/Tm', '6f7e20c9-73db-4529-8507-2cb0b490bf06', '2'),
+    'Med Adm End Dt/Tm': ('Med Adm End Dt/Tm', 'ffed4e18-9860-4e54-b03f-e4370e77e2e1', '2'),
+    'Med Adm Event Id': ('Med Adm Event Id', '919ff389-29bb-423a-a886-c4a4ac8a356e', '3'),
     'Med Adm Event Type': ('Med Adm Event Type', '00bb938e-5fa1-44d6-9223-dbc84d8963c8', '3'),
+    'Med Adm Id': ('Med Adm Id', '7736fb99-a316-46f5-8270-e9d9826e1b0d', '3'),
+    'Med Adm MedScan Ind': ('Med Adm Event Type', '00bb938e-5fa1-44d6-9223-dbc84d8963c8', '3'),
     'Med Adm Order Id': ('Med Adm Order Id', '2c54e780-d040-496d-b790-f386d0d25c09', '3'),
     'Med Adm Prsnl Name': ('Med Adm Prsnl Name', '3355ab6a-f9f7-4b0f-8222-ddd7db2e1a82', '3'),
+    'Med Adm PtScan Ind': ('Med Adm Event Id', '919ff389-29bb-423a-a886-c4a4ac8a356e', '1'),
     'Med Adm Sch Dt/Tm': ('Med Adm Sch Dt/Tm', '4f650c97-d237-4480-a56b-2f0413e4c784', '2'),
     'Med Adm Temp Order Id': ('Med Adm Temp Order Id', '96a2d4ef-a8da-464a-8fe2-efafd3289e86', '3'),
     'Med Adm Verify Dt/Tm': ('Med Adm Verify Dt/Tm', 'f56baaa3-f873-4c37-be69-954ae5ee624b', '2'),
+    'Med C Cost': ('Chg Item Price', '07112aeb-0932-4898-a6be-fe9b5ddf048c', '1'),
+    'Med C Cost Type': ('Chg Type', '59016b19-0636-4cb9-bbff-af3ea84d1a5e', '3'),
+    'Med Prod Formulary Status': ('Order Catalog', 'ca672220-76a6-4601-bc0f-f0104e07874c', '3'),
+    'Mltm Legal Status': ('Order Catalog Type', '97f18dc3-faf9-42d5-a47a-999fe7cdf944', '1'),
     'Name First': ('Name First', 'ddb89eb8-f2c6-4821-9153-66a050f7481d', '3'),
     'Name Last': ('Name Last', 'ee6b2563-7e7f-484b-9435-4cd9ad6cde5b', '3'),
     'Ord Detail Display': ('Order Detail Display', 'a371d5d0-f1a0-41f0-a2af-aeeceef175e2', '3'),
+    'Ord Detail Field Id': ('Ord Detail Field Id', 'c76c1416-dc5a-470b-b338-f4f3fdd3a1ab', '1'),
+    'Ord Detail Field Meaning': ('Ord Detail Field Meaning', 'cede0389-e782-49f5-a140-f197ff1806c6', '3'),
+    'Ord Detail Field Value': ('Ord Detail Field Value', '3fda7e65-00ff-4e59-b05e-5b2d7084757b', '3'),
     'Ord Mnemonic': ('Order Catalog', 'ca672220-76a6-4601-bc0f-f0104e07874c', '3'),
     'Ord Order Id': ('Order Id', '0081bf6a-b747-49ad-be49-e193d5b3bc93', '3'),
     'Ord Orig Order Dt/Tm': ('Order Dt/Tm', 'db8be1e0-6f63-4851-8f87-163fae80ead3', '2'),
     'Ord Status': ('Order Status', '1d1ee0d5-6e14-462f-bb27-2939048ea0bd', '1'),
+    'Order AS Mnemonic': ('Order AS Mnemonic', 'c1b0fbbc-baa6-42a8-ab1c-202bba3d3ed7', '3'),
     'Order Active Ind': ('Order Active Ind', 'dc9a6a8a-5a97-4087-a7d8-a57063635e42', '1'),
-    'Order Catalog': ('Order Catalog', 'ca672220-76a6-4601-bc0f-f0104e07874c', '3'),
+    'Order Activity Type': ('Order Activity Type', '710c4385-c5db-41ac-89b8-03a5b1a7120b', '3'),
+    'Order Catalog': ('Order Catalog', 'ca672220-76a6-4601-bc0f-f0104e07874c', '1'),
     'Order Catalog Type': ('Order Catalog Type', '97f18dc3-faf9-42d5-a47a-999fe7cdf944', '1'),
+    'Order Clinical Category': ('Order Clinical Category', '2842d04a-a78b-4374-a1bd-1a220c684ecb', '1'),
     'Order Clinical Display': ('Order Clinical Display', '563c423f-45f7-49ff-bd79-34066c5931e3', '3'),
     'Order Clinical Display Line': ('Order Detail Display', 'a371d5d0-f1a0-41f0-a2af-aeeceef175e2', '3'),
+    'Order Department Status': ('Order Department Status', '88fd4dac-f6b3-40d0-bd4b-5712a36b92e3', '1'),
     'Order Detail Display': ('Order Detail Display', 'a371d5d0-f1a0-41f0-a2af-aeeceef175e2', '3'),
-    'Order Dt/Tm': ('Order Dt/Tm', 'db8be1e0-6f63-4851-8f87-163fae80ead3', '2'),
-    'Order Orig Order Dt/Tm': ('Order Dt/Tm', 'db8be1e0-6f63-4851-8f87-163fae80ead3', '2'),
-    'Order Status Dt/Tm': ('Order Status Dt/Tm', '9a24bc49-fd21-53d4-95de-8d4da240d852', '2'),
     'Order Discontinue Eff Dt/Tm': ('Order Discontinue Eff Dt/Tm', '87db9652-09cd-45c9-bb4a-dec92aa4b92c', '2'),
-    'Order Update Dt/Tm': ('Order Update Dt/Tm', 'f14b375c-ccb8-4caa-9627-aa5f54acf962', '2'),
-    'Sch Ev Act Dt/Tm': ('Sch Ev Act Dt/Tm', 'd11667eb-48e5-5e8b-a12c-2145f8028763', '2'),
-    'Prsnl Create Dt/Tm': ('Prsnl Create Dt/Tm', 'a40b5503-43de-464c-ad9f-f924ce095882', '2'),
+    'Order Discontinue Ind': ('Order Discontinue Ind', '124e2bbf-35be-4fd4-ab74-c8c611b0f062', '1'),
+    'Order Discontinue Type': ('Order Discontinue Type', '40737f78-7b30-4c98-94e7-a81df012bd12', '3'),
+    'Order Dt/Tm': ('Order Dt/Tm', 'db8be1e0-6f63-4851-8f87-163fae80ead3', '2'),
+    'Order Enc Id': ('Order Enc Id', '4b37cd4f-e389-4220-843e-9c982b9a984e', '3'),
     'Order Flag': ('Order Flag', '6436dc0f-ae98-4fee-a30b-23a755eec2a2', '1'),
-    'Order Id': ('Order Id', '0081bf6a-b747-49ad-be49-e193d5b3bc93', '3'),
+    'Order Id': ('Order Id', '0081bf6a-b747-49ad-be49-e193d5b3bc93', '1'),
+    'Order Last Updt Provider Name': ('Order Last Updt Provider Name', 'd510b953-d957-4865-add3-2363504873fb', '3'),
     'Order Mnemonic': ('Order Mnemonic', '7120df4c-b25b-4595-badb-79dedda7f9aa', '3'),
+    'Order Orig Order Dt/Tm': ('Order Dt/Tm', 'db8be1e0-6f63-4851-8f87-163fae80ead3', '2'),
     'Order PRN Ind': ('Order PRN Ind', 'f8cf6fa8-7d9d-4a7e-8636-a1f36e6f952a', '1'),
     'Order Start Dt/Tm': ('Order Start Dt/Tm', '5de804b0-ae7b-4044-9735-f897f5b46a23', '2'),
     'Order Status': ('Order Status', '1d1ee0d5-6e14-462f-bb27-2939048ea0bd', '1'),
+    'Order Status Dt/Tm': ('Order Update Dt/Tm', 'f14b375c-ccb8-4caa-9627-aa5f54acf962', '2'),
     'Order Temp Order Id': ('Order Temp Order Id', 'a310079c-cd4a-486f-8a9d-f61b057dde0f', '1'),
+    'Order Update Dt/Tm': ('Order Update Dt/Tm', 'f14b375c-ccb8-4caa-9627-aa5f54acf962', '2'),
+    'Order Update Prsnl Name': ('Order Update Prsnl Name', '2e0c59d2-f20f-40ed-9306-770d086d3108', '3'),
+    'Order Valid Dose Dt/Tm': ('Order Valid Dose Dt/Tm', '019a4b85-404d-457a-b24c-82ff4978139d', '2'),
+    'P S Desc': ('Chg CDM', 'ee98bf46-35fe-46d1-a919-c6d280e8010d', '3'),
+    'Pay Amount': ('Chg Item Price', '07112aeb-0932-4898-a6be-fe9b5ddf048c', '1'),
+    'Pay Effective Dt': ('Chg Service Dt/Tm', '9452e25e-98ec-4820-b40c-b95fbc94935e', '2'),
+    'Pay Post Dt': ('Chg Posted Dt/Tm', 'f34d0bfe-074f-4268-8275-ef17de249e1c', '2'),
+    'Pay Trans Reason': ('F Chg Status', '30aadfd4-ba16-4e13-a56d-b0de02c4882b', '3'),
+    'Pay Trans Sub Type': ('Chg Type', '59016b19-0636-4cb9-bbff-af3ea84d1a5e', '3'),
+    'Pay Trans Type': ('Chg Activity Type', '07e4d357-ed1c-46fb-acb3-84ce2957db36', '3'),
+    'PayTrans Alias': ('Chg CDM', 'ee98bf46-35fe-46d1-a919-c6d280e8010d', '3'),
     'Per Addr Beg Eff Dt/Tm': ('Per Addr Beg Eff Dt/Tm', '7c4c03d8-a010-4263-9a12-22e038fda244', '2'),
     'Per Addr City': ('Per Addr City', 'a47b6faf-dbcd-497f-80c4-05414fc6266a', '3'),
     'Per Addr Country': ('Per Addr Country', '09587d58-43be-4653-9471-d48619c62e8b', '3'),
@@ -299,7 +369,7 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Per Addr State': ('Per Addr State', '71f44615-2002-4ee1-af2d-c40914b6fe5d', '3'),
     'Per Addr Street 1': ('Per Addr Street 1', '461f0fd2-786b-476f-8beb-0129d080cf7c', '3'),
     'Per Addr Street 2': ('Per Addr Street 2', '4f7b765d-400b-470d-a312-60818acdb6b5', '3'),
-    'Per Addr Type': ('Per Addr Type', 'a7213cf1-35ee-41cc-ab9d-ca966e634dfa', '3'),
+    'Per Addr Type': ('Per Addr Type', 'a7213cf1-35ee-41cc-ab9d-ca966e634dfa', '1'),
     'Per Addr Update Dt/Tm': ('Per Addr Update Dt/Tm', '506cbe22-845a-419b-9f8a-7205a54083a7', '2'),
     'Per Addr Val Expire Dt/Tm': ('Per Addr Val Expire Dt/Tm', '18a5b628-e4fb-4f35-8ae8-b9820cb157ad', '2'),
     'Per Addr Zip': ('Per Addr Zip', 'e3a175aa-d704-43cb-9b0c-2adf977443dc', '3'),
@@ -327,32 +397,76 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Person Name Last': ('Person Name Last', '2e9a30aa-c98f-4d50-9f5e-8d642c169fe8', '3'),
     'Person Name Last Format': ('Person Name Last Format', '8a93f07a-cc70-4aac-9c4c-716cc657ce78', '3'),
     'Person Name Middle': ('Person Name Middle', '942c60f2-698f-4328-b25f-e9bff77bb610', '3'),
+    'Person Primary Care Pro': ('Person Primary Care Pro', '9caaa93e-0169-43fc-b78d-cc381b2ad9a0', '3'),
     'Person Race': ('Person Race', '777f74ad-9412-48ad-a4b5-220153432d6b', '3'),
     'Person SSN': ('Person SSN', '7e6cf9a2-3769-49f6-8486-bae6efee5253', '3'),
     'Person Sex': ('Person Sex', 'd15afa2f-0bce-40b6-9672-ad811db27bf3', '3'),
+    'Pl Alias': ('Enc Admitting Phys NPI', '8b343e83-e1ee-4146-9a42-9f144317b653', '3'),
+    'Pl Grp Name': ('Enc Medical Service', 'd803b34d-3519-4096-9309-24ae60c669ab', '3'),
+    'Prsnl Active Ind': ('Prsnl Active Ind', 'c270984e-acb9-4472-9ed5-ad670a127463', '1'),
+    'Prsnl Create Dt/Tm': ('Prsnl Create Dt/Tm', 'a40b5503-43de-464c-ad9f-f924ce095882', '2'),
+    'Prsnl End Eff Dt/Tm': ('Prsnl End Eff Dt/Tm', '3560a0d6-208c-48ea-af57-16acfffdd115', '2'),
     'Prsnl Full Name': ('CE Performed Prsnl Name', '2ecc5b49-c180-440c-b0c2-ce9712307ba3', '3'),
-    'Prsnl Position': ('Prsnl Position', '4146434c-1a5d-40ec-8498-b80eccaf5094', '3'),
+    'Prsnl Name Full Format': ('Prsnl Name Full Format', 'b59660e9-add8-41b1-991c-1eeb1d31b613', '3'),
+    'Prsnl Position': ('Enc Pl Relationship Type', 'd68ba34b-7554-43ba-9d7c-6bdd97054578', '1'),
+    'Sch App Active Ind': ('Sch App Active Ind', '480501df-a23e-475a-a6fa-8cccc157620c', '1'),
     'Sch App Beg Dt/Tm': ('Sch App Beg Dt/Tm', 'c487e75f-4cc5-415e-80d2-dbd1afd61bdd', '2'),
+    'Sch App Begin Dt/Tm': ('Sch App Beg Dt/Tm', 'c487e75f-4cc5-415e-80d2-dbd1afd61bdd', '2'),
+    'Sch App Contig Ind': ('Sch App Contig Ind', '20a1ad5e-bd51-4f12-bc17-0a44f0573e77', '1'),
+    'Sch App Def Slot Id': ('Sch App Def Slot Id', '4eb15512-a73b-4ce8-896e-928bdd6a27e2', '3'),
     'Sch App Description': ('Sch App Description', 'f11e6f1b-c0ca-41c7-be24-c1ac40dda593', '3'),
     'Sch App Duration': ('Sch App Duration', '31b8f1ff-4ba2-43cf-adc7-e3f386fbc87e', '1'),
     'Sch App Enc Id': ('Sch App Enc Id', '49daf484-e3ae-4967-ace2-f7ec7cf5e346', '3'),
     'Sch App End Dt/Tm': ('Sch App End Dt/Tm', 'abe2639f-c3a6-4980-befb-30300a250fd7', '2'),
-    'Sch App Role': ('Sch App Role', 'c2d4234c-5846-4060-be75-33385907322e', '1'),
+    'Sch App Ev Id': ('Sch App Ev Id', '6ef57148-5ff8-4093-8064-ce48737cfc03', '3'),
+    'Sch App Id': ('Sch App Id', 'd5807380-8c35-4f9c-8f32-487839a0bade', '3'),
+    'Sch App Loc': ('Sch App Loc', '0f16e717-3b51-4441-be1f-079041a00ed8', '1'),
+    'Sch App Realease Dt/Tm': ('Sch App Realease Dt/Tm', '4240e33a-04f0-48b4-8d02-ff3e11d2545b', '2'),
+    'Sch App Resource': ('Sch App Resource', '9e7c1eb7-945a-4fbb-ba7e-c0e28978e0be', '1'),
+    'Sch App Role': ('Sch App Role', 'c2d4234c-5846-4060-be75-33385907322e', '3'),
+    'Sch App Role Meaning': ('Sch App Role Meaning', 'ebdc43ce-e888-4300-870a-27973ba39162', '3'),
+    'Sch App Sch Id': ('Sch App Sch Id', 'bc508b73-3be0-4ec3-8d7d-eb818f547964', '3'),
+    'Sch App Setup Duration': ('Sch App Setup Duration', '701fc4eb-8bc2-401d-91f5-99dd93679870', '1'),
+    'Sch App Slot Mnemonic': ('Sch App Slot Mnemonic', '268b43b5-4271-46d5-8603-f86ccda45ad7', '3'),
+    'Sch App Slot State': ('Sch App Slot State', 'f1120d40-c9b9-48bc-bdc8-cb9bff1c7ce1', '1'),
     'Sch App State': ('Sch App State', 'b678ef69-8bf2-4bcb-ac34-19a274f36ebe', '3'),
+    'Sch App State Meaning': ('Sch App State Meaning', 'ba8923db-ef63-43e7-87f2-376e0bb19370', '3'),
+    'Sch App Time Flag': ('Sch App Time Flag', '536350e1-e59a-4504-8d33-0da79ab79dbe', '1'),
+    'Sch Ev Act Action': ('Sch Ev State', '51555e3b-3afd-40f7-889e-8e4fda3e726e', '3'),
+    'Sch Ev Act Dt/Tm': ('Sch App Beg Dt/Tm', 'c487e75f-4cc5-415e-80d2-dbd1afd61bdd', '2'),
+    'Sch Ev Act Reason': ('Sch App Description', 'f11e6f1b-c0ca-41c7-be24-c1ac40dda593', '3'),
     'Sch Ev App Type': ('Sch Ev App Type', 'b8533e26-c303-4c1f-8689-90b6dc4f27cd', '3'),
+    'Sch Ev Appt Type': ('Sch Ev App Type', 'b8533e26-c303-4c1f-8689-90b6dc4f27cd', '3'),
+    'Sch Ev Sch Seq': ('Sch Ev Sch Seq', '95665401-f4ab-46c6-b7a3-498dff29d6dd', '1'),
+    'Sch Ev State': ('Sch Ev State', '51555e3b-3afd-40f7-889e-8e4fda3e726e', '3'),
+    'Sch Evt Act Reason': ('Sch App Description', 'f11e6f1b-c0ca-41c7-be24-c1ac40dda593', '3'),
+    'Sch Evt Appt Type': ('Sch Ev App Type', 'b8533e26-c303-4c1f-8689-90b6dc4f27cd', '3'),
+    'Sch Res': ('Sch Res', '7cc1d1cf-2296-41ff-b195-2b90eea162f8', '3'),
     'Sch Res Description': ('Sch Res Description', '6c6a93e4-88e0-40ac-9c1b-d0c45e984bf8', '3'),
+    'Sch Res Quota': ('Sch Res Quota', '48fdead8-fc26-48b7-9814-55e9c0073bb0', '1'),
+    'Task Atv Active Ind': ('Task Atv Status', '7d5b0261-afc4-4540-9d3f-e4490a3faf02', '3'),
+    'Task Atv Class': ('Task Atv Type', 'c9dfe041-a37f-4cb5-b689-4f08a702abe9', '3'),
     'Task Atv Create Dt/Tm': ('Task Atv Create Dt/Tm', '0c874a83-84db-4be9-ac01-ce63a8a467c2', '2'),
     'Task Atv Dt/Tm': ('Task Atv Dt/Tm', '68702077-a5fa-4cda-808b-6a5a6dec7aac', '2'),
     'Task Atv Event': ('Task Atv Event', 'cb085880-0d86-4abc-8984-14241b0ba379', '3'),
     'Task Atv Event Id': ('Task Atv Event Id', '2164578e-218c-40a6-82b8-8600cad15ba6', '3'),
-    'Task Atv Order Id': ('Task Atv Order Id', '69408c86-810e-4bae-b065-3857f12d608f', '3'),
+    'Task Atv Id': ('Task Atv Event Id', '2164578e-218c-40a6-82b8-8600cad15ba6', '3'),
+    'Task Atv Loc': ('Task Atv Loc', '425e0df2-6849-4911-a403-ef6db587c661', '3'),
+    'Task Atv Order Id': ('Task Atv Order Id', '69408c86-810e-4bae-b065-3857f12d608f', '1'),
+    'Task Atv Performed Dt/Tm': ('Task Atv Dt/Tm', '68702077-a5fa-4cda-808b-6a5a6dec7aac', '2'),
     'Task Atv Performed Prsnl Name': ('Task Atv Performed Prsnl Name', '0fda616a-d623-43dc-8a1a-cb13089a9da0', '3'),
-    'Task Atv Ref Task Id': ('Task Atv Ref Task Id', '718e51bd-bdb3-44b7-aef0-c52662ac01dc', '3'),
+    'Task Atv Ref Task Id': ('Task Atv Ref Task Id', '718e51bd-bdb3-44b7-aef0-c52662ac01dc', '1'),
     'Task Atv Result Set Id': ('Task Atv Result Set Id', '08d2ecad-cce8-4de8-94df-7ff4c9287c33', '3'),
+    'Task Atv Scheduled Dt/Tm': ('Task Atv Scheduled Dt/Tm', 'c787b623-4c2c-47c4-bfc6-4cd64e877c34', '2'),
     'Task Atv Status': ('Task Atv Status', '7d5b0261-afc4-4540-9d3f-e4490a3faf02', '3'),
+    'Task Atv Status Reason': ('Task Atv Status Reason', 'd566f312-2cb0-4728-a67d-66535416c8f2', '3'),
     'Task Atv Task Type': ('Task Atv Task Type', '0b5e4d6f-d099-4d98-87b6-69d92d516bca', '1'),
+    'Task Atv Type': ('Task Atv Type', 'c9dfe041-a37f-4cb5-b689-4f08a702abe9', '3'),
     'Task Atv Update Dt/Tm': ('Task Atv Update Dt/Tm', '610cb1ca-291a-4912-82ea-58cb8bdc6720', '2'),
+    'Task AtvStatus Reason': ('Task Atv Status Reason', 'd566f312-2cb0-4728-a67d-66535416c8f2', '3'),
 }
+
+VERIFIED_CWC_ENCOUNTER_UUIDS: set[str] = {v[1] for v in LIVE_CWC_ELEMENT_MAP.values()}
 
 
 CSSRS_INLINE_SUBQUERIES: list[tuple[str, str, list[tuple[str, str]]]] = [
@@ -1087,13 +1201,17 @@ class DA2ReportGenerator:
                     if "Dt" in e["da2_field_name"] and "Valid Until" not in e["da2_field_name"] and "Birth" not in e["da2_field_name"]
                 ),
                 {
-                    "da2_field_name": "Enc Admit Dt Tm",
-                    "element_uuid": str(uuid.uuid5(uuid.NAMESPACE_OID, "com.cerner.discern.da2.element:Enc Admit Dt Tm")),
+                    "da2_field_name": "Enc Registration Dt/Tm",
+                    "element_uuid": "42ee9a32-031f-495d-962a-5f04376e071a",
                 },
             ),
         )
         prompt_name = date_elem["da2_field_name"]
         prompt_uuid = date_elem["element_uuid"]
+        if prompt_name in LIVE_CWC_ELEMENT_MAP:
+            prompt_name, prompt_uuid, _ = LIVE_CWC_ELEMENT_MAP[prompt_name]
+        elif uuid.UUID(prompt_uuid).version == 5:
+            prompt_name, prompt_uuid = "Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a"
 
         inner_qual = (
             '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
@@ -1212,6 +1330,13 @@ class DA2ReportGenerator:
                 euuid = el["element_uuid"]
                 ct = (el.get("ccl_data_type") or "").lower()
                 etype = "2" if ("datetime" in ct or "dq8" in ct or "Dt" in ename) else ("1" if ("i4" in ct or "f8" in ct or "Ind" in ename) else "3")
+            try:
+                if uuid.UUID(euuid).version == 5:
+                    continue
+            except ValueError:
+                continue
+            if domain == "CWC Encounter" and euuid not in VERIFIED_CWC_ENCOUNTER_UUIDS:
+                continue
             if euuid in seen_daquery_uuids:
                 continue
             seen_daquery_uuids.add(euuid)
@@ -2636,6 +2761,43 @@ class DA2ReportGenerator:
             else:
                 checked.append(
                     f"DA2_CWC_CANONICAL_UUID_NO_DEPRECATE_COLLISION ({q.query_name}): Uses canonical CWC Encounter element UUIDs without deprecated CWF collisions"
+                )
+
+            v5_or_unverified: list[str] = []
+            for qli_node in dq_root.findall(".//*"):
+                if qli_node.tag.startswith("query_list_item"):
+                    dom_node = qli_node.find("domain")
+                    qli_dom = dom_node.attrib.get("name", "") if dom_node is not None else q.da2_domain
+                    for el_node in qli_node.findall(".//element"):
+                        el_u = el_node.attrib.get("uuid", "")
+                        el_n = el_node.attrib.get("name", "")
+                        if not el_u:
+                            continue
+                        try:
+                            if uuid.UUID(el_u).version == 5:
+                                v5_or_unverified.append(f"{el_n} ({el_u}: synthetic UUIDv5)")
+                            elif qli_dom == "CWC Encounter" and el_u not in VERIFIED_CWC_ENCOUNTER_UUIDS:
+                                v5_or_unverified.append(f"{el_n} ({el_u}: not in CWC Encounter)")
+                        except ValueError:
+                            v5_or_unverified.append(f"{el_n} ({el_u}: invalid UUID)")
+            for rp_node in dq_root.findall(".//*"):
+                if rp_node.tag.startswith("runtimeprompt") and "uuid" in rp_node.attrib:
+                    rp_u = rp_node.attrib.get("uuid", "")
+                    rp_n = rp_node.attrib.get("name", "")
+                    try:
+                        if uuid.UUID(rp_u).version == 5:
+                            v5_or_unverified.append(f"prompt {rp_n} ({rp_u}: synthetic UUIDv5)")
+                        elif q.da2_domain == "CWC Encounter" and rp_u not in VERIFIED_CWC_ENCOUNTER_UUIDS:
+                            v5_or_unverified.append(f"prompt {rp_n} ({rp_u}: not in CWC Encounter)")
+                    except ValueError:
+                        v5_or_unverified.append(f"prompt {rp_n} ({rp_u}: invalid UUID)")
+            if v5_or_unverified:
+                errors.append(
+                    f"Query {q.query_name} .daquery contains synthetic v5 or unverified domain element UUIDs (causes ColumnDomainException): {', '.join(v5_or_unverified[:5])}"
+                )
+            else:
+                checked.append(
+                    f"DA2_VERIFIED_DOMAIN_ELEMENT_UUIDS ({q.query_name}): All .daquery element and runtimeprompt UUIDs are verified UUIDv4s for {q.da2_domain}"
                 )
 
             ql = dq_root.find("query_list")
