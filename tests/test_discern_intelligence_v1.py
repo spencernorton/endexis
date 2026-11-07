@@ -972,7 +972,7 @@ def test_release_audit_safetensors_and_canary_verification(tmp_path: Path) -> No
 
     prompts = build_behavioral_canary_prompts()
     assert len(prompts) >= 15
-    clean_gens = ["owner_group_display='TENANT_OWNER_GROUP', Enc Loc Nurse Unit='2 North Inpatient Rehab'" for _ in prompts]
+    clean_gens = ["owner_group_display='TENANT_OWNER_GROUP', Enc Loc Nurse Unit='2 North Medical-Surgical Unit'" for _ in prompts]
     assert verify_canary_generations(clean_gens)["canary_audit_passed"]
 
     # Construct a valid clean .safetensors binary file and verify it passes
@@ -991,3 +991,155 @@ def test_release_audit_safetensors_and_canary_verification(tmp_path: Path) -> No
     dirty_st.write_bytes(struct.pack("<Q", len(header_json)) + header_json + dirty_tok.encode("ascii") + b"\x00" * 8)
     dirty_res = audit_safetensors_weights(dirty_st)
     assert not dirty_res["safetensors_clean"]
+
+
+def test_phase3_endexis_toml_profile_and_code_set_220_discovery(tmp_path: Path) -> None:
+    from discern_intelligence.cli import main as cli_main
+    from discern_intelligence.schemas import TenantConfig
+
+    toml_file = tmp_path / ".endexis.toml"
+    assert cli_main([
+        "init",
+        "--out",
+        str(toml_file),
+        "--owner-group",
+        "NORTHWEST_CLINICAL_DA2",
+        "--tenancy",
+        "communityworks",
+        "--utc-timezone-index",
+        "62",
+        "--facility",
+        "Northwest Regional Medical Center",
+        "--facility-code-value",
+        "77001100",
+    ]) == 0
+    loaded = TenantConfig.from_file(toml_file)
+    assert loaded.owner_group_display == "NORTHWEST_CLINICAL_DA2"
+    assert loaded.utc_timezone_index == 62
+    assert loaded.facility_display == "Northwest Regional Medical Center"
+    assert loaded.get_location_overrides("Enc Loc Facility")["Northwest Regional Medical Center"] == "77001100"
+
+    # Test Code Set 220 CSV discovery via init-discover
+    csv_export = tmp_path / "code_set_220.csv"
+    csv_export.write_text(
+        "CODE_SET,CODE_VALUE,CDF_MEANING,DISPLAY,ACTIVE_IND\n"
+        "220,91001,FACILITY,Summit Medical Campus,1\n"
+        "220,91002,BUILDING,Summit East Tower,1\n"
+        "220,91003,NURSEUNIT,4 East Telemetry,1\n"
+        "220,91004,ROOM,Room 412,1\n"
+        "220,91005,BED,Bed B,1\n",
+        encoding="utf-8",
+    )
+    discovered_toml = tmp_path / "discovered.endexis.toml"
+    assert cli_main([
+        "init-discover",
+        str(csv_export),
+        "--out",
+        str(discovered_toml),
+        "--owner-group",
+        "SUMMIT_HEALTH_DA2",
+        "--utc-timezone-index",
+        "58",
+    ]) == 0
+    disc_cfg = TenantConfig.from_file(discovered_toml)
+    assert disc_cfg.owner_group_display == "SUMMIT_HEALTH_DA2"
+    assert disc_cfg.utc_timezone_index == 58
+    assert disc_cfg.get_location_overrides("Enc Loc Facility")["Summit Medical Campus"] == "91001"
+    assert disc_cfg.get_location_overrides("Enc Loc Building")["Summit East Tower"] == "91002"
+    assert disc_cfg.get_location_overrides("Enc Loc Nurse Unit")["4 East Telemetry"] == "91003"
+    assert disc_cfg.get_location_overrides("Enc Loc Room")["Room 412"] == "91004"
+    assert disc_cfg.get_location_overrides("Enc Loc Bed")["Bed B"] == "91005"
+
+    # Verify custom utc_timezone_index flows into generated EJS V500 SQL
+    bundle = DA2ReportGenerator(tenant_config=disc_cfg).generate(
+        "Active inpatient encounter census with FIN, MRN, and nurse unit",
+        report_name="Summit_Census",
+        tenant_config=disc_cfg,
+    )
+    assert "cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, 58)" in bundle.queries[0].ejs_v500_sql
+
+
+def test_phase4_sqlite_v500_execution_harness_and_expanded_subject_areas() -> None:
+    from discern_intelligence.cli import main as cli_main
+    from discern_intelligence.sql_execution_harness import (
+        create_synthetic_v500_connection,
+        execute_and_verify_ejs_sql,
+    )
+
+    gen = DA2ReportGenerator()
+    conn = create_synthetic_v500_connection()
+    try:
+        requests_and_names = [
+            ("Active inpatient encounter census with FIN, MRN, Nurse Unit, and Admit Date", "Census_Check"),
+            ("C-SSRS adult completed suicide risk screening responses", "CSSRS_Screening_Check"),
+            ("Rehab therapy minutes by discipline PT OT SLP", "Rehab_Minutes_Check"),
+            ("Active Sepsis Lactate orders and lab results", "Sepsis_Orders_Check"),
+            ("Patient account payments and charges by bill item", "Charges_Check"),
+            ("Inpatient MAR medication administration dosage and start time", "MAR_Med_Admin_Check"),
+            ("Perioperative surgical case start time and case number", "Periop_Surg_Case_Check"),
+            ("Inpatient ICD-10 diagnosis priority and diagnosis display", "ICD10_Diag_Check"),
+        ]
+        for req_text, rpt_name in requests_and_names:
+            bundle = gen.generate(req_text, report_name=rpt_name)
+            assert bundle.verification.is_valid, f"Bundle verification failed for {rpt_name}: {bundle.verification.errors}"
+            for q in bundle.queries:
+                exec_res = execute_and_verify_ejs_sql(q.ejs_v500_sql, conn=conn)
+                assert exec_res["executed"], f"SQLite execution failed for {q.query_name}: {exec_res['error']}"
+                assert exec_res["non_empty"], f"Empty result set for {q.query_name}"
+                assert exec_res["fanout_safe"], f"Fan-out detected for {q.query_name}: {exec_res}"
+    finally:
+        conn.close()
+
+    assert cli_main([
+        "verify-sql",
+        "Active inpatient encounter census with FIN, MRN, Nurse Unit, and Admit Date",
+    ]) == 0
+
+
+def test_v2_adversarial_benchmark_and_precision_disambiguation() -> None:
+    from discern_intelligence.eval_harness import evaluate_adversarial_v2_benchmark, verify_cclquery_xml, verify_ejs_v500_sql
+    from discern_intelligence.knowledge import load_da2_elements, load_v500_tables, resolve_da2_filter_value
+    from discern_intelligence.sql_execution_harness import run_adversarial_sql_edge_case_suite
+
+    # 1. Verify catalog enrichments (Track C)
+    elems = load_da2_elements()
+    assert len(elems) == 2606
+    assert all("v500_table" in e and "v500_column" in e and "daquery_type" in e and "recommended_filters" in e for e in elems)
+    vt = load_v500_tables()
+    assert len(vt) == 230
+    assert any("polymorphic_bridges" in t for t in vt.values())
+
+    # 2. Verify context-conditioned filter value resolution (Track B)
+    lang_hits = resolve_da2_filter_value(
+        "Japanese",
+        query_intent="Filter patient spoken language requiring interpreter services for value Japanese",
+    )
+    assert lang_hits[0]["da2_field_name"] == "Person Language"
+    assert lang_hits[0]["code_set"] == 36
+    assert lang_hits[0]["matched_code_values"]["Japanese"] == "312739"
+
+    ord_hits = resolve_da2_filter_value(
+        "Canceled",
+        query_intent="Exclude pharmacy medication orders where Order Status is Canceled",
+    )
+    assert ord_hits[0]["da2_field_name"] == "Order Status"
+    assert ord_hits[0]["code_set"] == 6004
+    assert ord_hits[0]["matched_code_values"]["Canceled"] == "2542"
+
+    # 3. Verify SQLite V500 edge-case execution suite (Track D)
+    edge_res = run_adversarial_sql_edge_case_suite()
+    assert edge_res["pass_rate"] == 1.0, f"SQLite edge cases failed: {edge_res}"
+
+    # 4. Verify zero-leakage Adversarial V2 Benchmark (Track A + B + D)
+    adv_rep = evaluate_adversarial_v2_benchmark()
+    assert adv_rep["total_scenarios"] == 20
+    assert adv_rep["zero_leakage_passed"] is True
+    assert adv_rep["column_precision"] == 1.0
+    assert adv_rep["column_recall"] == 1.0
+    assert adv_rep["column_f1"] == 1.0
+    assert adv_rep["forbidden_column_bloat_rate"] == 0.0
+    assert adv_rep["ten_domain_routing_accuracy"] == 1.0
+    assert adv_rep["context_conditioned_filter_acc_at_1"] == 1.0
+    assert adv_rep["negative_trap_rejection_rate"] == 1.0
+    assert adv_rep["sqlite_v500_edge_case_pass_rate"] == 1.0
+    assert adv_rep["overall_pass_rate"] == 1.0

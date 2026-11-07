@@ -8,6 +8,7 @@ Provides four integrated capabilities:
 4. Direct-Upload Discern Analytics 2.0 (DA2) Query & BIRT 4.4.2 .rptdesign Report Generator
 """
 
+from .sql_execution_harness import create_synthetic_v500_connection, execute_and_verify_ejs_sql, run_adversarial_sql_edge_case_suite
 from .schemas import (
     DEFAULT_OWNER_GROUP_DISPLAY,
     ColumnMatch,
@@ -25,6 +26,7 @@ from .ccl_compiler import CCLCompiler
 from .da2_generator import DA2ReportGenerator
 from .neural_compiler import ApolloNeuralCompiler, LocalNeuralCompiler
 from .eval_harness import (
+    evaluate_adversarial_v2_benchmark,
     evaluate_filter_value_routing,
     generate_reasoning_trace,
     run_full_evaluation_suite,
@@ -45,10 +47,12 @@ from .knowledge import (
     resolve_da2_view_or_alias,
 )
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __all__ = [
     "DEFAULT_OWNER_GROUP_DISPLAY",
     "TenantConfig",
+    "create_synthetic_v500_connection",
+    "execute_and_verify_ejs_sql",
     "ColumnMatch",
     "FormOutputResolution",
     "InterpretationResult",

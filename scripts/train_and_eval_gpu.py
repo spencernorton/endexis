@@ -257,7 +257,7 @@ def main() -> int:
 
     # 0. Pre-training Baseline Evaluation on GPU
     print("Evaluating Pre-Training Base Model (Qwen3-0.6B) on GPU...", flush=True)
-    pre_metrics = evaluate_validation_loss_and_dpo_margin(model, val_sft_encoded, dpo_encoded[:60])
+    pre_metrics = evaluate_validation_loss_and_dpo_margin(model, val_sft_encoded, dpo_encoded)
     print("  Pre-training metrics:", pre_metrics, flush=True)
 
     sft_ckpt_file = WORK_DIR / "checkpoints" / "stage1_sft" / "adapters.safetensors"
@@ -296,7 +296,7 @@ def main() -> int:
                 sft_loss_curve.append({"step": step, "train_loss": round(float(out.loss.item()), 4)})
                 print(f"  [SFT step {step}/{len(train_sft_encoded)}] loss={out.loss.item():.4f}", flush=True)
 
-    post_sft_metrics = evaluate_validation_loss_and_dpo_margin(model, val_sft_encoded, dpo_encoded[:60])
+    post_sft_metrics = evaluate_validation_loss_and_dpo_margin(model, val_sft_encoded, dpo_encoded)
     print("  Post-Stage-1 SFT metrics:", post_sft_metrics, flush=True)
     sft_ckpt_info = save_adapter_checkpoint(model, WORK_DIR / "checkpoints" / "stage1_sft")
 
@@ -336,7 +336,7 @@ def main() -> int:
         dpo_loss_curve.append({"epoch": epoch, "dpo_loss": mean_ep_loss})
         print(f"  [DPO epoch {epoch}/2] mean_dpo_loss={mean_ep_loss:.4f}", flush=True)
 
-    post_dpo_metrics = evaluate_validation_loss_and_dpo_margin(model, val_sft_encoded, dpo_encoded[:60])
+    post_dpo_metrics = evaluate_validation_loss_and_dpo_margin(model, val_sft_encoded, dpo_encoded)
     print("  Post-Stage-2 DPO metrics:", post_dpo_metrics, flush=True)
     dpo_ckpt_info = save_adapter_checkpoint(model, WORK_DIR / "checkpoints" / "stage2_dpo")
 
@@ -347,7 +347,7 @@ def main() -> int:
     with torch.no_grad():
         for hq in holdout_qs:
             p_text = (
-                "<|im_start|>system\nYou are Discern Intelligence (discern-iq), the Cerner Millennium V500, "
+                "<|im_start|>system\nYou are Endexis (endexis), the Cerner Millennium V500, "
                 "Discern Analytics 2.0 (DA2), CCL, and BIRT 4.4.2 neural compiler.<|im_end|>\n"
                 f"<|im_start|>user\n{hq['prompt']}<|im_end|>\n<|im_start|>assistant\n<reasoning>\n"
             )
@@ -377,7 +377,7 @@ def main() -> int:
     post_gpu = get_gpu_watcher_status()
 
     receipt = {
-        "host": "cuda-gpu (NVIDIA GeForce RTX 4070 Ti SUPER 16GB, 32-thread)",
+        "host": "cuda-bf16-trainer",
         "base_model": "Qwen/Qwen3-0.6B (BF16 dequantized, 596,049,920 parameters)",
         "lora_architecture": {
             "rank": 16,

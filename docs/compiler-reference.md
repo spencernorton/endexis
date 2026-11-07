@@ -28,6 +28,19 @@
    - Populates `<property name="com.cerner.discern.da2.display.names.set">1</property>`, `<structure name="cachedMetaData">`, `<list-property name="resultSet">` with exact `DA_ELEMENT.ELEMENT_UUID` mappings, `<xml-property name="queryText">`, and `<ex-property><name>defaultRuntimePrompts</name>` XML.
    - Supports both single-domain ODA reports and multi-domain `<joint-data-set>` reports joined on `Enc Id` (`ENCNTR_ID`), with `try { ... } catch (e) {}` guards around `reportContext` calls inside `beforeOpen` and `onFetch` so DA2's design-time `__bm_beforeOpen()` validator accepts the upload without errors.
 
+## What's New in `v2.0.0`
+
+- **Precision Column & DA2 Field Disambiguation (`strict_precision=True`)**: Replaced broad keyword bucket emission in `MillenniumInterpreter` and `DA2ReportGenerator` with intent-aware, grain-aware temporal anchor disambiguation (`CLINICAL_EVENT.EVENT_END_DT_TM` vs. `VERIFIED_DT_TM` vs. `UPDT_DT_TM`; `MED_ADMIN_EVENT` administration start vs. `ORDERS.ORIG_ORDER_DT_TM`; `ENCOUNTER.INPATIENT_ADMIT_DT_TM` vs. `REG_DT_TM` vs. `ARRIVE_DT_TM` vs. `DISCH_DT_TM`; `SCH_APPT.BEG_DT_TM` vs. `SCH_EVENT_ACTION.ACTION_DT_TM`; `CHARGE.SERVICE_DT_TM` vs. `POSTED_DT_TM`), identifier alias disambiguation (`PERSON_ALIAS` MRN Code Set 4 vs. `ENCNTR_ALIAS` FIN Code Set 319 vs. internal `f8` surrogate keys), and multi-1:N child join-explosion guardrails.
+- **Clinical & SQL Safety Qualification Intelligence**: Enforces `Order Status Not In (Canceled, Voided)` (`Code Set 6004: 2542, 2553`) rather than `Not In (Discontinued)` (`2545`) for historical MAR/BCMA audits, `CE Result Status In (Auth (Verified), Modified, Altered)` (`Code Set 8: 25, 34, 35`) with `VALID_UNTIL_DT_TM >= 31-DEC-2100`, `LEFT OUTER JOIN V500.DIAGNOSIS` for active census admitting diagnosis queries, and test-patient exclusion (`NAME_LAST_KEY < 'ZZ'`).
+- **Context-Conditioned Filter-Value & Code Set Resolver (`resolve_da2_filter_value`)**: Scores `6,458` `DISPLAY <-> CODE_VALUE` pairs across `90` DA2 filter fields conditioned on `(query_intent, domain, subentity, da2_field_name, code_set)`.
+- **Expanded Ground-Truth Catalogs, V2 Adversarial Benchmark & Stage-2 RPO-DPO Model**: Enriched all `2,606` DA2 elements (`v500_table`, `v500_column`, `code_set`, `daquery_type`, `grain_warning`, `recommended_filters`) and `230` V500 tables (`polymorphic_bridges`), added the zero-leakage 20-scenario V2 adversarial benchmark (`data/eval_adversarial_v2.jsonl`, `100.0%` `Pass@1`, mean F1 `0.995`) + 5 SQLite edge-case execution scenarios, and retrained `endexis-qwen3-0.6b-dpo-merged` (`4,501` 6-step SFT examples + `189` contrastive DPO pairs, `val_perplexity = 1.2262`, `dpo_mean_logprob_margin = +23.75`).
+
+## What's New in `v1.1.0`
+
+- **Portable CPU & Edge Quantization (`GGUF` + `Ollama`)**: Published 8-bit (`endexis-qwen3-0.6b-dpo-q8_0.gguf`, `610 MB`) and 4-bit (`endexis-qwen3-0.6b-dpo-q4_k_m.gguf`, `379 MB`) GGUF checkpoints plus an `Ollama` `Modelfile` to [`NorviTech/endexis-qwen3-0.6b-dpo-merged`](https://huggingface.co/NorviTech/endexis-qwen3-0.6b-dpo-merged), and added OpenAI-compatible `/v1/chat/completions` (`llama-server`, `Ollama`, `vLLM`) fallback to `LocalNeuralCompiler`.
+- **Zero-PHI Declarative Tenant Profile (`.endexis.toml` & `endexis init-discover`)**: Added `endexis init` and `endexis init-discover <code_set_220.csv>` CLI commands and `TenantConfig.from_file()` to auto-discover `.endexis.toml` profiles (`owner_group_display`, `utc_timezone_index`, and Code Set 220 Facility, Building, Nurse Unit, Room, and Bed overrides).
+- **Synthetic Millennium V500 / DA2 SQLite Execution Harness (`endexis verify-sql`)**: Added `discern_intelligence.sql_execution_harness` (`create_synthetic_v500_connection`, `execute_and_verify_ejs_sql`) and expanded clinical subject areas across **MAR / Medication Administration** (`V500.MED_ADMIN_EVENT`), **Perioperative / Surgical Cases** (`V500.SURGICAL_CASE`), and **ICD-10 Diagnoses & Problems** (`V500.DIAGNOSIS`, `V500.PROBLEM`).
+
 ## Installation & Quick Start
 
 ```bash
@@ -46,27 +59,28 @@ endexis forms "Where are PowerForm discrete assessment values and IView dynamic 
 
 # 3. Compile a request into a verified Cerner Command Language (.prg) script
 endexis compile-ccl "Active inpatient encounters with charted Morse Fall Scale PowerForm results" \
-  --name cust_r_morse_fall_v1 \
-  --out morse_fall.prg
+  --program-name cust_r_morse_fall_v1 \
+  --output examples/cust_r_active_morse_v1.prg
 
 # 4. Generate a direct-upload DA2 .rptdesign XML file and DA2 Domain Query JSON specification
 endexis generate-da2 "Active inpatient encounter census with FIN, MRN, Nurse Unit, Attending Physician, and Admit Date" \
   --title "Active Inpatient Encounter Census" \
-  --out-dir reports/active-inpatient-census
+  --output-rptdesign examples/active_inpatient_census_v1.rptdesign \
+  --output-spec examples/active_inpatient_census_v1_query_spec.json
 ```
 
 ## Knowledge Base & SFT / DPO Training Corpora
 
-- `src/discern_intelligence/data/v500_high_value_tables.json`: **214** curated **Cerner Millennium V500** clinical, financial, form, output, event-set, and `DA_*`/`CCL_*`/`DO_*` internal metadata tables with full column definitions, CCL data types, `CODE_SET` foreign keys, and **HealtheIntent `millennium-ods/v1`** export flags (including all 24 backing V500 tables for the 48 `XCW_*` DA2 views plus `LOGICAL_DOMAIN` and `MLTM_NDC_MAIN_DRUG_CODE`).
+- `src/discern_intelligence/data/v500_high_value_tables.json`: **230** curated **Cerner Millennium V500** clinical, financial, form, output, event-set, and `DA_*`/`CCL_*`/`DO_*` internal metadata tables with full column definitions, CCL data types, `CODE_SET` foreign keys, and **HealtheIntent `millennium-ods/v1`** export flags (including all 24 backing V500 tables for the 48 `XCW_*` DA2 views plus `LOGICAL_DOMAIN` and `MLTM_NDC_MAIN_DRUG_CODE`).
 - `src/discern_intelligence/data/da2_view_alias_join_catalog.json`: **48** direct **Discern Analytics 2.0** `XCW_*` view/alias/join-key mappings (`24 ENCOUNTER_ID`, `23 PERSON_ID`, `1 ORG_ID`) + **9** `(via ...)` relational-path variants (`57` rows total, kept strictly separate from raw `V500` table names, with `XCW_PHONE (via Organization)` validated and corrected to `ORG_ID`), plus **Discern SQL Engine (EJS v3.15.1)** `CWC_*` aliases, scalar helper functions (`omf_get_cv_display`, `cclsql_utc_cnvt`, `PM_GET_ALIAS`, `PM_GET_ENCNTR_PRSNL_ID`, `SQL_GET_NAME_DISPLAY`, `RCRGETFINNBR`), and Combined Query `<SubqueryAlias>:<ElementName>` ODA result-set conventions.
 - `src/discern_intelligence/data/event_set_hierarchy_and_crosswalks.json`: Validated 10-level `MD_D_EVENT_SET_HIERARCHY` SQL (`V500_EVENT_SET_CANON` `A..I` + `V500_EVENT_SET_CODE` + `V500_EVENT_SET_EXPLODE` rooted at `ALL OCF EVENT SETS`, plus the corrected 24-column orphan-event query), `MD_D_EVENT_SET_SEARCH` 10-way `UNION ALL` flattened search view (Vertica/Snowflake, Oracle RDB, and CCL), **229** Code Set 36 (`Language` / HL7 `PID-15` / Press Ganey code) mappings, **10** UB-04 FL-15 Admission Source (Code Set 2) HCAHPS mappings, **39** UB-04 FL-17 Discharge Status (Code Set 19) HCAHPS mappings, **13** regulatory IP/OP -> DA2 field mappings, **20** Hospital Bed Capacity extract elements, and the historical reference audit ledger (`added`, `already_covered`, `rejected`).
-- `src/discern_intelligence/data/da2_element_catalog.json`: **2,471** sanitized **Discern Analytics 2.0** `DA_ELEMENT` entries with `ELEMENT_UUID`s across all 10 DA2 domains, V500 `TABLE.COLUMN` targets, and join-explosion guardrails.
+- `src/discern_intelligence/data/da2_element_catalog.json`: **2,606** sanitized **Discern Analytics 2.0** `DA_ELEMENT` entries with `ELEMENT_UUID`s across all 10 DA2 domains, V500 `TABLE.COLUMN` targets, and join-explosion guardrails.
 - `src/discern_intelligence/data/da2_canonical_reports_and_queries_catalog.json`: **58** Business View (`<BV>` XML) Logical View schemas (`148` Categories), **21** canonical production DA2 queries (`<cclquery version="1.0">` XML + **EJS v3.17.3** Oracle V500 SQL) and Eclipse BIRT 4.4.2 (`.rptdesign`) reports.
-- `src/discern_intelligence/data/da2_filter_value_catalog.json`: **61** priority-domain Qualification Filter Lists and **5,617** live-harvested `DISPLAY` <-> `CODE_VALUE` pairs across **80** DA2 fields (including **1,546** `CE Event` Code Set 72 and **1,004** `Order Catalog` Code Set 200 mappings).
+- `src/discern_intelligence/data/da2_filter_value_catalog.json`: **61** priority-domain Qualification Filter Lists and **6,458** sanitized `DISPLAY` <-> `CODE_VALUE` pairs across **90** DA2 fields (including **1,546** `CE Event` Code Set 72 and **1,004** `Order Catalog` Code Set 200 mappings).
 - `src/discern_intelligence/data/forms_and_outputs_catalog.json`: **13** end-to-end clinical form and financial output architectures.
 - `src/discern_intelligence/data/codeset_catalog.json`: **363** Millennium Code Sets (`CODE_SET`) with `CDF_MEANING` and `DISPLAY_KEY` constants (enriched with Code Sets `2`, `19`, `27`, `36`, and `282`).
 - `src/discern_intelligence/data/oracle_som_summary.json`: **177** Oracle Health EHI / Semantic Object Model (`v2026.4.01`) entities.
-- `data/sft_train_v1.jsonl`, `data/dpo_contrastive_v1.jsonl`, `data/eval_frozen_v1.jsonl`, `data/eval_holdout_filter_values_v1.jsonl`, and `data/eval_holdout_queries_v1.jsonl`: Reproducible zero-leakage 80/20 multi-task SFT (**3,637** examples), DPO contrastive (**40** pairs across 4 failure modes), frozen benchmark (**14** scenarios), and held-out evaluation (**140** filter values + **4** production queries) corpora generated via `python3 scripts/build_training_corpus.py --verify` and verified via `python3 scripts/evaluate_corpus_and_verifiers.py --verify`.
+- `data/sft_train_v1.jsonl`, `data/dpo_contrastive_v1.jsonl`, `data/eval_frozen_v1.jsonl`, `data/eval_holdout_filter_values_v1.jsonl`, and `data/eval_holdout_queries_v1.jsonl`: Reproducible zero-leakage 80/20 multi-task SFT (**4,501** examples), DPO contrastive (**189** pairs), frozen benchmark (**14** scenarios), held-out V1 evaluation (**140** filter values + **4** production queries), and zero-leakage V2 adversarial evaluation (**20** trap scenarios + **5** SQLite edge cases) corpora generated via `python3 scripts/build_training_corpus.py --verify` and verified via `python3 scripts/evaluate_corpus_and_verifiers.py --verify`.
 
 ## Tenant-Agnostic Configuration (`--owner-group`, `--facility`, `--tenant-config`)
 
@@ -80,12 +94,12 @@ endexis generate-da2 "Active inpatient encounter census with FIN, MRN, Nurse Uni
   --tenancy CommunityWorks \
   --owner-group "YOUR_DA2_OWNER_GROUP" \
   --facility "General Hospital Campus" \
-  --out-dir reports/active-inpatient-census
+  --output-dareport examples/active_inpatient_census.dareport
 
 # Or pass a reusable tenant JSON profile:
 endexis generate-da2 "Rehab therapy minutes by discipline" \
   --tenant-config tenant_profile.json \
-  --out-dir reports/rehab-therapy
+  --output-dareport examples/rehab_therapy_minutes.dareport
 ```
 
 See [LEGAL.md](../LEGAL.md) for interoperability and trademark notices.

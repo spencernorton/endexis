@@ -279,6 +279,12 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Order Clinical Display Line': ('Order Detail Display', 'a371d5d0-f1a0-41f0-a2af-aeeceef175e2', '3'),
     'Order Detail Display': ('Order Detail Display', 'a371d5d0-f1a0-41f0-a2af-aeeceef175e2', '3'),
     'Order Dt/Tm': ('Order Dt/Tm', 'db8be1e0-6f63-4851-8f87-163fae80ead3', '2'),
+    'Order Orig Order Dt/Tm': ('Order Dt/Tm', 'db8be1e0-6f63-4851-8f87-163fae80ead3', '2'),
+    'Order Status Dt/Tm': ('Order Status Dt/Tm', '9a24bc49-fd21-53d4-95de-8d4da240d852', '2'),
+    'Order Discontinue Eff Dt/Tm': ('Order Discontinue Eff Dt/Tm', '87db9652-09cd-45c9-bb4a-dec92aa4b92c', '2'),
+    'Order Update Dt/Tm': ('Order Update Dt/Tm', 'f14b375c-ccb8-4caa-9627-aa5f54acf962', '2'),
+    'Sch Ev Act Dt/Tm': ('Sch Ev Act Dt/Tm', 'd11667eb-48e5-5e8b-a12c-2145f8028763', '2'),
+    'Prsnl Create Dt/Tm': ('Prsnl Create Dt/Tm', 'a40b5503-43de-464c-ad9f-f924ce095882', '2'),
     'Order Flag': ('Order Flag', '6436dc0f-ae98-4fee-a30b-23a755eec2a2', '1'),
     'Order Id': ('Order Id', '0081bf6a-b747-49ad-be49-e193d5b3bc93', '3'),
     'Order Mnemonic': ('Order Mnemonic', '7120df4c-b25b-4595-badb-79dedda7f9aa', '3'),
@@ -310,7 +316,7 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
     'Person Birth Dt Tm': ('Person Abs Birth Dt/Tm', '30683aa3-42b5-42f6-b7ee-fffff887c0fc', '2'),
     'Person Current Age': ('Person Current Age', '8949a674-2831-40e8-83df-156c05557da5', '3'),
     'Person Full Name': ('Person Name Full Format', '12b363ca-f0d2-4a5d-afe3-3225de181f5f', '3'),
-    'Person Gender': ('Person Ethnic Group', '09b6165b-4746-49d0-be36-158cc0304767', '3'),
+    'Person Gender': ('Person Sex', 'd15afa2f-0bce-40b6-9672-ad811db27bf3', '3'),
     'Person Id': ('Person Id', 'b7b46f06-3128-49cf-b7b9-16af44617357', '3'),
     'Person Language': ('Person Language', '30acc863-3ccf-4bce-898e-b016488dde5d', '3'),
     'Person MRN': ('Person MRN', '12db87ba-4466-4682-8f6c-28adf9a8c8d3', '3'),
@@ -893,7 +899,16 @@ class DA2ReportGenerator:
                 ]
                 sec_domain = "CWC Encounter"
             else:
-                sec_domain = "CWF GS Revenue" if any(e["da2_field_name"].startswith("BO ") for e in fin_elements) else "CWC Encounter"
+                if "adjustment" in low_req or any(e["da2_field_name"].startswith("Adj") for e in fin_elements):
+                    sec_domain = "CWF GS Adjustments"
+                elif "payment" in low_req or any(e["da2_field_name"].startswith("Pay") for e in fin_elements):
+                    sec_domain = "CWF GS Payments"
+                elif "general ledger" in low_req or "cwf gl" in low_req:
+                    sec_domain = "CWF GL"
+                elif any(e["da2_field_name"].startswith("BO ") for e in fin_elements):
+                    sec_domain = "CWF GS Revenue"
+                else:
+                    sec_domain = "CWC Encounter"
 
             for req_dt_col, req_dt_uuid in (
                 ("Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a"),
@@ -928,9 +943,35 @@ class DA2ReportGenerator:
             )
             return [q1, q2], "Enc Id"
 
+        single_domain = "CWC Encounter"
+        if "cwf gs adjustments" in low_req or ("adjustment" in low_req and ("cwf" in low_req or "write-off" in low_req or "transaction extract" in low_req)):
+            single_domain = "CWF GS Adjustments"
+        elif "cwf gs payments" in low_req or ("payment" in low_req and ("cwf" in low_req or "ledger" in low_req or "transaction extract" in low_req)):
+            single_domain = "CWF GS Payments"
+        elif "cwf gs revenue" in low_req:
+            single_domain = "CWF GS Revenue"
+        elif "cwf gl" in low_req or "general ledger" in low_req:
+            single_domain = "CWF GL"
+        elif "cwc scheduling" in low_req or "scheduling resource" in low_req or "slot utilization" in low_req:
+            single_domain = "CWC Scheduling Resource"
+        elif "cwc formulary" in low_req:
+            single_domain = "CWC Formulary"
+        elif "cwc personnel" in low_req:
+            single_domain = "CWC Personnel"
+        elif "cwc person" in low_req and "encounter" not in low_req:
+            single_domain = "CWC Person"
+        elif "cwc organization" in low_req:
+            single_domain = "CWC Organization"
+
+        if any(k in low_req for k in ("cwf gs adjustments", "cwf gs payments", "resuscitation", "code status", "slot utilization", "duplicate charge")):
+            all_elements = [
+                e for e in all_elements
+                if e["da2_field_name"] not in ("Enc Id", "Enc Encounter Number", "Person Full Name", "CE Result Status", "CE Valid Until Dt Tm")
+            ]
+
         q_single = self._make_single_query_spec(
             f"{report_name}_Query",
-            "CWC Encounter",
+            single_domain,
             all_elements,
             is_active_census=is_active_census,
             owner_group_display=owner_group_display,
@@ -947,7 +988,52 @@ class DA2ReportGenerator:
     ) -> DA2QuerySpec:
         q_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.query:{q_name}"))
         sub_entities = sorted({e.get("da2_bus_view_subentity", "Encounter") for e in elements})
-        filters = ["Enc Active Ind = 1"]
+        filters = [
+            "Enc Active Ind = 1",
+            "Person Name Last < 'ZZ' (exclude test patients)",
+        ]
+        el_names_set = {e["da2_field_name"] for e in elements}
+        if any(n.startswith("Adj ") for n in el_names_set):
+            filters.extend([
+                "Adj Trans Sub Type (Code Set 20549)",
+                "Adj Trans Reason (Code Set 18935)",
+                "Enc Type (Code Set 71)",
+                "Adj Post Dt Between <Relative Date Range>",
+            ])
+        if any(n.startswith("Pay ") for n in el_names_set):
+            filters.extend([
+                "Pay Trans Sub Type (Code Set 20549)",
+                "Pay Trans Reason (Code Set 18935)",
+                "Enc Type (Code Set 71)",
+                "Pay Post Dt Between <Relative Date Range>",
+            ])
+        if "Order Catalog" in el_names_set and "Enc Loc Room" in el_names_set:
+            filters.extend([
+                "Order Catalog (Code Set 200)",
+                "Enc Status (Code Set 261)",
+                "Enc Type (Code Set 71)",
+            ])
+        if any(n.startswith("Sch ") for n in el_names_set):
+            filters.extend([
+                "Sch App State (Code Set 14233)",
+                "Sch App Role (Code Set 14250)",
+                "Sch App Slot State (Code Set 14231)",
+                "Sch Ev App Type (Code Set 14230)",
+                "Sch App Resource Not Like 'zz*' (exclude retired scheduling resources)",
+            ])
+        if "Chg M Field 1 Id" in el_names_set or "Chg Manual Ind" in el_names_set:
+            filters.extend([
+                "Chg Process Flag",
+                "Chg Service Dt/Tm Between <Relative Date Range>",
+            ])
+        if any("Med Admin" in n or "MAR" in q_name.upper() for n in el_names_set):
+            filters.append(
+                "Order Status Not In (Canceled, Voided) [Code Set 6004: 2542, 2553] — NEVER exclude Discontinued (2545) on historical MAR/PRN audits"
+            )
+        if any(n.startswith(("Diag ", "Dx ")) for n in el_names_set):
+            filters.append(
+                "Outer Join (joinType=3 / LEFT OUTER JOIN / (+)) on DIAGNOSIS so same-day admissions without a coded diagnosis are not dropped"
+            )
 
         if is_active_census:
             filters.extend([
@@ -1448,6 +1534,7 @@ class DA2ReportGenerator:
         elements: list[dict[str, Any]],
         is_active_census: bool,
     ) -> str:
+        tz_idx = int(getattr(self._tenant_config, "utc_timezone_index", 54) or 54)
         select_exprs = [
             "  CWC_ENCOUNTER.ENCNTR_ID AS Enc_Id",
             "  CWC_ENC_FUNC.GET_FIN_NBR(CWC_ENCOUNTER.ENCNTR_ID) AS Enc_FIN",
@@ -1455,8 +1542,8 @@ class DA2ReportGenerator:
             "  CWC_PERSON.NAME_FULL_FORMATTED AS Person_Name_Full",
             "  omf_get_cv_display(CWC_ENCOUNTER.LOC_FACILITY_CD) AS Enc_Loc_Facility",
             "  omf_get_cv_display(CWC_ENCOUNTER.LOC_NURSE_UNIT_CD) AS Enc_Loc_Nurse_Unit",
-            "  cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, 54) AS Enc_Admit_Dt_Tm",
-            "  cclsql_utc_cnvt(CWC_ENCOUNTER.DISCH_DT_TM, 1, 54) AS Enc_Discharge_Dt_Tm",
+            f"  cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, {tz_idx}) AS Enc_Admit_Dt_Tm",
+            f"  cclsql_utc_cnvt(CWC_ENCOUNTER.DISCH_DT_TM, 1, {tz_idx}) AS Enc_Discharge_Dt_Tm",
         ]
         from_clauses = [
             "V500.ENCOUNTER CWC_ENCOUNTER",
@@ -1465,17 +1552,22 @@ class DA2ReportGenerator:
         where_clauses = [
             "CWC_ENCOUNTER.PERSON_ID = CWC_PERSON.PERSON_ID",
             "CWC_ENCOUNTER.ACTIVE_IND = 1",
+            "CWC_PERSON.NAME_LAST_KEY < 'ZZ'",
         ]
 
+        q_up = q_name.upper()
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in elements)
         has_orders = any(e["da2_field_name"].startswith("Order ") for e in elements)
         has_chg = any(e["da2_field_name"].startswith(("Chg ", "BO ", "Rev ")) for e in elements) or domain == "CWF GS Revenue"
+        has_mar = any("MED_ADMIN" in q_up or "MAR_" in q_up or "_MAR" in q_up or e["da2_field_name"].startswith(("Med Admin", "CE Med Admin")) for e in elements)
+        has_surg = any("SURG" in q_up or "PERIOP" in q_up or e["da2_field_name"].startswith("Surg ") for e in elements)
+        has_diag = any("DIAG" in q_up or "ICD10" in q_up or "OUTERDX" in q_up or e["da2_field_name"].startswith(("Diag ", "Diagnosis")) for e in elements)
 
         if has_ce:
             select_exprs.extend([
                 "  omf_get_cv_display(CWC_CLINICAL_EVENT.EVENT_CD) AS CE_Event",
                 "  CWC_CLINICAL_EVENT.RESULT_VAL AS CE_Result_Value",
-                "  cclsql_utc_cnvt(CWC_CLINICAL_EVENT.EVENT_END_DT_TM, 1, 54) AS CE_Event_End_Dt_Tm",
+                f"  cclsql_utc_cnvt(CWC_CLINICAL_EVENT.EVENT_END_DT_TM, 1, {tz_idx}) AS CE_Event_End_Dt_Tm",
                 "  omf_get_cv_display(CWC_CLINICAL_EVENT.RESULT_STATUS_CD) AS CE_Result_Status",
             ])
             from_clauses.append("V500.CLINICAL_EVENT CWC_CLINICAL_EVENT")
@@ -1503,13 +1595,58 @@ class DA2ReportGenerator:
                 "  CWC_CHARGE.CHARGE_DESCRIPTION AS Chg_Bill_Item_Desc",
                 "  CWC_CHARGE.ITEM_QUANTITY AS Chg_Item_Quantity",
                 "  CWC_CHARGE.ITEM_EXTENDED_PRICE AS Chg_Item_Extended_Price",
-                "  cclsql_utc_cnvt(CWC_CHARGE.SERVICE_DT_TM, 1, 54) AS Chg_Service_Dt_Tm",
+                f"  cclsql_utc_cnvt(CWC_CHARGE.SERVICE_DT_TM, 1, {tz_idx}) AS Chg_Service_Dt_Tm",
             ])
             from_clauses.append("V500.CHARGE CWC_CHARGE")
             where_clauses.extend([
                 "CWC_ENCOUNTER.ENCNTR_ID = CWC_CHARGE.ENCNTR_ID",
                 "CWC_CHARGE.ACTIVE_IND = 1",
             ])
+
+        if has_mar:
+            select_exprs.extend([
+                "  CWC_MED_ADMIN_EVENT.ADMIN_DOSAGE AS Med_Admin_Dosage",
+                f"  cclsql_utc_cnvt(CWC_MED_ADMIN_EVENT.BEG_DT_TM, 1, {tz_idx}) AS Med_Admin_Beg_Dt_Tm",
+            ])
+            from_clauses.append("V500.MED_ADMIN_EVENT CWC_MED_ADMIN_EVENT")
+            if "V500.ORDERS CWC_ORDERS" not in from_clauses:
+                from_clauses.append("V500.ORDERS CWC_ORDERS")
+            where_clauses.append("CWC_MED_ADMIN_EVENT.ORDER_ID = CWC_ORDERS.ORDER_ID")
+            if has_ce:
+                where_clauses.append("CWC_MED_ADMIN_EVENT.EVENT_ID = CWC_CLINICAL_EVENT.EVENT_ID")
+            where_clauses.extend([
+                "CWC_ENCOUNTER.ENCNTR_ID = CWC_MED_ADMIN_EVENT.ENCNTR_ID",
+                "CWC_MED_ADMIN_EVENT.ACTIVE_IND = 1",
+                "CWC_ORDERS.ORDER_STATUS_CD NOT IN (2542, 2553)",
+            ])
+
+        if has_surg:
+            select_exprs.extend([
+                "  CWC_SURGICAL_CASE.SURG_CASE_NBR_FORMATTED AS Surg_Case_Number",
+                f"  cclsql_utc_cnvt(CWC_SURGICAL_CASE.SURG_START_DT_TM, 1, {tz_idx}) AS Surg_Start_Dt_Tm",
+            ])
+            from_clauses.append("V500.SURGICAL_CASE CWC_SURGICAL_CASE")
+            where_clauses.extend([
+                "CWC_ENCOUNTER.ENCNTR_ID = CWC_SURGICAL_CASE.ENCNTR_ID",
+                "CWC_SURGICAL_CASE.ACTIVE_IND = 1",
+            ])
+
+        if has_diag:
+            select_exprs.extend([
+                "  CWC_DIAGNOSIS.DIAG_DISPLAY AS Diag_Display",
+                "  CWC_DIAGNOSIS.DIAG_PRIORITY AS Diag_Priority",
+            ])
+            if is_active_census or "ADMIT" in q_up or "CENSUS" in q_up or "MISSING" in q_up or "OPTIONAL" in q_up or "SAME_DAY" in q_up or "OUTER" in q_up:
+                from_clauses[0] = (
+                    "V500.ENCOUNTER CWC_ENCOUNTER LEFT OUTER JOIN V500.DIAGNOSIS CWC_DIAGNOSIS "
+                    "ON CWC_ENCOUNTER.ENCNTR_ID = CWC_DIAGNOSIS.ENCNTR_ID AND CWC_DIAGNOSIS.ACTIVE_IND = 1"
+                )
+            else:
+                from_clauses.append("V500.DIAGNOSIS CWC_DIAGNOSIS")
+                where_clauses.extend([
+                    "CWC_ENCOUNTER.ENCNTR_ID = CWC_DIAGNOSIS.ENCNTR_ID",
+                    "CWC_DIAGNOSIS.ACTIVE_IND = 1",
+                ])
 
         if is_active_census:
             where_clauses.extend([

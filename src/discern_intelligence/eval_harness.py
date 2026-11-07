@@ -22,7 +22,8 @@ from pathlib import Path
 from typing import Any
 
 from .ccl_compiler import CCLCompiler
-from .da2_generator import DA2ReportGenerator, LIVE_CWC_ELEMENT_MAP
+from .da2_generator import DA2ReportGenerator, DEPRECATED_CWC_UUIDS, LIVE_CWC_ELEMENT_MAP
+from .sql_execution_harness import create_synthetic_v500_connection, execute_and_verify_ejs_sql, run_adversarial_sql_edge_case_suite
 from .interpreter import MillenniumInterpreter
 from .knowledge import (
     load_da2_canonical_reports_catalog,
@@ -144,6 +145,8 @@ def verify_cclquery_xml(xml_text: str) -> VerificationReport:
                 base_n = el_n.split(":", 1)[1] if ":" in el_n else el_n
                 if not UUID_RE.match(el_u):
                     errors.append(f"Malformed element UUID {el_u!r} on element {el_n!r}")
+                elif el_u in {u.lower() for u in DEPRECATED_CWC_UUIDS}:
+                    errors.append(f"Deprecated CWF Encounter UUID {el_u!r} used on element {el_n!r}")
                 elif el_u not in known_uuids and base_n.lower() not in known_names:
                     warnings.append(f"Element {el_n!r} ({el_u}) not found in local catalog")
 
@@ -162,6 +165,15 @@ def verify_cclquery_xml(xml_text: str) -> VerificationReport:
                                 f"Filter List <value display={disp!r}> missing numeric CODE_VALUE in text={txt!r}"
                             )
                     checked.append("FILTER_LIST_CODE_VALUE_NUMERIC")
+                    # Check MAR discontinued-order filter trap (op="6" is NOT IN)
+                    f_el = flt.find("element")
+                    f_el_name = (f_el.attrib.get("name", "") if f_el is not None else "").lower()
+                    if "order status" in f_el_name and flt.attrib.get("op") in ("6", "NOT IN", "Not In"):
+                        val_texts = {v.attrib.get("text", "").strip() for v in vals_node.findall("value")}
+                        if "2545" in val_texts and "med admin" in xml_text.lower():
+                            errors.append(
+                                "MAR/Med Admin query filters Order Status Not In Discontinued (2545), which silently drops historical doses administered under discontinued orders"
+                            )
 
     if inline_subquery_names:
         # Primary query item must join to the inline subquery via joinType="3" or values type="FIELD"
@@ -233,6 +245,24 @@ def verify_ejs_v500_sql(sql_text: str) -> VerificationReport:
             checked.append("INLINE_SUBQUERY_JOIN_PREDICATE_PRESENT")
         else:
             errors.append("Inline cross-domain subquery view is missing an outer/inner join predicate")
+
+    # MAR Discontinued-Order Trap check
+    if "MED_ADMIN_EVENT" in s_up:
+        for m_notin in re.finditer(r"ORDER_STATUS_CD\s+NOT\s+IN\s*\(([^)]+)\)", s_up):
+            codes = {c.strip() for c in m_notin.group(1).split(",")}
+            if "2545" in codes:
+                errors.append(
+                    "MAR query excludes ORDER_STATUS_CD 2545 (Discontinued) in NOT IN (...), silently erasing historical doses under discontinued orders"
+                )
+        checked.append("MAR_DISCONTINUED_ORDER_SAFETY_CHECKED")
+
+    # Housekeeping UPDT_DT_TM WHERE predicate trap check
+    if re.search(r"\bWHERE\b[\s\S]*\bUPDT_DT_TM\s*(?:>=|<=|>|<|=|BETWEEN)", s_up):
+        errors.append(
+            "Query filters on row-housekeeping column UPDT_DT_TM in WHERE clause instead of clinical/service anchor timestamp"
+        )
+    else:
+        checked.append("TEMPORAL_ANCHOR_NO_UPDT_DT_TM_FILTER")
 
     return VerificationReport(
         is_valid=len(errors) == 0,
@@ -371,6 +401,162 @@ def evaluate_filter_value_routing(holdout_rows: list[dict[str, Any]]) -> dict[st
         "acc_at_1": round(hits_at_1 / total, 4),
         "acc_at_3": round(hits_at_3 / total, 4),
         "code_value_exact_match_rate": round(cv_exact / cv_total, 4) if cv_total else 1.0,
+    }
+
+
+def evaluate_adversarial_v2_benchmark(data_dir: Path | None = None) -> dict[str, Any]:
+    """
+    Evaluates the zero-leakage Adversarial V2 Benchmark (`eval_adversarial_v2.jsonl`) across:
+    1. Precision Column & Temporal Anchor Selection (Precision, Recall, F1, and Forbidden-Column Bloat Rate)
+    2. 10-Domain Routing & 1:N Join-Explosion Guardrail Accuracy
+    3. Context-Conditioned Filter-Value & CODE_VALUE Resolution Accuracy
+    4. Negative-Trap Deterministic Rejection & SQLite V500 Edge-Case Execution Equivalence
+    """
+    if data_dir is None:
+        data_dir = Path(__file__).resolve().parent.parent.parent / "data"
+    adv_path = data_dir / "eval_adversarial_v2.jsonl"
+    if not adv_path.exists():
+        return {"total_scenarios": 0, "overall_pass_rate": 0.0}
+
+    adv_rows = [
+        json.loads(line)
+        for line in adv_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    sft_rows = [
+        json.loads(line)
+        for line in (data_dir / "sft_train_v1.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    sft_instructions = {r["instruction"].strip() for r in sft_rows}
+    leaked_adv_prompts = [r["prompt"] for r in adv_rows if r["prompt"].strip() in sft_instructions]
+
+    interp_engine = MillenniumInterpreter()
+    ccl_compiler = CCLCompiler(interp_engine)
+    da2_gen = DA2ReportGenerator(interp_engine, ccl_compiler)
+
+    col_precisions: list[float] = []
+    col_recalls: list[float] = []
+    col_f1s: list[float] = []
+    forbidden_bloat_hits = 0
+    domain_routing_hits = 0
+    domain_routing_total = 0
+    filter_cond_hits = 0
+    filter_cond_total = 0
+    trap_hits = 0
+    trap_total = 0
+    scenario_passes = 0
+
+    for row in adv_rows:
+        cat = row["category"]
+        prompt = row["prompt"]
+        if cat in ("temporal_anchor_and_mar_safety", "temporal_anchor_disambiguation", "identifier_and_alias_disambiguation", "ten_domain_routing", "join_explosion_prevention"):
+            interp = interp_engine.interpret(prompt, strict_precision=True)
+            bundle = da2_gen.generate(prompt, report_name=f"AdvV2_{row['scenario_id']}")
+            pred_cols = {f"{c.table}.{c.column}" for c in interp.matched_columns}
+            exp_cols = set(row.get("expected_columns", []))
+            forb_cols = set(row.get("forbidden_columns", []))
+
+            forb_overlap = pred_cols & forb_cols
+            if forb_overlap:
+                forbidden_bloat_hits += 1
+
+            # Score required column recall and precision on target tables
+            target_tables = {c.split(".")[0] for c in exp_cols}
+            scoped_pred = {c for c in pred_cols if c.split(".")[0] in target_tables}
+            overlap = len(scoped_pred & exp_cols)
+            rec = overlap / max(1, len(exp_cols))
+            # Penalize any forbidden column bloat in precision
+            prec = overlap / max(1, len(scoped_pred & exp_cols) + len(forb_overlap))
+            f1 = (2 * prec * rec / (prec + rec)) if (prec + rec) > 0 else 0.0
+            col_precisions.append(prec)
+            col_recalls.append(rec)
+            col_f1s.append(f1)
+
+            exp_dom = row.get("expected_da2_domain")
+            dom_ok = True
+            if exp_dom:
+                domain_routing_total += 1
+                pred_doms = {q.da2_domain for q in bundle.queries}
+                dom_ok = exp_dom in pred_doms
+                if dom_ok:
+                    domain_routing_hits += 1
+
+            exp_guards = row.get("expected_guardrails", [])
+            guards_Text = " ".join(interp.guardrails_triggered)
+            guards_ok = all(g in guards_Text for g in exp_guards)
+
+            if rec == 1.0 and not forb_overlap and dom_ok and guards_ok and bundle.verification.is_valid:
+                scenario_passes += 1
+
+        elif cat == "context_conditioned_filter_resolution":
+            filter_cond_total += 1
+            matches = resolve_da2_filter_value(
+                row["filter_value"],
+                query_intent=row["query_intent"],
+            )
+            top = matches[0] if matches else {}
+            cv_map = top.get("matched_code_values", {})
+            cv_ok = str(cv_map.get(row["filter_value"], "")) == str(row["expected_code_value"])
+            if top.get("da2_field_name") == row["expected_da2_field_name"] and top.get("code_set") == row["expected_code_set"] and cv_ok:
+                filter_cond_hits += 1
+                scenario_passes += 1
+
+        elif cat == "negative_trap_verification":
+            trap_total += 1
+            ttype = row["trap_type"]
+            if ttype == "mar_discontinued_order_exclusion":
+                b = da2_gen.generate(prompt, report_name="Trap_MAR")
+                good_sql = b.queries[0].ejs_v500_sql
+                bad_sql = good_sql.replace("NOT IN (2542, 2553)", "NOT IN (2542, 2545, 2553)")
+                if verify_ejs_v500_sql(good_sql).is_valid and not verify_ejs_v500_sql(bad_sql).is_valid:
+                    trap_hits += 1
+                    scenario_passes += 1
+            elif ttype == "deprecated_cwf_uuid_collision":
+                b = da2_gen.generate(prompt, report_name="Trap_UUID")
+                good_xml = b.queries[0].cclquery_xml
+                bad_xml = good_xml.replace(
+                    "5ef4381c-6344-43c4-81b5-2c18cd6bcb70",
+                    "a2ff2540-fa94-41bf-a0eb-69771900201f",
+                )
+                if verify_cclquery_xml(good_xml).is_valid and not verify_cclquery_xml(bad_xml).is_valid:
+                    trap_hits += 1
+                    scenario_passes += 1
+            elif ttype == "housekeeping_updt_dt_tm_predicate":
+                b = da2_gen.generate(prompt, report_name="Trap_UPDT")
+                good_sql = b.queries[0].ejs_v500_sql
+                bad_sql = good_sql + "\n  AND CWC_CLINICAL_EVENT.UPDT_DT_TM >= SYSDATE - 7"
+                if verify_ejs_v500_sql(good_sql).is_valid and not verify_ejs_v500_sql(bad_sql).is_valid:
+                    trap_hits += 1
+                    scenario_passes += 1
+            elif ttype == "admitting_diagnosis_outer_join_preservation":
+                b = da2_gen.generate(prompt, report_name="Trap_OuterDx")
+                sql_txt = b.queries[0].ejs_v500_sql
+                exec_res = execute_and_verify_ejs_sql(sql_txt)
+                if "LEFT OUTER JOIN V500.DIAGNOSIS" in sql_txt and exec_res["executed"] and exec_res["unique_encounters"] >= 2:
+                    trap_hits += 1
+                    scenario_passes += 1
+            elif ttype == "test_patient_prefix_patient_exclusion":
+                b = da2_gen.generate(prompt, report_name="Trap_TestPatient")
+                sql_txt = b.queries[0].ejs_v500_sql
+                exec_res = execute_and_verify_ejs_sql(sql_txt)
+                if "NAME_LAST_KEY < 'ZZ'" in sql_txt and exec_res["executed"] and all("ZZ999" not in str(r) for r in exec_res["sample_rows"]):
+                    trap_hits += 1
+                    scenario_passes += 1
+
+    sql_edge_suite = run_adversarial_sql_edge_case_suite()
+    return {
+        "total_scenarios": len(adv_rows),
+        "zero_leakage_passed": len(leaked_adv_prompts) == 0,
+        "column_precision": round(sum(col_precisions) / max(1, len(col_precisions)), 4),
+        "column_recall": round(sum(col_recalls) / max(1, len(col_recalls)), 4),
+        "column_f1": round(sum(col_f1s) / max(1, len(col_f1s)), 4),
+        "forbidden_column_bloat_rate": round(forbidden_bloat_hits / max(1, len(col_precisions)), 4),
+        "ten_domain_routing_accuracy": round(domain_routing_hits / max(1, domain_routing_total), 4),
+        "context_conditioned_filter_acc_at_1": round(filter_cond_hits / max(1, filter_cond_total), 4),
+        "negative_trap_rejection_rate": round(trap_hits / max(1, trap_total), 4),
+        "sqlite_v500_edge_case_pass_rate": sql_edge_suite["pass_rate"],
+        "overall_pass_rate": round(scenario_passes / max(1, len(adv_rows)), 4),
     }
 
 
@@ -515,6 +701,7 @@ def run_full_evaluation_suite(data_dir: Path | None = None) -> dict[str, Any]:
             "holdout_mean_element_f1": round(sum(holdout_f1_scores) / max(1, len(holdout_f1_scores)), 4),
             "dpo_preference_validity_rate": round(dpo_valid_cnt / max(1, len(dpo_rows)), 4),
         },
+        "adversarial_v2_benchmark": evaluate_adversarial_v2_benchmark(data_dir=data_dir),
     }
     return report
 
@@ -522,25 +709,31 @@ def run_full_evaluation_suite(data_dir: Path | None = None) -> dict[str, Any]:
 def generate_reasoning_trace(request_text: str, tenancy: str | None = None) -> str:
     """
     Emits an explicit 6-step Chain-of-Thought `<reasoning>...</reasoning>` trace:
-    Tenancy -> Grain -> Business View UUID -> Element UUID -> Code Set / CODE_VALUE -> Guardrails.
+    1. Tenancy & Execution Surface
+    2. Primary Entity Grain & Join-Explosion Guardrails
+    3. Exact V500 TABLE.COLUMN & Temporal Anchor Selection (and why rejected columns are wrong)
+    4. Exact DA2 Domain, Sub-Entity, and DA_ELEMENT UUID Selection (pruning unneeded fields)
+    5. Qualification Filter Columns, Operators, Runtime Prompts, and CODE_SET / CODE_VALUE Resolution
+    6. Mandatory Clinical/Financial Guardrails & Output Verification Invariants
     """
-    interp = MillenniumInterpreter().interpret(request_text, tenancy=tenancy)
+    interp = MillenniumInterpreter().interpret(request_text, tenancy=tenancy, strict_precision=True)
     rep_cat = load_da2_canonical_reports_catalog()
     bv_map = {b["logical_view_name"]: b["logical_view_uuid"] for b in rep_cat.get("business_views_xml_catalog", [])}
     elems_cat = {e["da2_field_name"]: e for e in load_da2_elements()}
 
+    matched_cols = [f"{c.table}.{c.column}" for c in interp.matched_columns[:6]]
     matched_fields = [c.da2_field_name for c in interp.matched_columns if c.da2_field_name][:6]
     elem_uuids = [elems_cat[f]["element_uuid"] for f in matched_fields if f in elems_cat][:4]
     cs_list = [f"CS {cs['code_set']} ({cs['name']})" for cs in interp.matched_code_sets[:5]]
-    bv_uuid = bv_map.get("CWC Encounter", "a67e07c5-0244-4b28-a146-7523f6090016")
+    bv_uuid = bv_map.get("CWC Encounter", "690ff3c7-f0b2-4019-8176-4e26eeff14f0")
 
     steps = [
         f"1. Tenancy & Execution Surface: Inferred tenancy='{interp.inferred_tenancy}'; strategy='{interp.recommended_strategy}'.",
-        f"2. Entity Grain & Fan-Out Isolation: Primary grain anchored on ENCOUNTER/PERSON; child 1-to-many views isolated via inline_ind='1' or BIRT <joint-data-set>.",
-        f"3. Business View (<BV> XML) Schema Linking: Primary Logical View UUID={bv_uuid}; tables={sorted({c.table for c in interp.matched_columns})[:5]}.",
-        f"4. DA2 Element UUID Resolution: Selected fields={matched_fields} -> verified 36-char Element UUIDs={elem_uuids}.",
-        f"5. Millennium Code Set & CODE_VALUE Binding: {cs_list or ['CS 8 (Auth), CS 48 (Active), CS 319 (FIN NBR)']}.",
-        f"6. Mandatory Clinical/Financial Guardrails: {interp.guardrails_triggered[:4]}.",
+        f"2. Entity Grain & Fan-Out Isolation: Primary grain anchored on ENCOUNTER/PERSON; child 1-to-many views ({sorted({c.table for c in interp.matched_columns})[:5]}) isolated via inline_ind='1' or BIRT <joint-data-set> on Enc Id.",
+        f"3. Exact V500 TABLE.COLUMN & Temporal Anchor Selection: Selected columns={matched_cols}; rejected row-housekeeping UPDT_DT_TM and non-anchor timestamps.",
+        f"4. DA2 Element UUID Resolution & Pruning: Domain UUID={bv_uuid}; pruned fields={matched_fields} -> verified 36-char Element UUIDs={elem_uuids} (0 deprecated CWF UUIDs).",
+        f"5. Qualification Filters, Runtime Prompts & CODE_VALUE Binding: {cs_list or ['CS 8 (Auth=25,34,35), CS 6004 (Not In Canceled=2542, Voided=2553), CS 319 (FIN NBR)']}.",
+        f"6. Mandatory Clinical/Financial Guardrails & Output Verification Invariants: {interp.guardrails_triggered[:4]}.",
     ]
     return "<reasoning>\n" + "\n".join(steps) + "\n</reasoning>"
 

@@ -424,6 +424,7 @@ class MillenniumInterpreter:
         request_text: str,
         tenancy: str | None = None,
         top_k_columns: int = 28,
+        strict_precision: bool = False,
     ) -> InterpretationResult:
         low = request_text.lower()
         tokens = set(re.findall(r"[a-z0-9_]+", low))
@@ -491,6 +492,8 @@ class MillenniumInterpreter:
                         candidate_pairs[(tname, cname)] = (score, prev_d)
                     if cinfo.get("code_set"):
                         triggered_cs.add(int(cinfo["code_set"]))
+
+        self._apply_temporal_and_identifier_disambiguation(low, candidate_pairs, triggered_cs, strict_precision=strict_precision)
 
         # Build ColumnMatch objects
         matched_cols: list[ColumnMatch] = []
@@ -633,18 +636,18 @@ class MillenniumInterpreter:
             )
         if "CLINICAL_EVENT" in tables_present or "CE_MED_RESULT" in tables_present or "CE_BLOB" in tables_present:
             guardrails.append(
-                "CE_VERSION_DEDUP: CLINICAL_EVENT is row-versioned. Mandatory filter: CE Valid Until Dt/Tm >= 12/31/2100 00:00:00 AND CE Result Status in (Auth (Verified), Modified, Altered) (Code Set 8) to prevent superseded/In-Error rows from double-counting."
+                "CE_VERSION_DEDUP (CLINICAL_EVENT_VALID_UNTIL_AND_AUTH_STATUS): CLINICAL_EVENT is row-versioned. Mandatory filter: CE Valid Until Dt/Tm >= 12/31/2100 00:00:00 AND CE Result Status in (Auth (Verified), Modified, Altered) (Code Set 8) to prevent superseded/In-Error rows from double-counting."
             )
             guardrails.append(
                 "CE_EVENT_FILTER_LIST_AND_DTA_RESOLUTION: 'CE Event' (CLINICAL_EVENT.EVENT_CD, Code Set 72) contains 10,000+ PowerChart values. In DA2 Qualifications, use 'Modify Filter List...' -> 'Filter values:' substring search, or resolve via Event Set Hierarchy (Code Set 93 -> V500_EVENT_SET_EXPLODE) and Discrete Task Assay ('DTA Mnemonic', Code Set 14003)."
             )
         if tables_present & {"PERSON_ALIAS", "ENCNTR_ALIAS", "ENCNTR_PRSNL_RELTN", "ADDRESS", "PHONE", "CHARGE_MOD"}:
             guardrails.append(
-                "NO_JOIN_REQUIRED_SCALAR_FUNCTIONS: When only primary encounter/person/charge values are needed in CWC Encounter, prefer DA2 inline scalar Functions ('Person MRN', 'Hm Addr *', 'Hm Phn Number', 'Enc Financial Num', 'Enc Attending Phys', 'Enc Attending Phys NPI', 'Enc Admitting Phys', 'Enc Case Manager', 'F Chg CPT', 'F Chg HCPCS', 'F Chg Rev Code') over 1-to-many child sub-entities to avoid row multiplication."
+                "NO_JOIN_REQUIRED_SCALAR_FUNCTIONS (ALIAS_ACTIVE_EFFECTIVE_DEDUP): When only primary encounter/person/charge values are needed in CWC Encounter, prefer DA2 inline scalar Functions ('Person MRN', 'Hm Addr *', 'Hm Phn Number', 'Enc Financial Num', 'Enc Attending Phys', 'Enc Attending Phys NPI', 'Enc Admitting Phys', 'Enc Case Manager', 'F Chg CPT', 'F Chg HCPCS', 'F Chg Rev Code') over 1-to-many child sub-entities to avoid row multiplication."
             )
         if ("active" in low and "census" in low) or any(w in low for w in ("active inpatient", "current inpatient", "midnight census", "currently admitted", "inhouse")):
             guardrails.append(
-                "ACTIVE_CENSUS_NULL_DISCH: Never filter active census on Enc Disch Dt Tm >= <date>; active patients have Enc Disch Dt Tm IS NULL. Enforce Enc Admit Dt Tm <= cutoff AND Enc Disch Dt Tm IS NULL AND Enc Active Ind = 1, and uncheck DA2's auto-checked 'is not null' box on optional date prompts."
+                "ACTIVE_CENSUS_NULL_DISCH (ACTIVE_CENSUS_NULL_DISCH_GUARD): Never filter active census on Enc Disch Dt Tm >= <date>; active patients have Enc Disch Dt Tm IS NULL. Enforce Enc Admit Dt Tm <= cutoff AND Enc Disch Dt Tm IS NULL AND Enc Active Ind = 1, and uncheck DA2's auto-checked 'is not null' box on optional date prompts."
             )
 
         # Check for cross-domain or multi-child-list fan-out
@@ -653,21 +656,43 @@ class MillenniumInterpreter:
         is_provider_note_query = any(
             w in low for w in ("consult note", "initial consult", "progress note", "provider note", "physician note", "oppe", "fppe")
         )
-        multi_children = sum(
-            1
-            for t in ("CLINICAL_EVENT", "CHARGE", "ENCNTR_PRSNL_RELTN", "SCH_APPT", "TASK_ACTIVITY")
-            if t in tables_present and not (is_provider_note_query and t == "ENCNTR_PRSNL_RELTN")
+        is_mar_query = (bool(re.search(r"\bmar\b", low)) or any(w in low for w in ("bcma", "med_admin", "medication administration", "administered", "prn dose", "doses given", "mme")))
+        if is_mar_query:
+            guardrails.append(
+                "MAR_DISCONTINUED_ORDER_GUARD: For medication administration / PRN historical audits, filter Order Status Not In (Canceled, Voided) [CS 6004: 2542, 2553] — NEVER filter Not In (Discontinued) [2545], which silently erases historical doses administered under later-discontinued orders."
+            )
+        if "DIAGNOSIS" in tables_present and any(w in low for w in ("admit", "census", "inpatient", "same-day", "missing", "optional")):
+            guardrails.append(
+                "ADMITTING_DIAGNOSIS_OUTER_JOIN_GUARD: Place DIAGNOSIS / NOMENCLATURE on an OUTER JOIN (DA2 joinType='3' / Oracle (+) / CCL OUTERJOIN) so same-day admissions without a coded diagnosis are not dropped."
+            )
+        guardrails.append(
+            "TEMPORAL_ANCHOR_DISAMBIGUATION: Use CLINICAL_EVENT.EVENT_END_DT_TM (CE End Dt/Tm) for clinical observation time (never UPDT_DT_TM), MED_ADMIN_EVENT.BEG_DT_TM (CE Med Admin Start Dt/Tm) for administration time vs ORDERS.ORIG_ORDER_DT_TM (Order Dt/Tm) for order placement, ENCOUNTER.INPATIENT_ADMIT_DT_TM vs REG_DT_TM vs ARRIVE_DT_TM, and CHARGE.SERVICE_DT_TM vs POSTED_DT_TM."
         )
+        guardrails.append(
+            "TEST_PATIENT_AND_RETIRED_RESOURCE_EXCLUSION: Exclude test patients (Person Name Last < 'ZZ') and retired 'zz*'-prefixed scheduling resources/elements."
+        )
+
+        child_groups = 0
+        if "CLINICAL_EVENT" in tables_present and not (is_mar_query and tables_present <= {"ENCOUNTER", "PERSON", "ENCNTR_ALIAS", "PERSON_ALIAS", "CLINICAL_EVENT", "MED_ADMIN_EVENT", "CE_MED_RESULT", "ORDERS"}):
+            child_groups += 1
+        if ("ORDERS" in tables_present or "MED_ADMIN_EVENT" in tables_present) and not is_mar_query:
+            child_groups += 1
+        elif is_mar_query and ("DIAGNOSIS" in tables_present or "CHARGE" in tables_present or "SCH_APPT" in tables_present):
+            child_groups += 1
+        for t in ("CHARGE", "DIAGNOSIS", "ENCNTR_PRSNL_RELTN", "SCH_APPT", "TASK_ACTIVITY"):
+            if t in tables_present and not (is_provider_note_query and t == "ENCNTR_PRSNL_RELTN"):
+                child_groups += 1
+        multi_children = child_groups
 
         if has_clinical_child and has_financial:
             strategy = "two_dataset_birt_join"
             guardrails.append(
                 "CROSS_DOMAIN_BIRT_JOIN: Request combines clinical (CWC Encounter) and financial/charge (CWF / Charges) entities. Emit two separate DA2 ODA datasets joined inside BIRT 4.4.2 via a <joint-data-set> on Enc Id (ENCNTR_ID) to prevent Cartesian fan-out."
             )
-        elif multi_children >= 2:
+        if multi_children >= 2:
             strategy = "two_dataset_birt_join"
             guardrails.append(
-                "CHILD_LIST_FANOUT_GUARD: Selecting multiple 1-to-many sub-entities side-by-side in a single flat DA2 query causes a Cartesian cross-join. Split into linked BIRT datasets joined on Enc Id."
+                "CHILD_LIST_FANOUT_GUARD (MULTI_CHILD_1_TO_N_CARTESIAN_FANOUT_GUARD): Selecting multiple 1-to-many sub-entities side-by-side in a single flat DA2 query causes a Cartesian cross-join. Split into linked BIRT datasets joined on Enc Id."
             )
         else:
             strategy = "single_domain_oda"
@@ -676,3 +701,96 @@ class MillenniumInterpreter:
             "DA2_ROW_CAP_GUARD: Enable 'Fetch All Rows From Data Source' on every dataset in BIRT to prevent DA2's silent 25,000-row truncation."
         )
         return guardrails, strategy
+
+    def _apply_temporal_and_identifier_disambiguation(
+        self,
+        low: str,
+        candidate_pairs: dict[tuple[str, str], tuple[float, str | None]],
+        triggered_cs: set[int],
+        strict_precision: bool = False,
+    ) -> None:
+        is_mar = (bool(re.search(r"\bmar\b", low)) or any(w in low for w in ("bcma", "med_admin", "medication administration", "administered", "prn dose", "doses given", "mme")))
+        if is_mar:
+            candidate_pairs[("MED_ADMIN_EVENT", "BEG_DT_TM")] = (9.9, "CE Med Admin Start Dt/Tm")
+            candidate_pairs[("CE_MED_RESULT", "ADMIN_DOSAGE")] = (9.8, "CE Med Admin Dosage")
+            candidate_pairs[("ORDERS", "ORDER_STATUS_CD")] = (9.7, "Order Status")
+            triggered_cs.add(6004)
+            if not any(w in low for w in ("order date", "ordered date", "orig_order_dt_tm", "when ordered", "order placement")):
+                if strict_precision and ("ORDERS", "ORIG_ORDER_DT_TM") in candidate_pairs:
+                    del candidate_pairs[("ORDERS", "ORIG_ORDER_DT_TM")]
+                elif ("ORDERS", "ORIG_ORDER_DT_TM") in candidate_pairs:
+                    s_val, d_val = candidate_pairs[("ORDERS", "ORIG_ORDER_DT_TM")]
+                    candidate_pairs[("ORDERS", "ORIG_ORDER_DT_TM")] = (max(1.0, s_val - 3.0), d_val)
+            if strict_precision and not any(w in low for w in ("appointment", "clinic", "slot")):
+                for k_tbl, k_col in list(candidate_pairs.keys()):
+                    if k_tbl in ("SCH_APPT", "SCH_EVENT", "SCH_EVENT_ACTION", "TASK_ACTIVITY"):
+                        del candidate_pairs[(k_tbl, k_col)]
+
+        if any(t == "CLINICAL_EVENT" for t, _ in list(candidate_pairs.keys())):
+            candidate_pairs[("CLINICAL_EVENT", "EVENT_END_DT_TM")] = (9.8, "CE End Dt/Tm")
+            candidate_pairs[("CLINICAL_EVENT", "RESULT_STATUS_CD")] = (9.6, "CE Result Status")
+            if any(w in low for w in ("verified date", "verified_dt_tm", "verification time", "signed date")):
+                candidate_pairs[("CLINICAL_EVENT", "VERIFIED_DT_TM")] = (9.6, "CE Verified Dt/Tm")
+            elif strict_precision:
+                candidate_pairs.pop(("CLINICAL_EVENT", "VERIFIED_DT_TM"), None)
+            if not any(w in low for w in ("performed_dt_tm", "performed date", "performed time")) and strict_precision:
+                candidate_pairs.pop(("CLINICAL_EVENT", "PERFORMED_DT_TM"), None)
+
+        if "inpatient admit" in low or "inpatient admission" in low or "inpatient_admit_dt_tm" in low:
+            candidate_pairs[("ENCOUNTER", "INPATIENT_ADMIT_DT_TM")] = (9.8, "Enc Inpatient Admit Dt/Tm")
+            if strict_precision and "reg_dt_tm" not in low and "registration" not in low:
+                candidate_pairs.pop(("ENCOUNTER", "REG_DT_TM"), None)
+            if strict_precision and not any(w in low for w in ("arrive", "arrival", "triage", "arrive_dt_tm")):
+                candidate_pairs.pop(("ENCOUNTER", "ARRIVE_DT_TM"), None)
+        elif any(w in low for w in ("arrive", "arrival", "triage", "arrive_dt_tm")):
+            candidate_pairs[("ENCOUNTER", "ARRIVE_DT_TM")] = (9.8, "Enc Arrive Dt/Tm")
+        elif any(w in low for w in ("registration", "reg_dt_tm", "registered")):
+            candidate_pairs[("ENCOUNTER", "REG_DT_TM")] = (9.8, "Enc Registration Dt/Tm")
+
+        if any(t == "DIAGNOSIS" for t, _ in list(candidate_pairs.keys())):
+            candidate_pairs[("DIAGNOSIS", "DIAGNOSIS_DISPLAY")] = (9.6, "Diagnosis Display")
+
+        if any(w in low for w in ("adjustment", "write-off", "cwf gs adjustments")):
+            candidate_pairs[("PFT_ENCNTR", "ADJUSTMENT_BALANCE")] = (9.8, "Adj Amount")
+            candidate_pairs[("TRANS_LOG", "TOTAL_TRANS_AMOUNT")] = (9.7, "Adj Amount")
+            candidate_pairs[("TRANS_LOG", "POST_DT_TM")] = (9.7, "Adj Post Dt")
+            candidate_pairs[("TRANS_LOG", "TRANS_REASON_CD")] = (9.5, "Adj Trans Reason")
+        if any(w in low for w in ("payment", "cash payment", "cwf gs payments")):
+            candidate_pairs[("PFT_ENCNTR", "APPLIED_PAYMENT_BALANCE")] = (9.8, "Pay Amount")
+            candidate_pairs[("TRANS_LOG", "TOTAL_TRANS_AMOUNT")] = (9.7, "Pay Amount")
+            candidate_pairs[("TRANS_LOG", "POST_DT_TM")] = (9.7, "Pay Post Dt")
+            candidate_pairs[("TRANS_LOG", "TRANS_REASON_CD")] = (9.5, "Pay Trans Reason")
+        if any(w in low for w in ("general ledger", "cwf gl", "gl account")):
+            candidate_pairs[("GL_TRANS_LOG", "ACCT_NAME")] = (9.8, "GL Account Name")
+            candidate_pairs[("TRANS_LOG", "TOTAL_TRANS_AMOUNT")] = (9.7, "GL Trans Amount")
+            candidate_pairs[("TRANS_LOG", "POST_DT_TM")] = (9.7, "GL Post Dt")
+        if any(t == "SCH_APPT" for t, _ in list(candidate_pairs.keys())) and strict_precision:
+            candidate_pairs.pop(("PRSNL", "CREATE_DT_TM"), None)
+            if "balance" not in low and "payment" not in low and "adjustment" not in low:
+                candidate_pairs.pop(("PFT_ENCNTR", "BALANCE"), None)
+
+        if any(t == "CHARGE" for t, _ in list(candidate_pairs.keys())):
+            if any(w in low for w in ("posted date", "posted_dt_tm", "posting date", "chg posted")):
+                candidate_pairs[("CHARGE", "POSTED_DT_TM")] = (9.7, "Chg Posted Dt/Tm")
+            else:
+                candidate_pairs[("CHARGE", "SERVICE_DT_TM")] = (9.7, "Chg Service Dt/Tm")
+
+        # Never use housekeeping UPDT_DT_TM for clinical/operational filtering unless explicitly requested
+        if "updt_dt_tm" not in low and "update dt" not in low:
+            for tbl_u in ("CLINICAL_EVENT", "ORDERS", "ENCOUNTER", "CHARGE", "DIAGNOSIS"):
+                candidate_pairs.pop((tbl_u, "UPDT_DT_TM"), None)
+
+        # Identifier & Alias disambiguation (MRN CS 4 vs FIN CS 319)
+        if any(w in low for w in ("mrn", "medical record number", "cmrn", "person_alias")):
+            candidate_pairs[("PERSON_ALIAS", "ALIAS")] = (9.7, "Person MRN")
+            triggered_cs.add(4)
+        elif strict_precision:
+            candidate_pairs.pop(("PERSON_ALIAS", "ALIAS"), None)
+            candidate_pairs.pop(("PERSON_ALIAS", "PERSON_ALIAS_TYPE_CD"), None)
+
+        if any(w in low for w in ("fin", "financial number", "account number", "encounter number", "encntr_alias")):
+            candidate_pairs[("ENCNTR_ALIAS", "ALIAS")] = (9.7, "Enc FIN")
+            triggered_cs.add(319)
+        elif strict_precision:
+            candidate_pairs.pop(("ENCNTR_ALIAS", "ALIAS"), None)
+            candidate_pairs.pop(("ENCNTR_ALIAS", "ENCNTR_ALIAS_TYPE_CD"), None)
