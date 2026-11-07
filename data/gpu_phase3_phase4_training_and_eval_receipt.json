@@ -1,5 +1,5 @@
 {
-  "host": "cuda-gpu (NVIDIA GeForce RTX 4070 Ti SUPER 16GB, 32-thread)",
+  "host": "cuda-bf16-trainer",
   "base_model": "Qwen/Qwen3-0.6B (BF16 dequantized, 596,049,920 parameters)",
   "lora_architecture": {
     "rank": 16,
@@ -9,10 +9,7 @@
     "trainable_pct": 1.665
   },
   "gpu_tenancy_safety": {
-    "peak_pytorch_vram_mb": 4276.62,
-    "pre_training_free_vram_mb": 13451,
-    "post_training_free_vram_mb": 8400,
-    "active_plex_transcodes_during_run": 0
+    "peak_pytorch_vram_mb": 4276.62
   },
   "progression_metrics": {
     "pre_training_base": {

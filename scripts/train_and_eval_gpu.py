@@ -377,7 +377,7 @@ def main() -> int:
     post_gpu = get_gpu_watcher_status()
 
     receipt = {
-        "host": "cuda-gpu (NVIDIA GeForce RTX 4070 Ti SUPER 16GB, 32-thread)",
+        "host": "cuda-bf16-trainer",
         "base_model": "Qwen/Qwen3-0.6B (BF16 dequantized, 596,049,920 parameters)",
         "lora_architecture": {
             "rank": 16,

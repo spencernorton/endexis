@@ -99,7 +99,7 @@ class LocalNeuralCompiler:
                         "role": "system",
                         "content": "You are Endexis (endexis), a tenant-agnostic Cerner Millennium V500, Discern Analytics 2.0 (DA2), CCL, and BIRT 4.4.2 clinical report compiler.",
                     },
-                    {"role": "user", "content": f"{prompt} /no_think"},
+                    {"role": "user", "content": prompt},
                 ],
                 "temperature": 0.0,
                 "max_tokens": max_new_tokens,
@@ -113,7 +113,10 @@ class LocalNeuralCompiler:
                 chat_res = json.loads(resp.read().decode("utf-8"))
                 choices = chat_res.get("choices") or []
                 if choices:
-                    content = choices[0].get("message", {}).get("content", "")
+                    msg = choices[0].get("message", {})
+                    rc = msg.get("reasoning_content") or ""
+                    cc = msg.get("content") or ""
+                    content = (f"<reasoning>\n{rc}\n</reasoning>\n{cc}".strip() if rc and "<reasoning>" not in cc else cc)
                     return {
                         "best_completion": content,
                         "candidates": [content],
