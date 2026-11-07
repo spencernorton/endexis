@@ -214,7 +214,7 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
             ("SCH_EVENT_ACTION", "SCH_REASON_CD"),
             ("SCH_EVENT_ACTION", "ACTION_DT_TM"),
         ],
-        "da2": ["Sch App Id", "Sch App Begin Dt/Tm", "Sch App End Dt/Tm", "Sch App State", "Sch Ev Act Action", "Sch Ev Act Reason"],
+        "da2": ["Sch App Id", "Sch App Beg Dt/Tm", "Sch App End Dt/Tm", "Sch App Duration", "Sch App State", "Sch Ev App Type", "Sch Ev Act Action", "Sch Evt Act Reason", "Sch App Beg Dt/Tm"],
         "code_sets": [14232, 14233],
     },
     {
@@ -506,13 +506,15 @@ class MillenniumInterpreter:
                 continue
 
             da2_rec = self._da2_by_name.get(da2_hint) if da2_hint else None
+            if not da2_rec and tbl == "PERSON" and col == "NAME_FULL_FORMATTED" and "guarantor" not in low:
+                da2_rec = self._da2_by_name.get("Person Name Full Format")
             if not da2_rec:
                 # Look up by exact v500_target table.column prefix first, falling back to table prefix only if no da2_hint
                 da2_rec = next(
                     (
                         e for e in self._da2_elements
-                        if e["v500_target"].startswith(f"{tbl}.{col}")
-                        or (not da2_hint and e["v500_target"].startswith(tbl))
+                        if (e["v500_target"].startswith(f"{tbl}.{col}") and ("guarantor" in low or e["da2_field_name"] != "Acct Guarantor Name"))
+                        or (not da2_hint and e["v500_target"].startswith(tbl) and ("guarantor" in low or e["da2_field_name"] != "Acct Guarantor Name"))
                     ),
                     None,
                 )
