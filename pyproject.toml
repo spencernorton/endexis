@@ -5,16 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "endexis"
 version = "1.0.0"
-description = "Endexis — Tenant-Agnostic Clinical & Financial Analytics, DA2, V500, CCL, and BIRT 4.4.2 Compiler"
+description = "Local SQL, CCL and report compiler for Oracle Health and Cerner Millennium analytics"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "Apache-2.0"}
+license = {file = "LICENSE"}
 authors = [{name = "Endexis Contributors"}]
 dependencies = ["pydantic>=2.0"]
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
 dev = ["pytest>=8.0"]
+
+[project.urls]
+Repository = "https://github.com/spencernorton/endexis"
+Documentation = "https://github.com/spencernorton/endexis/blob/main/docs/compiler-reference.md"
+Releases = "https://github.com/spencernorton/endexis/releases"
+"Model weights" = "https://huggingface.co/NorviTech/endexis-qwen3-0.6b-dpo-merged"
 
 [project.scripts]
 endexis = "discern_intelligence.cli:main"
