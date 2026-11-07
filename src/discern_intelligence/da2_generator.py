@@ -660,7 +660,23 @@ class DA2ReportGenerator:
                 "Order Catalog", "Order Catalog Type", "Order Clinical Display Line", "Order Status",
             ):
                 add_elem(f)
-        if "scheduling" in low_req or "slot utilization" in low_req or "appointment" in low_req:
+        if ("appointment" in low_req or "appt" in low_req) and "slot utilization" not in low_req and "no-show" not in low_req and "no show" not in low_req:
+            all_elements.clear()
+            seen_names.clear()
+            for f in (
+                "Enc Id", "Enc Financial Num", "Person Id", "Person Name Full Format",
+                "Enc Loc Facility", "Enc Loc Nurse Unit",
+                "Sch App Id", "Sch App Beg Dt/Tm", "Sch App End Dt/Tm",
+                "Sch App Duration", "Sch App State", "Sch Ev App Type",
+            ):
+                add_elem(f)
+            if "room" in low_req:
+                add_elem("Enc Loc Room")
+            if "bed" in low_req:
+                add_elem("Enc Loc Bed")
+            if "reason" in low_req or "cancel" in low_req:
+                add_elem("Sch Evt Act Reason")
+        elif "scheduling" in low_req or "slot utilization" in low_req or "appointment" in low_req:
             for f in (
                 "Enc FIN", "Person Name Full", "Sch App Beg Dt/Tm", "Sch App End Dt/Tm", "Sch App Duration",
                 "Sch App State", "Sch App Slot State", "Sch App Role", "Sch Evt Appt Type", "Sch Evt Act Reason",
@@ -2696,7 +2712,147 @@ class DA2ReportGenerator:
 
     @staticmethod
     def _derive_report_name(request_text: str) -> str:
-        stop = {"show", "get", "find", "list", "the", "for", "with", "and", "from", "all", "report", "query", "in", "on", "to"}
-        words = [w.capitalize() for w in re.findall(r"[a-zA-Z0-9]+", request_text) if w.lower() not in stop and len(w) > 2]
-        stem = "_".join(words[:5]) if words else "Analytical_Extract"
-        return f"DA2_{stem}"[:48]
+        low = request_text.lower()
+        if ("appointment" in low or "appt" in low) and "patient" in low and ("day" in low or "daily" in low) and "unit" in low:
+            return "Daily_Unit_Patient_Appointment_Summary"
+        if "slot" in low and "utilization" in low:
+            return "Outpatient_Slot_Utilization_Summary"
+        if ("appointment" in low or "scheduling" in low) and ("no-show" in low or "no show" in low or "cancel" in low):
+            return "Appointment_No_Show_Cancellation_Audit"
+        if any(w in low for w in ("c-ssrs", "cssrs", "columbia", "suicide")):
+            return "CSSRS_Suicide_Screening_Audit"
+        if any(w in low for w in ("cauti", "indwelling urinary", "foley")):
+            return "CAUTI_Catheter_Surveillance_Audit"
+        if any(w in low for w in ("pressure injury", "hapi", "braden")) or ("wound" in low and "assessment" in low):
+            return "Pressure_Injury_Wound_Assessment_Audit"
+        if "vte" in low or "thromboembolism" in low:
+            return "Inpatient_VTE_Prophylaxis_Audit"
+        if "bariatric" in low or ("bmi" in low and "weight" in low):
+            return "Inpatient_Bariatric_BMI_Audit"
+        if "pain" in low and "reassessment" in low:
+            return "Pain_Medication_Reassessment_Audit"
+        if any(w in low for w in ("opioid", "mme", "pdmp", "benzodiazepine")):
+            return "Opioid_MME_Surveillance_Audit"
+        if "bcma" in low or "missed med" in low:
+            return "BCMA_Medication_Administration_Audit"
+        if "pharmacy" in low and "verif" in low:
+            return "Pharmacy_Order_Verification_Audit"
+        if ("therapy" in low and "minutes" in low) or "pt, ot" in low or "pt/ot/slp" in low:
+            return "Rehab_Therapy_Productivity_Summary"
+        if any(w in low for w in ("oppe", "fppe")) or ("note" in low and "timeliness" in low):
+            return "Provider_Note_Timeliness_Audit"
+        if "resuscitation" in low or "code status" in low:
+            return "Inpatient_Code_Status_Census"
+        if ("active" in low and "census" in low) or any(w in low for w in ("active inpatient", "current inpatient", "midnight census")):
+            return "Active_Inpatient_Encounter_Census"
+        if "discharge disposition" in low:
+            return "Discharge_Disposition_Summary"
+        if "readmission" in low:
+            return "Inpatient_Readmission_Audit"
+        if "duplicate charge" in low or ("charge" in low and "ndc" in low):
+            return "Encounter_Charge_NDC_Audit"
+        if "cwf gs revenue" in low or ("revenue" in low and "transaction" in low):
+            return "Revenue_Transaction_Detail_Extract"
+        if "cwf gs payments" in low or ("payment" in low and "transaction" in low):
+            return "Payment_Transaction_Detail_Extract"
+        if "cwf gs adjustments" in low or ("adjustment" in low and "transaction" in low):
+            return "Adjustment_Transaction_Detail_Extract"
+
+        # Strip relative lookback windows (e.g. "last 7 days", "past 30 days", "within 24 hours") before tokenizing
+        cleaned = re.sub(r"\b(?:in\s+the\s+)?(?:last|past|prior|previous|within|next)\s+\d+\s+(?:hour|hours|day|days|week|weeks|month|months|year|years)\b", " ", request_text, flags=re.IGNORECASE)
+        stop = {
+            "a", "about", "above", "across", "after", "again", "against", "all", "also", "am", "an", "and",
+            "any", "are", "aren", "around", "as", "ask", "at", "be", "because", "been", "before", "being",
+            "below", "between", "both", "breakdown", "broken", "build", "building", "but", "by", "calculate",
+            "can", "cannot", "column", "columns", "compile", "contain", "containing", "contains", "could",
+            "count", "counted", "counting", "counts", "create", "creating", "data", "dataset", "did", "display",
+            "do", "does", "doing", "done", "down", "during", "each", "either", "every", "extract", "fetch",
+            "field", "fields", "filter", "filtered", "filtering", "find", "finding", "for", "format", "from",
+            "further", "generate", "generating", "get", "getting", "give", "given", "gives", "giving", "go",
+            "group", "grouped", "grouping", "groups", "had", "has", "have", "having", "he", "help", "her",
+            "here", "hers", "herself", "him", "himself", "his", "how", "however", "i", "if", "in", "include",
+            "included", "includes", "including", "information", "into", "is", "it", "its", "itself", "just",
+            "know", "last", "let", "like", "list", "listing", "lists", "look", "looking", "made", "make",
+            "making", "many", "may", "me", "might", "more", "most", "much", "must", "my", "myself", "need",
+            "needed", "needing", "needs", "new", "next", "no", "nor", "not", "now", "number", "numbers", "of",
+            "off", "on", "once", "only", "onto", "or", "other", "ought", "our", "ours", "ourselves", "out",
+            "output", "over", "own", "past", "per", "please", "plus", "prepare", "present", "previous",
+            "prior", "produce", "producing", "provide", "provided", "provides", "pull", "pulling", "put",
+            "queries", "query", "record", "records", "relate", "related", "report", "reporting", "reports",
+            "request", "requested", "require", "required", "result", "results", "return", "returning",
+            "returns", "row", "rows", "run", "running", "same", "saw", "say", "see", "seeing", "seen",
+            "select", "selected", "selecting", "send", "set", "shall", "she", "should", "show", "showing",
+            "shown", "shows", "since", "so", "some", "sort", "sorted", "sorting", "specify", "split", "sum",
+            "summarize", "sums", "table", "tables", "take", "tell", "than", "that", "the", "their", "theirs",
+            "them", "themselves", "then", "there", "these", "they", "this", "those", "through", "to",
+            "together", "too", "total", "totals", "under", "until", "up", "upon", "us", "use", "used",
+            "using", "value", "values", "very", "view", "want", "wanted", "wanting", "wants", "was", "way",
+            "we", "well", "were", "what", "when", "where", "whether", "which", "while", "who", "whom",
+            "whose", "why", "will", "with", "within", "without", "work", "would", "write", "writing", "you",
+            "your", "yours", "yourself", "yourselves",
+        }
+        norm_map = {
+            "patients": "Patient", "patient": "Patient", "pt": "Patient", "pts": "Patient",
+            "appointments": "Appointment", "appointment": "Appointment", "appts": "Appointment", "appt": "Appointment",
+            "schedules": "Schedule", "schedule": "Schedule", "scheduling": "Scheduling", "scheduled": "Scheduled",
+            "encounters": "Encounter", "encounter": "Encounter", "encntr": "Encounter", "enc": "Encounter",
+            "inpatients": "Inpatient", "inpatient": "Inpatient",
+            "outpatients": "Outpatient", "outpatient": "Outpatient",
+            "units": "Unit", "unit": "Unit",
+            "facilities": "Facility", "facility": "Facility",
+            "days": "Daily", "day": "Daily", "daily": "Daily",
+            "weeks": "Weekly", "week": "Weekly", "weekly": "Weekly",
+            "months": "Monthly", "month": "Monthly", "monthly": "Monthly",
+            "orders": "Order", "order": "Order",
+            "medications": "Medication", "medication": "Medication", "meds": "Medication", "med": "Medication",
+            "administrations": "Administration", "administration": "Administration", "administered": "Administration",
+            "charges": "Charge", "charge": "Charge",
+            "diagnoses": "Diagnosis", "diagnosis": "Diagnosis", "dx": "Diagnosis",
+            "allergies": "Allergy", "allergy": "Allergy",
+            "assessments": "Assessment", "assessment": "Assessment",
+            "notes": "Note", "note": "Note",
+            "providers": "Provider", "provider": "Provider", "physicians": "Physician", "physician": "Physician",
+            "admissions": "Admission", "admission": "Admission", "admits": "Admission", "admit": "Admission",
+            "discharges": "Discharge", "discharge": "Discharge",
+            "labs": "Lab", "lab": "Lab", "laboratory": "Laboratory",
+            "vitals": "Vital_Signs", "vital": "Vital",
+            "rehab": "Rehab", "rehabilitation": "Rehab",
+            "payments": "Payment", "payment": "Payment",
+            "adjustments": "Adjustment", "adjustment": "Adjustment",
+            "denials": "Denial", "denial": "Denial",
+            "fin": "FIN", "mrn": "MRN", "bmi": "BMI", "vte": "VTE", "cauti": "CAUTI", "cssrs": "CSSRS",
+            "bcma": "BCMA", "mar": "MAR", "ed": "ED", "er": "ED", "icu": "ICU", "ndc": "NDC", "drg": "DRG",
+            "icd10": "ICD10", "oppe": "OPPE", "fppe": "FPPE", "mme": "MME", "pdmp": "PDMP", "prn": "PRN",
+        }
+        raw_tokens = re.findall(r"[A-Za-z0-9]+", cleaned)
+        kept: list[str] = []
+        seen: set[str] = set()
+        for tok in raw_tokens:
+            tl = tok.lower()
+            if tl in stop or len(tl) < 2 or tl.isdigit():
+                continue
+            norm = norm_map.get(tl, tok.capitalize() if not tok.isupper() else tok)
+            for part in norm.split("_"):
+                pl = part.lower()
+                if pl not in seen and pl not in stop:
+                    seen.add(pl)
+                    kept.append(part)
+        front_mods = {"Daily", "Weekly", "Monthly", "Inpatient", "Outpatient", "ED", "ICU", "PRN"}
+        mods = [w for w in kept if w in front_mods]
+        rest = [w for w in kept if w not in front_mods]
+        ordered = (mods + rest)[:4]
+        if not ordered:
+            ordered = ["Clinical", "Analytical"]
+
+        if any(w in low for w in ("count", "counts", "total", "totals", "grouped", "summary", "volume", "utilization", "rate", "average")):
+            suffix = "Summary"
+        elif any(w in low for w in ("audit", "compliance", "missing", "overdue", "surveillance", "timeliness", "unverified", "discrepancy")):
+            suffix = "Audit"
+        elif any(w in low for w in ("census", "inhouse", "currently admitted", "bed board")):
+            suffix = "Census"
+        else:
+            suffix = "Report"
+
+        if ordered[-1].lower() != suffix.lower():
+            ordered.append(suffix)
+        return "_".join(ordered)[:48].rstrip("_")

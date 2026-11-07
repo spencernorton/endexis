@@ -1143,3 +1143,19 @@ def test_v2_adversarial_benchmark_and_precision_disambiguation() -> None:
     assert adv_rep["negative_trap_rejection_rate"] == 1.0
     assert adv_rep["sqlite_v500_edge_case_pass_rate"] == 1.0
     assert adv_rep["overall_pass_rate"] == 1.0
+
+
+def test_derive_report_name_and_scheduling_summary_precision() -> None:
+    gen = DA2ReportGenerator()
+    req = "I need a report of total counts of patients seen + the total number of appointments grouped by day and unit"
+    bundle = gen.generate(req)
+    assert bundle.report_name == "Daily_Unit_Patient_Appointment_Summary"
+    assert bundle.queries[0].query_name == "Daily_Unit_Patient_Appointment_Summary_Query"
+    elem_names = [e["da2_field_name"] for e in bundle.queries[0].selected_elements]
+    assert "Acct Guarantor Name" not in elem_names
+    assert "Enc Loc Room" not in elem_names
+    assert "Enc Loc Bed" not in elem_names
+    assert "Sch App Id" in elem_names
+    assert "Sch App Beg Dt/Tm" in elem_names
+    assert "Enc Loc Nurse Unit" in elem_names
+    assert bundle.verification.is_valid
