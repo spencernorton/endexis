@@ -50,6 +50,8 @@ pytest -v
 
 ### CLI Commands (`endexis`)
 
+These examples use a synthetic reporting request. The compiler writes local files, and `verify-sql` runs against a synthetic SQLite fixture.
+
 ```bash
 # 1. Interpret a natural-language request into V500 TABLE.COLUMN items and DA2 elements
 endexis interpret "Show active inpatient encounters with Morse Fall Scale score, FIN, MRN, and Nurse Unit" --tenancy CommunityWorks
@@ -57,17 +59,18 @@ endexis interpret "Show active inpatient encounters with Morse Fall Scale score,
 # 2. Resolve clinical form or output storage (definition tables, activity tables, payload columns)
 endexis forms "Where are PowerForm discrete assessment values and IView dynamic group flowsheet cells stored?"
 
-# 3. Compile a request into a verified Cerner Command Language (.prg) script
-endexis compile-ccl "Active inpatient encounters with charted Morse Fall Scale PowerForm results" \
-  --program-name cust_r_morse_fall_v1 \
-  --output examples/cust_r_active_morse_v1.prg
+# 3. Compile a Cerner Command Language program and check its source
+request='List active inpatient encounters with their nurse unit'
+endexis compile-ccl "$request" --name cust_r_census_demo --out inpatient_census.prg
 
-# 4. Generate a direct-upload DA2 .rptdesign XML file and DA2 Domain Query JSON specification
-endexis generate-da2 "Active inpatient encounter census with FIN, MRN, Nurse Unit, Attending Physician, and Admit Date" \
-  --title "Active Inpatient Encounter Census" \
-  --output-rptdesign examples/active_inpatient_census_v1.rptdesign \
-  --output-spec examples/active_inpatient_census_v1_query_spec.json
+# 4. Generate the BIRT report, DA2 packages and SQL in one directory
+endexis generate-da2 "$request" --name inpatient_census_demo --out-dir ./inpatient_census_da2
+
+# 5. Run the generated query against a synthetic Millennium V500 fixture
+endexis verify-sql "$request"
 ```
+
+The DA2 directory contains `inpatient_census_demo.rptdesign`, `inpatient_census_demo.dareport`, `inpatient_census_demo_Query.daquery`, `inpatient_census_demo_Query_ejs_v500.sql` and `inpatient_census_demo_bundle.json`. The synthetic check returns two rows with `executed`, `non_empty` and `fanout_safe` set to `true`. Review the output and validate the report in an authorized test tenant before use there.
 
 ## Knowledge Base & SFT / DPO Training Corpora
 
@@ -84,22 +87,21 @@ endexis generate-da2 "Active inpatient encounter census with FIN, MRN, Nurse Uni
 
 ## Tenant-Agnostic Configuration (`--owner-group`, `--facility`, `--tenant-config`)
 
-Endexis is completely tenant-agnostic across all **Discern Analytics 2.0 (DA2)** deployments (`CommunityWorks`, `Continuum`, and `Standalone_RHO`). By default, `.daquery` (`xmlversion="2"`) and `.dareport` (`.rpt` + `.rptdesign`) bundles populate `owner_group_display="TENANT_OWNER_GROUP"` and contain zero hardcoded `Logical Domain ID` or tenant-specific facility filters.
+Endexis accepts profiles for `communityworks`, `continuum` and `standalone_rho`. By default, generated `.daquery` and `.dareport` packages use `TENANT_OWNER_GROUP` as the owner group. Supply the display values for your authorized test tenant when preparing a package for it.
 
-Specify your target tenant's DA2 owner group or facility via CLI flags or a JSON profile:
+You can set the DA2 owner group and facility with flags or pass a TOML or JSON profile.
 
 ```bash
-# Override DA2 owner_group_display and facility directly on the CLI:
-endexis generate-da2 "Active inpatient encounter census with FIN, MRN, Nurse Unit, Attending Physician, and Admit Date" \
-  --tenancy CommunityWorks \
-  --owner-group "YOUR_DA2_OWNER_GROUP" \
-  --facility "General Hospital Campus" \
-  --output-dareport examples/active_inpatient_census.dareport
+# Pass placeholder display values as flags
+endexis generate-da2 'List active inpatient encounters with their nurse unit' \
+  --tenancy communityworks --owner-group EXAMPLE_DA2_OWNER_GROUP \
+  --facility EXAMPLE_FACILITY --name inpatient_census_demo --out-dir ./tenant_example
 
-# Or pass a reusable tenant JSON profile:
-endexis generate-da2 "Rehab therapy minutes by discipline" \
-  --tenant-config tenant_profile.json \
-  --output-dareport examples/rehab_therapy_minutes.dareport
+# Or generate and pass a reusable TOML profile with the same values
+endexis init --out ./example.endexis.toml --tenancy communityworks \
+  --owner-group EXAMPLE_DA2_OWNER_GROUP --facility EXAMPLE_FACILITY
+endexis generate-da2 'List active inpatient encounters with their nurse unit' \
+  --tenant-config ./example.endexis.toml --name inpatient_census_demo --out-dir ./profile_example
 ```
 
 See [LEGAL.md](../LEGAL.md) for interoperability and trademark notices.
