@@ -1,10 +1,10 @@
 # Endexis
 
-A tenant-agnostic SQL, CCL and report compiler for Oracle Health analytics.
+A local SQL, CCL and report compiler for Oracle Health and Cerner Millennium analytics.
 
 [![CI](https://github.com/spencernorton/endexis/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/spencernorton/endexis/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/spencernorton/endexis?label=release)](https://github.com/spencernorton/endexis/releases)
-[![Apache-2.0 licence](https://img.shields.io/badge/licence-Apache--2.0-blue.svg)](LICENSE)
+[![MIT licence](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Hugging Face model](https://img.shields.io/badge/Hugging_Face-model-FFD21E.svg)](https://huggingface.co/NorviTech/endexis-qwen3-0.6b-dpo-merged)
 
 Endexis translates reporting requests into Cerner Command Language (CCL), Discern
@@ -12,7 +12,13 @@ Analytics 2.0 (DA2) queries and Eclipse BIRT 4.4.2 reports. It maps requests to
 Cerner Millennium V500 tables and coded values, resolves clinical forms and
 outputs, and checks the generated artifacts with deterministic verifiers. The
 command-line compiler runs locally. An optional Qwen3 model can propose candidates
-for the same verifiers.
+for the same verifiers. Use the toolkit to map a reporting question to the V500
+schema, generate a CCL program or DA2 query, or build a BIRT report for review
+in an authorized environment.
+
+[Install the compiler](#get-started) · [Read the compiler reference](docs/compiler-reference.md) ·
+[Download the optional Qwen3 model](https://huggingface.co/NorviTech/endexis-qwen3-0.6b-dpo-merged) ·
+[View releases](https://github.com/spencernorton/endexis/releases)
 
 ![Endexis workflow from clinical forms through CCL and DA2 report generation](docs/da2_v1_forms_ccl_and_rptdesign_pipeline.png)
 
@@ -53,7 +59,9 @@ The [compiler reference](docs/compiler-reference.md) covers the output formats,
 clinical form mappings, source catalogs and tenant configuration. The
 [model card](MODEL_CARD.md) covers the separate neural model and its evaluation.
 Validate generated artifacts against the schema and permissions of the target
-DA2 environment before uploading them.
+DA2 environment before uploading them. The [software licence](LICENSE) applies
+to this source repository. See the [model listing](https://huggingface.co/NorviTech/endexis-qwen3-0.6b-dpo-merged)
+for the separately distributed checkpoint and its licence.
 
 ## Project links
 
