@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible Endexis problem with a synthetic example.
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use synthetic requests and data in public issues. Remove patient details, tenant identifiers, credentials, and private schema exports from all examples and logs.
+  - type: input
+    id: versions
+    attributes:
+      label: Endexis version, Python version and operating system
+      placeholder: Endexis 1.0.0, Python 3.12, Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the command and the smallest synthetic input that reproduces the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual results
+    validations:
+      required: true
