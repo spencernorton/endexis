@@ -1159,3 +1159,32 @@ def test_derive_report_name_and_scheduling_summary_precision() -> None:
     assert "Sch App Beg Dt/Tm" in elem_names
     assert "Enc Loc Nurse Unit" in elem_names
     assert bundle.verification.is_valid
+    dq = bundle.queries[0].daquery_xml
+    assert 'name="Sch App Id" type="3" uuid="d5807380-8c35-4f9c-8f32-487839a0bade"' in dq
+    assert "318efa3d-7231-5537-ba38-965a4ef61b33" not in dq
+    from discern_intelligence.da2_generator import LIVE_CWC_ELEMENT_MAP, VERIFIED_CWC_ENCOUNTER_UUIDS
+    import uuid as _uuid
+    assert len(LIVE_CWC_ELEMENT_MAP) >= 375
+    assert all(_uuid.UUID(v[1]).version == 4 for v in LIVE_CWC_ELEMENT_MAP.values())
+    dq_root = ET.fromstring(dq)
+    for el_node in dq_root.findall(".//element"):
+        u = el_node.attrib.get("uuid", "")
+        if u:
+            assert _uuid.UUID(u).version == 4
+            assert u in VERIFIED_CWC_ENCOUNTER_UUIDS
+    import dataclasses
+    broken_q = dataclasses.replace(
+        bundle.queries[0],
+        daquery_xml=dq.replace(
+            "d5807380-8c35-4f9c-8f32-487839a0bade",
+            "318efa3d-7231-5537-ba38-965a4ef61b33",
+        ),
+    )
+    bad_ver = gen.verify_da2_bundle(
+        rptdesign_xml=bundle.rptdesign_xml,
+        queries=[broken_q],
+        interp=gen._interpreter.interpret(req),
+        is_active_census=False,
+    )
+    assert not bad_ver.is_valid
+    assert any("ColumnDomainException" in err for err in bad_ver.errors)
