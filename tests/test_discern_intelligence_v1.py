@@ -1283,7 +1283,7 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     # 1. Bathing & Daily Hygiene Documentation Report (and verify "discharged" does NOT trigger CHARGE pollution)
     bath_req = (
         "Build a Bathing and Daily Hygiene Documentation report for active or recently discharged "
-        "inpatients showing bath type, shower/bed bath assistance, CHG bath, perineal care, and bathing refused reason."
+        "inpatients showing bath type, bathing refused reason, personal hygiene, shower/bathe self, and bathing/grooming."
     )
     bath_bundle = gen.generate(bath_req)
     assert bath_bundle.report_name == "Bathing_Hygiene_Documentation_Report"
@@ -1292,9 +1292,9 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     bath_elems = [e["da2_field_name"] for e in bath_bundle.queries[0].selected_elements]
     assert not any(c.startswith("Chg ") for c in bath_elems), f"Substring 'discharged' polluted CHARGE cols: {bath_elems}"
     bath_dq = bath_bundle.queries[0].daquery_xml
-    assert len(BATHING_HYGIENE_CE_EVENTS) >= 2
-    assert 'display="Bath Type" text="54993041.00"' in bath_dq
-    assert 'display="Bathing Refused Reason" text="54993005.00"' in bath_dq
+    assert len(BATHING_HYGIENE_CE_EVENTS) == 6
+    for disp, cv in BATHING_HYGIENE_CE_EVENTS:
+        assert f'display="{disp}" text="{cv}"' in bath_dq
 
     # 2. Inpatient Nutrition Assessment & Malnutrition Audit
     nutr_req = (
@@ -1306,7 +1306,7 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert nutr_bundle.verification.is_valid
     assert len(NUTRITION_ASSESSMENT_CE_EVENTS) >= 16
     assert 'display="Nutrition Assessment and Plan Form" text="64892683.00"' in nutr_bundle.queries[0].daquery_xml
-    assert 'display="Body Mass Index" text="705277.00"' in nutr_bundle.queries[0].daquery_xml
+    assert 'display="Body Mass Index" text="64759777.00"' in nutr_bundle.queries[0].daquery_xml
 
     # 3. Pharmacy Clinical Interventions & Antimicrobial Stewardship Audit
     pharm_req = (
@@ -1329,7 +1329,7 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert iv_bundle.report_name == "Peripheral_Central_IV_Catheter_Report"
     assert iv_bundle.verification.is_valid
     assert len(IV_CENTRAL_LINE_CE_EVENTS) >= 5
-    assert 'display="Peripheral IV Activity:" text="22055797.00"' in iv_bundle.queries[0].daquery_xml
+    assert 'display="Peripheral IV Activity:" text="17022182.00"' in iv_bundle.queries[0].daquery_xml
     assert 'display="Central IV #1" text="4153930.00"' in iv_bundle.queries[0].daquery_xml
 
     # 5. Inpatient Precaution & Isolation Orders Report (must NOT trigger C-SSRS 7-query template on "Suicide Precautions")
@@ -1346,7 +1346,7 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert ET.fromstring(prec_dq).find("query_list").attrib.get("xCount") == "1"
     assert len(PRECAUTION_ORDER_CATALOG_ITEMS) == 10
     assert 'name="Order Catalog" type="1" uuid="ca672220-76a6-4601-bc0f-f0104e07874c"' in prec_dq
-    assert 'display="Suicide Precautions" text="38889485.00"' in prec_dq
+    assert 'display="Suicide Precautions" text="4149527.00"' in prec_dq
     assert 'display="Fall Precautions" text="38884839.00"' in prec_dq
 
     # 6. 1:1 Observation & Video Monitoring Orders, Wound Care Consult Orders, and Diet Orders
@@ -1407,3 +1407,23 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert bath_hits and bath_hits[0]["matched_code_values"].get("Bath Type") == "54993041"
     prec_hits = resolve_da2_filter_value("Fall Precautions", da2_field_name="Order Catalog", code_set=200)
     assert prec_hits and prec_hits[0]["matched_code_values"].get("Fall Precautions") == "38884839"
+
+    # 9. Deterministic cross-check of v2.2 SFT training code_values against da2_filter_value_catalog.json
+    from discern_intelligence.knowledge import load_da2_filter_value_catalog
+    fvc_fields = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+    sft_rows = [
+        json.loads(line)
+        for line in (Path(__file__).resolve().parents[1] / "data" / "sft_train_v1.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    v22_sft = [r for r in sft_rows if r.get("provenance") == "live_da2_clinical_harvest_v2_2"]
+    assert len(v22_sft) == 8
+    for r in v22_sft:
+        resp = r["response"]
+        if "code_values" in resp:
+            field_key = "Order Catalog" if "Order Catalog" in resp.get("filter_element", "") else "CE Event"
+            fmap = fvc_fields[field_key]["display_to_code_value"]
+            for pair in resp["code_values"]:
+                disp = pair["display"]
+                cv_int = pair["code_value"].split(".")[0]
+                assert fmap.get(disp) == cv_int, f"SFT mismatch for {field_key} {disp}: {cv_int} vs {fmap.get(disp)}"

@@ -154,7 +154,6 @@ BLADDER_BOWEL_CE_EVENTS: list[tuple[str, str]] = [
     ("Bowel/Bladder Retraining Asmt LTC - Text", "101283751.00"),
     ("Frequency of Urination", "1508509.00"),
     ("Frequent Urination", "71106211.00"),
-    ("GG0130 Toileting Hygiene", "26956593.00"),
     ("GG0170 Toilet Transfer", "26956608.00"),
     ("GG0170 Toilet Transfer Goal", "26958981.00"),
     ("Indwelling Catheter", "4361873.00"),
@@ -171,6 +170,10 @@ BLADDER_BOWEL_CE_EVENTS: list[tuple[str, str]] = [
 BATHING_HYGIENE_CE_EVENTS: list[tuple[str, str]] = [
     ("Bath Type", "54993041.00"),
     ("Bathing Refused Reason", "54993005.00"),
+    ("GG0130 Personal Hygiene", "252186263.00"),
+    ("GG0130 Shower, Bathe Self", "29729947.00"),
+    ("WeeFIM Bathing", "83630627.00"),
+    ("WeeFIM Grooming", "83630601.00"),
 ]
 
 NUTRITION_ASSESSMENT_CE_EVENTS: list[tuple[str, str]] = [
@@ -182,18 +185,18 @@ NUTRITION_ASSESSMENT_CE_EVENTS: list[tuple[str, str]] = [
     ("Nutrition Evaluation - Task", "141031285.00"),
     ("Nutrition Evaluation - Text", "21564454.00"),
     ("Nutritional Screening - Form", "359275439.00"),
-    ("Body Mass Index", "705277.00"),
-    ("Body Mass Index Measured", "4154132.00"),
+    ("Body Mass Index", "64759777.00"),
+    ("Body Mass Index Measured", "60301285.00"),
     ("Body Mass Index Estimated", "4154144.00"),
     ("Body Mass Index Nutrition", "18837898.00"),
     ("Home Diet", "705140.00"),
     ("Nutrition Risk Factors", "16721672.00"),
     ("Nutritional Risk Factors", "705249.00"),
-    ("Weight Measured", "704352.00"),
+    ("Weight Measured", "4154120.00"),
 ]
 
 PHARMACY_INTERVENTIONS_CE_EVENTS: list[tuple[str, str]] = [
-    ("Pharmacy Clinical Interventions Form", "4203579.00"),
+    ("Pharmacy Clinical Interventions Form", "4203612.00"),
     ("Intervention Type Pharmacy", "4203582.00"),
     ("Associated Order(s) Pharmacy", "4203585.00"),
     ("Pharmacy Order Initiated By", "4203588.00"),
@@ -206,15 +209,15 @@ PHARMACY_INTERVENTIONS_CE_EVENTS: list[tuple[str, str]] = [
 ]
 
 IV_CENTRAL_LINE_CE_EVENTS: list[tuple[str, str]] = [
-    ("Peripheral IV Activity:", "22055797.00"),
+    ("Peripheral IV Activity:", "17022182.00"),
     ("Central IV #1", "4153930.00"),
-    ("Central IV #1 Access Type", "4153933.00"),
-    ("Central IV #1 Activity", "4153936.00"),
-    ("Central IV #1 Catheter Size/Length", "4153939.00"),
+    ("Central IV #1 Access Type", "4170586.00"),
+    ("Central IV #1 Activity", "4170574.00"),
+    ("Central IV #1 Catheter Size/Length", "4170580.00"),
 ]
 
 PRECAUTION_ORDER_CATALOG_ITEMS: list[tuple[str, str]] = [
-    ("Aspiration Precautions", "38881693.00"),
+    ("Aspiration Precautions", "2780633.00"),
     ("Fall Precautions", "38884839.00"),
     ("Hip Precautions", "38885579.00"),
     ("Isolation", "2958766.00"),
@@ -222,7 +225,7 @@ PRECAUTION_ORDER_CATALOG_ITEMS: list[tuple[str, str]] = [
     ("Seizure Precautions", "38888573.00"),
     ("Spinal Precautions", "38888949.00"),
     ("Sternal Precautions", "274704793.00"),
-    ("Suicide Precautions", "38889485.00"),
+    ("Suicide Precautions", "4149527.00"),
     ("Weight Bearing Status/Precautions", "38890609.00"),
 ]
 

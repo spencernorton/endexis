@@ -469,8 +469,172 @@ def main() -> int:
                 "response": resp_dict,
             })
 
+    v2_2_clinical_harvest_sft_rows = [
+        {
+            "task": "expand_clinical_concept_to_code_value_bundle",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map an Oral Care Documentation & Hygiene Audit request to its verified Code Set 72 CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30) CODE_VALUE filter list and encounter clinical grain.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "report_name": "Oral_Care_Documentation_Report",
+                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "code_values": [
+                    {"display": "Oral Care", "code_value": "700579.00"},
+                    {"display": "Oral Care Equipment", "code_value": "54993077.00"},
+                    {"display": "Oral Care Assisted By", "code_value": "54993113.00"},
+                    {"display": "Oral Care Refused Reason", "code_value": "54992951.00"},
+                    {"display": "Oral Hygiene Care Provided", "code_value": "273798305.00"},
+                    {"display": "GG0130 Oral Hygiene", "code_value": "26956578.00"},
+                ],
+                "standard_filters": [
+                    "Enc Active Ind = 1",
+                    "CE Result Status IN (Auth (Verified): 25.00, Modified: 34.00, Altered: 35.00)",
+                    "CE Valid Until Dt/Tm >= 12/31/2100",
+                ],
+            },
+        },
+        {
+            "task": "expand_clinical_concept_to_code_value_bundle",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map a Bladder & Bowel Continence Management Audit request to its verified Code Set 72 CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30) CODE_VALUE filter list.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "report_name": "Bladder_Bowel_Management_Report",
+                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "code_values": [
+                    {"display": "Bladder Management", "code_value": "36780603.00"},
+                    {"display": "Bladder Scan Volume", "code_value": "704017.00"},
+                    {"display": "Bowel Continence LTC", "code_value": "21837746.00"},
+                    {"display": "Bowel Elimination", "code_value": "36383823.00"},
+                    {"display": "Bowel Management", "code_value": "36779499.00"},
+                    {"display": "Bowel Movement Last Date", "code_value": "703492.00"},
+                    {"display": "Bowel Movement Status", "code_value": "71241245.00"},
+                    {"display": "Urinary Catheter Activity:", "code_value": "22047597.00"},
+                ],
+            },
+        },
+        {
+            "task": "expand_clinical_concept_to_code_value_bundle",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map a Bathing & Daily Hygiene Documentation Audit (including bath type, refusal reasons, personal hygiene, shower/bathe self, and bathing/grooming functional items) to verified Code Set 72 CE Event CODE_VALUEs.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "report_name": "Bathing_Hygiene_Documentation_Report",
+                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "code_values": [
+                    {"display": "Bath Type", "code_value": "54993041.00"},
+                    {"display": "Bathing Refused Reason", "code_value": "54993005.00"},
+                    {"display": "GG0130 Personal Hygiene", "code_value": "252186263.00"},
+                    {"display": "GG0130 Shower, Bathe Self", "code_value": "29729947.00"},
+                    {"display": "WeeFIM Bathing", "code_value": "83630627.00"},
+                    {"display": "WeeFIM Grooming", "code_value": "83630601.00"},
+                ],
+            },
+        },
+        {
+            "task": "expand_clinical_concept_to_code_value_bundle",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map an Inpatient Nutrition Assessment, Malnutrition & BMI Audit to verified Code Set 72 CE Event CODE_VALUEs.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "report_name": "Inpatient_Nutrition_Assessment_Report",
+                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "code_values": [
+                    {"display": "Nutrition Assessment and Plan Form", "code_value": "64892683.00"},
+                    {"display": "Nutrition Assessment Completed", "code_value": "54134057.00"},
+                    {"display": "Nutritional Screening - Form", "code_value": "359275439.00"},
+                    {"display": "Body Mass Index", "code_value": "64759777.00"},
+                    {"display": "Body Mass Index Measured", "code_value": "60301285.00"},
+                    {"display": "Nutrition Risk Factors", "code_value": "16721672.00"},
+                    {"display": "Weight Measured", "code_value": "4154120.00"},
+                ],
+            },
+        },
+        {
+            "task": "expand_clinical_concept_to_code_value_bundle",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map a Pharmacy Clinical Interventions & Antimicrobial Stewardship Audit to verified Code Set 72 CE Event CODE_VALUEs.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "report_name": "Pharmacy_Clinical_Interventions_Report",
+                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "code_values": [
+                    {"display": "Pharmacy Clinical Interventions Form", "code_value": "4203612.00"},
+                    {"display": "Intervention Type Pharmacy", "code_value": "4203582.00"},
+                    {"display": "Associated Order(s) Pharmacy", "code_value": "4203585.00"},
+                    {"display": "Clinical Importance Pharmacy", "code_value": "4203591.00"},
+                    {"display": "Prescriber Response Pharmacy", "code_value": "4203594.00"},
+                    {"display": "Patient Clinical Outcome Pharmacy", "code_value": "4203597.00"},
+                    {"display": "Pharmacist Intervention Time", "code_value": "4203600.00"},
+                ],
+            },
+        },
+        {
+            "task": "expand_clinical_concept_to_code_value_bundle",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map a Peripheral IV & Central Line Catheter Surveillance Audit to verified Code Set 72 CE Event CODE_VALUEs.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "report_name": "Peripheral_Central_IV_Catheter_Report",
+                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "code_values": [
+                    {"display": "Peripheral IV Activity:", "code_value": "17022182.00"},
+                    {"display": "Central IV #1", "code_value": "4153930.00"},
+                    {"display": "Central IV #1 Access Type", "code_value": "4170586.00"},
+                    {"display": "Central IV #1 Activity", "code_value": "4170574.00"},
+                    {"display": "Central IV #1 Catheter Size/Length", "code_value": "4170580.00"},
+                ],
+            },
+        },
+        {
+            "task": "expand_clinical_concept_to_code_value_bundle",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), build an Inpatient Precaution & Isolation Orders Audit (Aspiration, Fall, Hip, Isolation, Neutropenic, Seizure, Spinal, Sternal, Suicide, and Weight Bearing Precautions) using the CWC Encounter Order Catalog UUID without triggering the 7-query C-SSRS inline subquery template.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "report_name": "Inpatient_Precaution_Orders_Report",
+                "filter_element": "Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c -> ORDERS.CATALOG_CD, Code Set 200)",
+                "order_columns": [
+                    "Order Id (9a0c89db-959f-4e67-aa76-3cb49c698026)",
+                    "Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c)",
+                    "Order Mnemonic (7120df4c-b25b-4595-badb-79dedda7f9aa)",
+                    "Order Detail Display (a371d5d0-f1a0-41f0-a2af-aeeceef175e2)",
+                    "Order Status (1d1ee0d5-6e14-462f-bb27-2939048ea0bd)",
+                    "Order Dt/Tm (db8be1e0-6f63-4851-8f87-163fae80ead3)",
+                ],
+                "code_values": [
+                    {"display": "Aspiration Precautions", "code_value": "2780633.00"},
+                    {"display": "Fall Precautions", "code_value": "38884839.00"},
+                    {"display": "Hip Precautions", "code_value": "38885579.00"},
+                    {"display": "Isolation", "code_value": "2958766.00"},
+                    {"display": "Neutropenic Precautions", "code_value": "38886875.00"},
+                    {"display": "Seizure Precautions", "code_value": "38888573.00"},
+                    {"display": "Spinal Precautions", "code_value": "38888949.00"},
+                    {"display": "Sternal Precautions", "code_value": "274704793.00"},
+                    {"display": "Suicide Precautions", "code_value": "4149527.00"},
+                    {"display": "Weight Bearing Status/Precautions", "code_value": "38890609.00"},
+                ],
+            },
+        },
+        {
+            "task": "disambiguate_lookalike_da2_fields",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "instruction": "In Discern Analytics 2.0, disambiguate CWC Encounter Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c) and Enc Attending Phys (e43ef111-119b-4239-993a-daaa45e78c85) from CWC Person Order Catalog (30f92b49-fbbe-4bf5-9382-3df2abcfef7b) and CWF GS Adjustments Adj Post Prsnl.",
+            "response": {
+                "da2_domain": "CWC Encounter",
+                "cwc_encounter_order_catalog": "Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c -> ORDERS.CATALOG_CD, Code Set 200)",
+                "cwc_encounter_order_catalog_type": "Order Catalog Type (97f18dc3-faf9-42d5-a47a-999fe7cdf944 -> ORDERS.CATALOG_TYPE_CD, Code Set 6000)",
+                "cwc_encounter_attending_physician": "Enc Attending Phys (e43ef111-119b-4239-993a-daaa45e78c85 -> CWC_ENC_FUNC.GET_PRSNL_NAME_BY_ID)",
+                "guardrail": "Never use CWC Person Order Catalog UUIDs inside a CWC Encounter <cclquery> document, and never map attending physician or encounter admit/discharge dates to CWF GS Adjustments (Adj Post Prsnl) or CWF GS Revenue (F Enc inpatient Admit Dt/Tm) unless revenue/adjustments are explicitly requested.",
+            },
+        },
+    ]
+    for r_v22 in v2_2_clinical_harvest_sft_rows:
+        if r_v22["instruction"].strip() not in holdout_prompts:
+            extra_sft_rows.append(r_v22)
+
     # Combine base SFT rows (removing any previously appended phase2 rows if re-run) + extra_sft_rows
-    core_sft_rows = [r for r in base_sft_rows if not str(r.get("provenance", "")).startswith("phase2_")]
+    core_sft_rows = [r for r in base_sft_rows if not str(r.get("provenance", "")).startswith(("phase2_", "live_da2_clinical_harvest_v2_2"))]
     all_sft_candidates = core_sft_rows + extra_sft_rows
 
     # Enrich 100% of SFT candidates with explicit <reasoning>...</reasoning> traces
@@ -488,7 +652,7 @@ def main() -> int:
         enriched_sft.append(new_row)
 
     # 3. Expand DPO Contrastive Preference Pairs across all 8 failure modes (target >= 160 pairs)
-    core_dpo_rows = [r for r in base_dpo_rows if not str(r.get("provenance", "")).startswith(("phase2_", "live_da2_validation_"))]
+    core_dpo_rows = [r for r in base_dpo_rows if not str(r.get("provenance", "")).startswith(("phase2_", "live_da2_validation_", "live_da2_clinical_harvest_v2_2"))]
     extra_dpo_rows: list[dict[str, Any]] = []
 
     # Generate contrastive DPO pairs across qualification filter lists (teaching exact field + CODE_VALUE vs sibling lookalike field confusion)
@@ -887,6 +1051,63 @@ def main() -> int:
         },
     ]
     extra_dpo_rows.extend(v2_precision_dpo_pairs)
+    v2_2_clinical_harvest_dpo_pairs = [
+        {
+            "scenario_id": "v2_2_dpo_attending_phys_vs_adj_post_prsnl",
+            "failure_mode": "cross_domain_fallback_to_cwf_gs_adjustments_and_revenue",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "prompt": "Build a CWC Encounter clinical report showing patient name, FIN, room/bed, attending physician, admit date, and discharge date.",
+            "chosen": {
+                "da2_domain": "CWC Encounter",
+                "attending_physician_element": "Enc Attending Phys (e43ef111-119b-4239-993a-daaa45e78c85)",
+                "admit_date_element": "Enc Inpatient Admit Dt/Tm (42de992b-fe3c-4ff8-aa5d-d2ccbb7f7f05)",
+                "discharge_date_element": "Enc Discharge Dt/Tm (c6acbd64-fb7a-4484-9e77-d6c6b172c5e6)",
+                "guardrail": "Keep the query in single-domain CWC Encounter using Enc Attending Phys and Enc Inpatient Admit Dt/Tm / Enc Discharge Dt/Tm.",
+            },
+            "rejected": {
+                "antipattern": "Polluted a clinical encounter report with financial adjustment and revenue domains (Adj Post Prsnl in CWF GS Adjustments and F Enc inpatient Admit Dt/Tm in CWF GS Revenue) due to unanchored SQL column fallback",
+                "broken_filters": [
+                    "Selecting Adj Post Prsnl from CWF GS Adjustments instead of Enc Attending Phys in CWC Encounter",
+                ],
+            },
+        },
+        {
+            "scenario_id": "v2_2_dpo_discharged_substring_charge_pollution",
+            "failure_mode": "substring_containment_false_positive_pollution",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "prompt": "Build a report of active or recently discharged inpatients with primary and secondary insurance plans and bowel management documentation.",
+            "chosen": {
+                "da2_domain": "CWC Encounter",
+                "matched_concepts": ["inpatient", "discharged", "health plan", "insurance", "bowel"],
+                "excluded_false_positives": ["charge (inside discharged)", "mar (inside primary)", "age (inside management)"],
+                "guardrail": "Enforce word-boundary regex matching ((?<![a-z0-9])phrase(?![a-z0-9])) so 'discharged' never triggers CHARGE, 'primary' never triggers MAR, and 'management' never triggers Person Age.",
+            },
+            "rejected": {
+                "antipattern": "Raw substring containment matched 'charge' inside 'discharged', 'mar' inside 'primary', and 'age' inside 'management', polluting the query with Chg Bill Item Desc, Med Adm Event Id, and Person Age",
+                "broken_filters": [
+                    "Using `if phr in low:` substring matching without word boundaries",
+                ],
+            },
+        },
+        {
+            "scenario_id": "v2_2_dpo_scheduled_med_vs_sch_appt_and_suicide_precautions_vs_cssrs",
+            "failure_mode": "template_hijack_and_sch_appt_pollution",
+            "provenance": "live_da2_clinical_harvest_v2_2",
+            "prompt": "Build an Inpatient Precaution Orders report (Aspiration, Fall, Seizure, Suicide Precautions) and a Late Medication Administration Audit showing scheduled date/time vs administered date/time.",
+            "chosen": {
+                "precaution_orders_template": "Inpatient_Precaution_Orders_Report (single-query CWC Encounter filtering Order Catalog ca672220-76a6-4601-bc0f-f0104e07874c for 2780633.00, 38884839.00, 38888573.00, 4149527.00)",
+                "late_mar_template": "Late_Medication_Administration_Audit (Task Dt/Tm vs Med Admin Dt/Tm without Sch App Id)",
+                "guardrail": "Do not trigger the 7-query C-SSRS inline subquery template when 'Suicide Precautions' is requested as an inpatient precaution order, and do not map 'scheduled date/time' on MAR/Task audits to outpatient Sch App Id.",
+            },
+            "rejected": {
+                "antipattern": "Hijacked Inpatient Precaution Orders into the 7-query C-SSRS screening template and polluted Late Medication Administration with outpatient SCH_APPT columns (Sch App Id)",
+                "broken_filters": [
+                    "Triggering 7-query C-SSRS clinical event inline subquery on 'Suicide Precautions' order requests",
+                ],
+            },
+        },
+    ]
+    extra_dpo_rows.extend(v2_2_clinical_harvest_dpo_pairs)
 
 
     all_dpo_candidates = core_dpo_rows + extra_dpo_rows
