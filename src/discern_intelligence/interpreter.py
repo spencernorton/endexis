@@ -167,8 +167,8 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
     {
         "phrases": [
             "order", "orders", "medication order", "medication orders", "opioid", "opioids",
-            "benzo", "benzodiazepine", "lab order", "lab orders", "order detail", "order details",
-            "oe_format", "indication", "precaution", "precautions", "isolation",
+            "benzo", "benzos", "benzodiazepine", "benzodiazepines", "lab order", "lab orders", "order detail", "order details",
+            "oe_format", "indication", "indications", "precaution", "precautions", "isolation",
             "diet order", "diet orders", "diet report", "consult order", "consult orders",
             "1:1 observation", "video monitoring",
         ],

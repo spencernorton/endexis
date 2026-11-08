@@ -1425,9 +1425,39 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     prec_hits = resolve_da2_filter_value("Fall Precautions", da2_field_name="Order Catalog", code_set=200)
     assert prec_hits and prec_hits[0]["matched_code_values"].get("Fall Precautions") == "38884839"
 
-    # 9. Deterministic cross-check of v2.2 SFT training code_values against da2_filter_value_catalog.json
+    # 9. Deterministic cross-check of runtime constants and v2.2 SFT training code_values against da2_filter_value_catalog.json
     from discern_intelligence.knowledge import load_da2_filter_value_catalog
-    fvc_fields = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+    from discern_intelligence.interpreter import MillenniumInterpreter
+    interp = MillenniumInterpreter()
+    res_sing = interp.interpret("List benzodiazepine")
+    res_plur = interp.interpret("List benzodiazepines")
+    res_short_plur = interp.interpret("List benzos")
+    for res_b in (res_sing, res_plur, res_short_plur):
+        b_tables = {c.table for c in res_b.matched_columns}
+        b_cs = {cs["code_set"] for cs in res_b.matched_code_sets}
+        assert "ORDERS" in b_tables, f"ORDERS missing for {res_b.request_text}: {b_tables}"
+        assert {200, 6000, 6003, 6004}.issubset(b_cs), f"Order code sets missing for {res_b.request_text}: {b_cs}"
+
+    fvc_root = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]
+    fvc_fields = fvc_root["fields"]
+    assert fvc_root["total_coded_value_pairs"] == sum(len(v["display_to_code_value"]) for v in fvc_fields.values()) == sum(v["count"] for v in fvc_fields.values()) == 6678
+    ce_fmap = fvc_fields["CE Event"]["display_to_code_value"]
+    oc_fmap = fvc_fields["Order Catalog"]["display_to_code_value"]
+    for runtime_ce_list in (
+        BATHING_HYGIENE_CE_EVENTS,
+        NUTRITION_ASSESSMENT_CE_EVENTS,
+        PHARMACY_INTERVENTIONS_CE_EVENTS,
+        IV_CENTRAL_LINE_CE_EVENTS,
+    ):
+        for disp, cv in runtime_ce_list:
+            assert ce_fmap.get(disp) == cv.split(".")[0], f"Runtime CE Event mismatch for {disp}: {cv} vs {ce_fmap.get(disp)}"
+    for runtime_oc_list in (
+        PRECAUTION_ORDER_CATALOG_ITEMS,
+        OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS,
+        WOUND_CONSULT_ORDER_CATALOG_ITEMS,
+    ):
+        for disp, cv in runtime_oc_list:
+            assert oc_fmap.get(disp) == cv.split(".")[0], f"Runtime Order Catalog mismatch for {disp}: {cv} vs {oc_fmap.get(disp)}"
     sft_rows = [
         json.loads(line)
         for line in (Path(__file__).resolve().parents[1] / "data" / "sft_train_v1.jsonl").read_text(encoding="utf-8").splitlines()
