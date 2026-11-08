@@ -3062,7 +3062,7 @@
         "Billing Clerk",
         "CMA"
       ],
-      "disambiguation_note": "Encounter-level provider relationship (Code Set 333). IMPORTANT: Joining 'Personnel Encounter Relationship' directly can cause 1-to-many row duplication when multiple consulting providers exist. Whenever only the primary Attending, Admitting, Referring, Consulting, or Supervising Physician, Primary Nurse, Case Manager, or Social Worker is needed, use 'Encounter Functions' ('Enc Attending Phys', 'Enc Admitting Phys', 'Enc Case Manager', etc. — No Join Required).",
+      "disambiguation_note": "Encounter-level provider relationship (Code Set 333). IMPORTANT: Joining 'Personnel Encounter Relationship' directly can cause 1-to-many row duplication when multiple consulting providers exist. Whenever only the primary Attending, Admitting, Referring, Consulting, or Supervising Physician, Primary Nurse, Case Manager, or Social Worker is needed, use 'Encounter Functions' ('Enc Attending Phys', 'Enc Admitting Phys', 'Enc Case Manager', etc. \u2014 No Join Required).",
       "live_code_value_sample": {
         "Activities Assistant": "21685919",
         "Activities Director": "20944572",
@@ -6999,7 +6999,7 @@
     "v500_target": "CLINICAL_EVENT.EVENT_CD",
     "code_set": 72,
     "estimated_domain_cardinality": "10,000 to 60,000+ active CODE_VALUE rows per Millennium domain",
-    "why_ce_event_is_unique": "In Cerner Millennium PowerChart, nearly every clinical observation — PowerForm discrete fields, InteractiveView (iView) flowsheet rows, IRF-PAI Section GG & FIM functional scores, PT/OT/SLP therapy treatment minutes, vital signs, nursing risk assessments (Morse Fall, Braden, Pain, GCS, NIHSS, PHQ-9), General Lab/Microbiology/Point-of-Care test results, Dynamic Documentation PowerNotes, and scanned CPDI documents — is stored in CLINICAL_EVENT and identified by 'CE Event' (CLINICAL_EVENT.EVENT_CD, Code Set 72). Knowing the exact PowerChart 'CE Event' display vocabulary and how it maps to Event Sets (Code Set 93) and Discrete Task Assays (Code Set 14003) is mandatory for translating clinical requests into working DA2/CCL queries.",
+    "why_ce_event_is_unique": "In Cerner Millennium PowerChart, nearly every clinical observation \u2014 PowerForm discrete fields, InteractiveView (iView) flowsheet rows, IRF-PAI Section GG & FIM functional scores, PT/OT/SLP therapy treatment minutes, vital signs, nursing risk assessments (Morse Fall, Braden, Pain, GCS, NIHSS, PHQ-9), General Lab/Microbiology/Point-of-Care test results, Dynamic Documentation PowerNotes, and scanned CPDI documents \u2014 is stored in CLINICAL_EVENT and identified by 'CE Event' (CLINICAL_EVENT.EVENT_CD, Code Set 72). Knowing the exact PowerChart 'CE Event' display vocabulary and how it maps to Event Sets (Code Set 93) and Discrete Task Assays (Code Set 14003) is mandatory for translating clinical requests into working DA2/CCL queries.",
     "discovery_and_filtering_strategies": [
       {
         "strategy_id": "da2_filter_list_substring_search",
@@ -8462,10 +8462,10 @@
   },
   "live_harvested_code_value_mappings": {
     "description": "Exact DISPLAY <-> CODE_VALUE pairs harvested from live DA2 <cclquery> XML (<values type='LIST'><value display='...' text='...'/></values>) across clinical, therapy, nursing, pharmacy, scheduling, and billing queries.",
-    "total_coded_value_pairs": 6458,
+    "total_coded_value_pairs": 6678,
     "fields": {
       "CE Event": {
-        "count": 2530,
+        "count": 2535,
         "display_to_code_value": {
           "Admission Note-Physician": "2820507",
           "Bath Type": "54993041",
@@ -10996,11 +10996,16 @@
           "Oral Transit,Soft Solid Consistency": "4368965",
           "Oral care with Tube Feedings - Task": "141012963",
           "Oral kcal": "118702721",
-          "Oral mL of Fluid": "118702773"
+          "Oral mL of Fluid": "118702773",
+          "Clinic Provider Initial Note": "34285167",
+          "Internal Medicine Consultation": "2820513",
+          "Internal Medicine Office/Clinic Note": "2820528",
+          "Medication Administration Follow Up-Text": "3946271",
+          "Nutrition Assessment Completed": "54134057"
         }
       },
       "Order Catalog": {
-        "count": 1048,
+        "count": 1063,
         "display_to_code_value": {
           "BIPAP": "75407331",
           "CPAP": "75407311",
@@ -12049,7 +12054,22 @@
           "oxyCODONE": "2765831",
           "oxyMORphone": "2765912",
           "ropivacaine-sufentanil": "11239878",
-          "tapentadol": "6267705"
+          "tapentadol": "6267705",
+          "acetaMINOPHEN": "2756455",
+          "fentanyl": "2758613",
+          "methocarbamol": "2764652",
+          "oxyCODONE-acetaminophen": "2758467",
+          "pregabaLIN": "2777211",
+          "Fall Precautions": "38884839",
+          "Hip Precautions": "38885579",
+          "Isolation": "2958766",
+          "Neutropenic Precautions": "38886875",
+          "Seizure Precautions": "38888573",
+          "Spinal Precautions": "38888949",
+          "Sternal Precautions": "274704793",
+          "Weight Bearing Status/Precautions": "38890609",
+          "Patient Observation Needs (1:1, Enhanced Supervision, Close Observation)": "257629611",
+          "Continuous Video Monitoring": "257630227"
         }
       },
       "Order Catalog Type": {
@@ -15474,12 +15494,13 @@
         }
       },
       "HP E R Verify Status": {
-        "count": 4,
+        "count": 5,
         "display_to_code_value": {
           "Ambiguous": "684160",
           "Denied": "684156",
           "Verified": "684161",
-          "Yes": "56625341"
+          "Yes": "56625341",
+          "Yes Follow Up": "56623625"
         }
       },
       "Med Adm Event Type": {

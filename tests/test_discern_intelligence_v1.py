@@ -1261,3 +1261,149 @@ def test_oral_care_and_bladder_bowel_reports_and_ltca_owner_group() -> None:
 
     bladder_dx_bundle = gen.generate("Build a bladder diagnosis report with ICD-10 codes for active inpatients.")
     assert bladder_dx_bundle.report_name != "Bladder_Bowel_Management_Report"
+
+
+def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
+    from discern_intelligence.da2_generator import (
+        BATHING_HYGIENE_CE_EVENTS,
+        IV_CENTRAL_LINE_CE_EVENTS,
+        NUTRITION_ASSESSMENT_CE_EVENTS,
+        OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS,
+        PHARMACY_INTERVENTIONS_CE_EVENTS,
+        PRECAUTION_ORDER_CATALOG_ITEMS,
+        VERIFIED_CWC_ENCOUNTER_UUIDS,
+        WOUND_CONSULT_ORDER_CATALOG_ITEMS,
+    )
+    from discern_intelligence.knowledge import load_da2_canonical_reports_catalog, resolve_da2_filter_value
+
+    gen = DA2ReportGenerator()
+    canon_reports = load_da2_canonical_reports_catalog()["canonical_queries_and_reports"]
+    assert len(canon_reports) >= 36
+
+    # 1. Bathing & Daily Hygiene Documentation Report (and verify "discharged" does NOT trigger CHARGE pollution)
+    bath_req = (
+        "Build a Bathing and Daily Hygiene Documentation report for active or recently discharged "
+        "inpatients showing bath type, shower/bed bath assistance, CHG bath, perineal care, and bathing refused reason."
+    )
+    bath_bundle = gen.generate(bath_req)
+    assert bath_bundle.report_name == "Bathing_Hygiene_Documentation_Report"
+    assert bath_bundle.verification.is_valid, f"Bath bundle invalid: {bath_bundle.verification.errors}"
+    assert len(bath_bundle.queries) == 1
+    bath_elems = [e["da2_field_name"] for e in bath_bundle.queries[0].selected_elements]
+    assert not any(c.startswith("Chg ") for c in bath_elems), f"Substring 'discharged' polluted CHARGE cols: {bath_elems}"
+    bath_dq = bath_bundle.queries[0].daquery_xml
+    assert len(BATHING_HYGIENE_CE_EVENTS) >= 2
+    assert 'display="Bath Type" text="54993041.00"' in bath_dq
+    assert 'display="Bathing Refused Reason" text="54993005.00"' in bath_dq
+
+    # 2. Inpatient Nutrition Assessment & Malnutrition Audit
+    nutr_req = (
+        "Build an Inpatient Nutrition Assessment and Malnutrition report showing nutrition risk screening, "
+        "BMI, weight dosing, height/length measured, meal intake %, and tube feeding documentation."
+    )
+    nutr_bundle = gen.generate(nutr_req)
+    assert nutr_bundle.report_name == "Inpatient_Nutrition_Assessment_Report"
+    assert nutr_bundle.verification.is_valid
+    assert len(NUTRITION_ASSESSMENT_CE_EVENTS) >= 16
+    assert 'display="Nutrition Assessment and Plan Form" text="64892683.00"' in nutr_bundle.queries[0].daquery_xml
+    assert 'display="Body Mass Index" text="705277.00"' in nutr_bundle.queries[0].daquery_xml
+
+    # 3. Pharmacy Clinical Interventions & Antimicrobial Stewardship Audit
+    pharm_req = (
+        "Build a Pharmacy Clinical Interventions and Antibiotic Stewardship report showing intervention type, "
+        "pharmacist intervention time, significance, response value, and med rec notes."
+    )
+    pharm_bundle = gen.generate(pharm_req)
+    assert pharm_bundle.report_name == "Pharmacy_Clinical_Interventions_Report"
+    assert pharm_bundle.verification.is_valid
+    assert len(PHARMACY_INTERVENTIONS_CE_EVENTS) >= 10
+    assert 'display="Intervention Type Pharmacy" text="4203582.00"' in pharm_bundle.queries[0].daquery_xml
+    assert 'display="Pharmacist Intervention Time" text="4203600.00"' in pharm_bundle.queries[0].daquery_xml
+
+    # 4. Peripheral & Central IV Catheter Surveillance Report
+    iv_req = (
+        "Build a Peripheral IV and Central Line / PICC Catheter Surveillance report showing insertion date/time, "
+        "lumen count, dressing status, site assessment, and phlebitis/infiltration scale."
+    )
+    iv_bundle = gen.generate(iv_req)
+    assert iv_bundle.report_name == "Peripheral_Central_IV_Catheter_Report"
+    assert iv_bundle.verification.is_valid
+    assert len(IV_CENTRAL_LINE_CE_EVENTS) >= 5
+    assert 'display="Peripheral IV Activity:" text="22055797.00"' in iv_bundle.queries[0].daquery_xml
+    assert 'display="Central IV #1" text="4153930.00"' in iv_bundle.queries[0].daquery_xml
+
+    # 5. Inpatient Precaution & Isolation Orders Report (must NOT trigger C-SSRS 7-query template on "Suicide Precautions")
+    prec_req = (
+        "Build an Inpatient Precaution and Isolation Orders report for current inpatients showing Fall Precautions, "
+        "Contact Precautions, Droplet Precautions, Airborne Precautions, Aspiration Precautions, Seizure Precautions, "
+        "and Suicide Precautions orders."
+    )
+    prec_bundle = gen.generate(prec_req)
+    assert prec_bundle.report_name == "Inpatient_Precaution_Orders_Report"
+    assert prec_bundle.verification.is_valid, f"Precaution orders invalid: {prec_bundle.verification.errors}"
+    assert len(prec_bundle.queries) == 1
+    prec_dq = prec_bundle.queries[0].daquery_xml
+    assert ET.fromstring(prec_dq).find("query_list").attrib.get("xCount") == "1"
+    assert len(PRECAUTION_ORDER_CATALOG_ITEMS) == 10
+    assert 'name="Order Catalog" type="1" uuid="ca672220-76a6-4601-bc0f-f0104e07874c"' in prec_dq
+    assert 'display="Suicide Precautions" text="38889485.00"' in prec_dq
+    assert 'display="Fall Precautions" text="38884839.00"' in prec_dq
+
+    # 6. 1:1 Observation & Video Monitoring Orders, Wound Care Consult Orders, and Diet Orders
+    obs_bundle = gen.generate(
+        "Build a 1:1 Constant Visual Observation and Video Monitoring orders report for active inpatients."
+    )
+    assert obs_bundle.report_name == "One_To_One_Observation_Orders_Report"
+    assert obs_bundle.verification.is_valid
+    assert len(OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS) == 2
+    assert 'display="Patient Observation Needs (1:1, Enhanced Supervision, Close Observation)" text="257629611.00"' in obs_bundle.queries[0].daquery_xml
+    assert 'display="Continuous Video Monitoring" text="257630227.00"' in obs_bundle.queries[0].daquery_xml
+
+    wound_ord_bundle = gen.generate(
+        "Build a Wound Care Consult Orders report for inpatients showing order mnemonic, status, and order details."
+    )
+    assert wound_ord_bundle.report_name == "Wound_Care_Consult_Orders_Report"
+    assert wound_ord_bundle.verification.is_valid
+    assert len(WOUND_CONSULT_ORDER_CATALOG_ITEMS) == 2
+
+    diet_ord_bundle = gen.generate(
+        "Build an active inpatient Diet and Nutrition Orders report showing NPO, dysphagia diet, and tube feeding orders."
+    )
+    assert diet_ord_bundle.report_name == "Diet_And_Nutrition_Orders_Report"
+    assert diet_ord_bundle.verification.is_valid
+    assert 'name="Order Catalog Type" type="1" uuid="97f18dc3-faf9-42d5-a47a-999fe7cdf944"' in diet_ord_bundle.queries[0].daquery_xml
+
+    # 7. Word-boundary & domain isolation regression checks
+    hp_bundle = gen.generate(
+        "Build an Encounter Health Plans and Payer Coverage report for active inpatients showing primary and secondary insurance plans."
+    )
+    assert hp_bundle.report_name == "Encounter_Health_Plans_Report"
+    assert hp_bundle.verification.is_valid
+    assert len(hp_bundle.queries) == 1
+    hp_elems = [e["da2_field_name"] for e in hp_bundle.queries[0].selected_elements]
+    assert "HP Plan Name" in hp_elems
+    assert "Med Adm Event Id" not in hp_elems, f"Substring 'primary' triggered MAR: {hp_elems}"
+    assert not any(c.startswith("Chg ") for c in hp_elems), f"Health plan triggered CHARGE: {hp_elems}"
+
+    mar_bundle = gen.generate(
+        "Build a Late Medication Administration Audit for inpatients showing medication name, scheduled date/time, and administered date/time."
+    )
+    assert mar_bundle.report_name == "Late_Medication_Administration_Audit"
+    assert mar_bundle.verification.is_valid
+    mar_elems = [e["da2_field_name"] for e in mar_bundle.queries[0].selected_elements]
+    assert "Sch App Id" not in mar_elems, f"'scheduled date/time' polluted Sch App Id: {mar_elems}"
+
+    att_bundle = gen.generate(
+        "Build an active inpatient census showing patient name, FIN, room/bed, attending physician, and admit date."
+    )
+    assert att_bundle.verification.is_valid
+    assert len(att_bundle.queries) == 1
+    att_elems = [e["da2_field_name"] for e in att_bundle.queries[0].selected_elements]
+    assert "Enc Attending Phys" in att_elems
+    assert "Adj Post Prsnl" not in att_elems
+
+    # 8. Filter value catalog resolution for newly harvested Code Set 72 & Code Set 200 items
+    bath_hits = resolve_da2_filter_value("Bath Type", da2_field_name="CE Event", code_set=72)
+    assert bath_hits and bath_hits[0]["matched_code_values"].get("Bath Type") == "54993041"
+    prec_hits = resolve_da2_filter_value("Fall Precautions", da2_field_name="Order Catalog", code_set=200)
+    assert prec_hits and prec_hits[0]["matched_code_values"].get("Fall Precautions") == "38884839"
