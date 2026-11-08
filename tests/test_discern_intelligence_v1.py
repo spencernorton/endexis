@@ -1430,6 +1430,17 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     q2_mar_names = [e["da2_field_name"] for e in combined_prec_mar.queries[1].selected_elements]
     assert "Med Adm Sch Dt/Tm" in q2_mar_names or "Task Atv Scheduled Dt/Tm" in q2_mar_names
     assert "Med Adm Dt/Tm" in q2_mar_names or "Med Adm Beg Dt/Tm" in q2_mar_names
+    for alias_prompt in (
+        "Fall precaution orders and late MAR audit for active inpatients.",
+        "Fall precaution orders and missed medication audit for active inpatients.",
+    ):
+        alias_bundle = gen.generate(alias_prompt)
+        assert alias_bundle.verification.is_valid, f"Combined alias invalid for {alias_prompt}: {alias_bundle.verification.errors}"
+        assert len(alias_bundle.queries) == 2
+        assert alias_bundle.execution_strategy == "two_dataset_birt_join"
+        assert 'display="Fall Precautions" text="38884839.00"' in alias_bundle.queries[0].daquery_xml
+        alias_q2 = [e["da2_field_name"] for e in alias_bundle.queries[1].selected_elements]
+        assert "Med Adm Sch Dt/Tm" in alias_q2 and "Med Adm Dt/Tm" in alias_q2
 
     # 7. Word-boundary & domain isolation regression checks
     hp_bundle = gen.generate(

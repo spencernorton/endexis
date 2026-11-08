@@ -1224,6 +1224,10 @@ class DA2ReportGenerator:
                 })
 
         if is_targeted_order_report:
+            pre_mar_elements = [
+                e for e in all_elements
+                if e.get("da2_field_name", "").startswith(("Med Adm", "Task Atv", "CE Med"))
+            ]
             all_elements.clear()
             seen_names.clear()
             order_cols = [
@@ -1272,11 +1276,35 @@ class DA2ReportGenerator:
                     "primary_order_catalog_types": target_order_cat_types if cname == "Order Catalog Type" else None,
                     "value_semantics_and_guardrails": "Live-verified CWC Encounter orders element",
                 })
-            if any(k in low_req for k in ("medication administration", "med admin", "late medication", "missed dose", "late dose", "bcma", "barcode", "scheduled task", "overdue task")):
+            has_mar_audit_intent = bool(pre_mar_elements) or any(
+                k in low_req
+                for k in (
+                    "medication administration",
+                    "med admin",
+                    "late medication",
+                    "late dose",
+                    "late doses",
+                    "late mar",
+                    "missed medication",
+                    "missed med",
+                    "missed dose",
+                    "overdue medication task",
+                    "overdue task",
+                    "scheduled task",
+                    "bcma",
+                    "barcode",
+                )
+            )
+            if has_mar_audit_intent:
+                for e in pre_mar_elements:
+                    ename = e["da2_field_name"]
+                    if ename not in seen_names:
+                        seen_names.add(ename)
+                        all_elements.append(e)
                 for cm in interp.matched_columns:
                     if cm.da2_field_name and cm.da2_field_name.startswith(("Med Adm", "Task Atv", "CE Med")):
                         add_elem(cm.da2_field_name)
-                if "scheduled" in low_req:
+                if any(w in low_req for w in ("scheduled", "late", "missed", "overdue")):
                     add_elem("Med Adm Sch Dt/Tm")
                 add_elem("Med Adm Dt/Tm")
                 add_elem("Med Adm Event Id")
