@@ -1348,6 +1348,23 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert 'name="Order Catalog" type="1" uuid="ca672220-76a6-4601-bc0f-f0104e07874c"' in prec_dq
     assert 'display="Suicide Precautions" text="4149527.00"' in prec_dq
     assert 'display="Fall Precautions" text="38884839.00"' in prec_dq
+    assert "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)" in prec_bundle.queries[0].ejs_v500_sql
+    assert "ENCNTR_PRSNL_RELTN" not in prec_bundle.queries[0].ejs_v500_sql
+    att_el = next(e for e in prec_bundle.queries[0].selected_elements if e["da2_field_name"] == "Enc Attending Phys")
+    assert att_el["element_uuid"] == "beb01385-36a9-4371-93e2-68056229e216"
+    assert att_el["da2_bus_view_subentity"] == "Encounter Functions"
+    assert att_el["v500_target"] == "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)"
+    from discern_intelligence.sql_execution_harness import create_synthetic_v500_connection, execute_and_verify_ejs_sql
+    conn_ord = create_synthetic_v500_connection()
+    try:
+        conn_ord.executescript(
+            "CREATE TABLE IF NOT EXISTS V500.ENCNTR_PRSNL_RELTN (ENCNTR_PRSNL_RELTN_ID INTEGER PRIMARY KEY, ENCNTR_ID INTEGER, PRSNL_PERSON_ID INTEGER, ENCNTR_PRSNL_R_CD INTEGER, ACTIVE_IND INTEGER);"
+            "INSERT INTO V500.ENCNTR_PRSNL_RELTN VALUES (1, 1001, 9001, 1119, 1), (2, 1001, 9002, 1116, 1), (3, 1001, 9003, 1119, 1);"
+        )
+        ord_exec = execute_and_verify_ejs_sql(prec_bundle.queries[0].ejs_v500_sql, conn=conn_ord)
+        assert ord_exec["executed"] and ord_exec["non_empty"] and ord_exec["fanout_safe"], f"Order grain fan-out failed: {ord_exec}"
+    finally:
+        conn_ord.close()
 
     # 6. 1:1 Observation & Video Monitoring Orders, Wound Care Consult Orders, and Diet Orders
     obs_bundle = gen.generate(

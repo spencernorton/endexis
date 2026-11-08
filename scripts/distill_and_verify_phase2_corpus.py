@@ -473,11 +473,11 @@ def main() -> int:
         {
             "task": "expand_clinical_concept_to_code_value_bundle",
             "provenance": "live_da2_clinical_harvest_v2_2",
-            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map an Oral Care Documentation & Hygiene Audit request to its verified Code Set 72 CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30) CODE_VALUE filter list and encounter clinical grain.",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map an Oral Care Documentation & Hygiene Audit request to its verified Code Set 72 CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e) CODE_VALUE filter list and encounter clinical grain.",
             "response": {
                 "da2_domain": "CWC Encounter",
                 "report_name": "Oral_Care_Documentation_Report",
-                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "filter_element": "CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
                 "code_values": [
                     {"display": "Oral Care", "code_value": "700579.00"},
                     {"display": "Oral Care Equipment", "code_value": "54993077.00"},
@@ -496,11 +496,11 @@ def main() -> int:
         {
             "task": "expand_clinical_concept_to_code_value_bundle",
             "provenance": "live_da2_clinical_harvest_v2_2",
-            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map a Bladder & Bowel Continence Management Audit request to its verified Code Set 72 CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30) CODE_VALUE filter list.",
+            "instruction": "In Discern Analytics 2.0 (CWC Encounter), map a Bladder & Bowel Continence Management Audit request to its verified Code Set 72 CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e) CODE_VALUE filter list.",
             "response": {
                 "da2_domain": "CWC Encounter",
                 "report_name": "Bladder_Bowel_Management_Report",
-                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "filter_element": "CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
                 "code_values": [
                     {"display": "Bladder Management", "code_value": "36780603.00"},
                     {"display": "Bladder Scan Volume", "code_value": "704017.00"},
@@ -520,7 +520,7 @@ def main() -> int:
             "response": {
                 "da2_domain": "CWC Encounter",
                 "report_name": "Bathing_Hygiene_Documentation_Report",
-                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "filter_element": "CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
                 "code_values": [
                     {"display": "Bath Type", "code_value": "54993041.00"},
                     {"display": "Bathing Refused Reason", "code_value": "54993005.00"},
@@ -538,7 +538,7 @@ def main() -> int:
             "response": {
                 "da2_domain": "CWC Encounter",
                 "report_name": "Inpatient_Nutrition_Assessment_Report",
-                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "filter_element": "CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
                 "code_values": [
                     {"display": "Nutrition Assessment and Plan Form", "code_value": "64892683.00"},
                     {"display": "Nutrition Assessment Completed", "code_value": "54134057.00"},
@@ -557,7 +557,7 @@ def main() -> int:
             "response": {
                 "da2_domain": "CWC Encounter",
                 "report_name": "Pharmacy_Clinical_Interventions_Report",
-                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "filter_element": "CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
                 "code_values": [
                     {"display": "Pharmacy Clinical Interventions Form", "code_value": "4203612.00"},
                     {"display": "Intervention Type Pharmacy", "code_value": "4203582.00"},
@@ -576,7 +576,7 @@ def main() -> int:
             "response": {
                 "da2_domain": "CWC Encounter",
                 "report_name": "Peripheral_Central_IV_Catheter_Report",
-                "filter_element": "CE Event (b948fe47-a724-4030-9f12-b0bf13b0be30 -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
+                "filter_element": "CE Event (f01d0cc1-f599-46be-b816-ecd82fffbb0e -> CLINICAL_EVENT.EVENT_CD, Code Set 72)",
                 "code_values": [
                     {"display": "Peripheral IV Activity:", "code_value": "17022182.00"},
                     {"display": "Central IV #1", "code_value": "4153930.00"},
@@ -595,7 +595,7 @@ def main() -> int:
                 "report_name": "Inpatient_Precaution_Orders_Report",
                 "filter_element": "Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c -> ORDERS.CATALOG_CD, Code Set 200)",
                 "order_columns": [
-                    "Order Id (9a0c89db-959f-4e67-aa76-3cb49c698026)",
+                    "Order Id (0081bf6a-b747-49ad-be49-e193d5b3bc93)",
                     "Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c)",
                     "Order Mnemonic (7120df4c-b25b-4595-badb-79dedda7f9aa)",
                     "Order Detail Display (a371d5d0-f1a0-41f0-a2af-aeeceef175e2)",
@@ -619,12 +619,12 @@ def main() -> int:
         {
             "task": "disambiguate_lookalike_da2_fields",
             "provenance": "live_da2_clinical_harvest_v2_2",
-            "instruction": "In Discern Analytics 2.0, disambiguate CWC Encounter Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c) and Enc Attending Phys (e43ef111-119b-4239-993a-daaa45e78c85) from CWC Person Order Catalog (30f92b49-fbbe-4bf5-9382-3df2abcfef7b) and CWF GS Adjustments Adj Post Prsnl.",
+            "instruction": "In Discern Analytics 2.0, disambiguate CWC Encounter Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c) and Enc Attending Phys (beb01385-36a9-4371-93e2-68056229e216) from CWC Person Order Catalog (30f92b49-fbbe-4bf5-9382-3df2abcfef7b) and CWF GS Adjustments Adj Post Prsnl.",
             "response": {
                 "da2_domain": "CWC Encounter",
                 "cwc_encounter_order_catalog": "Order Catalog (ca672220-76a6-4601-bc0f-f0104e07874c -> ORDERS.CATALOG_CD, Code Set 200)",
                 "cwc_encounter_order_catalog_type": "Order Catalog Type (97f18dc3-faf9-42d5-a47a-999fe7cdf944 -> ORDERS.CATALOG_TYPE_CD, Code Set 6000)",
-                "cwc_encounter_attending_physician": "Enc Attending Phys (e43ef111-119b-4239-993a-daaa45e78c85 -> CWC_ENC_FUNC.GET_PRSNL_NAME_BY_ID)",
+                "cwc_encounter_attending_physician": "Enc Attending Phys (beb01385-36a9-4371-93e2-68056229e216 -> CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID))",
                 "guardrail": "Never use CWC Person Order Catalog UUIDs inside a CWC Encounter <cclquery> document, and never map attending physician or encounter admit/discharge dates to CWF GS Adjustments (Adj Post Prsnl) or CWF GS Revenue (F Enc inpatient Admit Dt/Tm) unless revenue/adjustments are explicitly requested.",
             },
         },
@@ -1059,9 +1059,9 @@ def main() -> int:
             "prompt": "Build a CWC Encounter clinical report showing patient name, FIN, room/bed, attending physician, admit date, and discharge date.",
             "chosen": {
                 "da2_domain": "CWC Encounter",
-                "attending_physician_element": "Enc Attending Phys (e43ef111-119b-4239-993a-daaa45e78c85)",
-                "admit_date_element": "Enc Inpatient Admit Dt/Tm (42de992b-fe3c-4ff8-aa5d-d2ccbb7f7f05)",
-                "discharge_date_element": "Enc Discharge Dt/Tm (c6acbd64-fb7a-4484-9e77-d6c6b172c5e6)",
+                "attending_physician_element": "Enc Attending Phys (beb01385-36a9-4371-93e2-68056229e216)",
+                "admit_date_element": "Enc Inpatient Admit Dt/Tm (5f44f766-2da4-4cff-b050-7bfb5159b6b8)",
+                "discharge_date_element": "Enc Discharge Dt/Tm (1d44a53e-cba7-4ddf-80c4-d86205e30e0d)",
                 "guardrail": "Keep the query in single-domain CWC Encounter using Enc Attending Phys and Enc Inpatient Admit Dt/Tm / Enc Discharge Dt/Tm.",
             },
             "rejected": {

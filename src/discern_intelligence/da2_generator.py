@@ -1232,7 +1232,7 @@ class DA2ReportGenerator:
                 ("Enc Loc Nurse Unit", "75267dc7-d5c6-437b-aa34-98e46bbc5db1", "vc (STRING)", "ENCOUNTER.LOC_NURSE_UNIT_CD", "Encounter", 220),
                 ("Enc Loc Room", "e52b4716-00f9-42ab-8a04-8ba1e9ea1ece", "vc (STRING)", "ENCOUNTER.LOC_ROOM_CD", "Encounter", 220),
                 ("Bed Loc", "219ba43a-c7ee-44a4-8e79-052d4a5703da", "vc (STRING)", "ENCOUNTER.LOC_BED_CD", "Encounter", 220),
-                ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "ENCNTR_PRSNL_RELTN.PRSNL_PERSON_ID", "Encounter", 333),
+                ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)", "Encounter Functions", None),
                 ("Enc Type", "10b02c36-ff84-47d6-a825-ea142281a547", "vc (STRING)", "ENCOUNTER.ENCNTR_TYPE_CD", "Encounter", 71),
                 ("Enc Status", "7161959f-72cd-46bb-b6f6-2b177edd0469", "vc (STRING)", "ENCOUNTER.ENCNTR_STATUS_CD", "Encounter", 261),
                 ("Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a", "dq8 (DATETIME)", "ENCOUNTER.REG_DT_TM", "Encounter", None),
@@ -1306,7 +1306,7 @@ class DA2ReportGenerator:
                     ("Enc Loc Nurse Unit", "75267dc7-d5c6-437b-aa34-98e46bbc5db1", "vc (STRING)", "ENCOUNTER.LOC_NURSE_UNIT_CD", "Encounter", 220),
                     ("Enc Loc Room", "e52b4716-00f9-42ab-8a04-8ba1e9ea1ece", "vc (STRING)", "ENCOUNTER.LOC_ROOM_CD", "Encounter", 220),
                     ("Bed Loc", "219ba43a-c7ee-44a4-8e79-052d4a5703da", "vc (STRING)", "ENCOUNTER.LOC_BED_CD", "Encounter", 220),
-                    ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "ENCNTR_PRSNL_RELTN.PRSNL_PERSON_ID", "Encounter", 333),
+                    ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)", "Encounter Functions", None),
                     ("Enc Type", "10b02c36-ff84-47d6-a825-ea142281a547", "vc (STRING)", "ENCOUNTER.ENCNTR_TYPE_CD", "Encounter", 71),
                     ("Enc Status", "7161959f-72cd-46bb-b6f6-2b177edd0469", "vc (STRING)", "ENCOUNTER.ENCNTR_STATUS_CD", "Encounter", 261),
                     ("Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a", "dq8 (DATETIME)", "ENCOUNTER.REG_DT_TM", "Encounter", None),
@@ -2126,6 +2126,8 @@ class DA2ReportGenerator:
         ]
 
         q_up = q_name.upper()
+        if any(e["da2_field_name"] == "Enc Attending Phys" for e in elements):
+            select_exprs.append("  CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID) AS Enc_Attending_Phys")
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in elements)
         has_orders = any(e["da2_field_name"].startswith("Order ") for e in elements)
         has_chg = any(e["da2_field_name"].startswith(("Chg ", "BO ", "Rev ")) for e in elements) or domain == "CWF GS Revenue"
