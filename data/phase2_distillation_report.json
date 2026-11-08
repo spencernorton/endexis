@@ -1,11 +1,11 @@
 {
   "phase2_distillation_and_verification": {
     "ge_teacher_rationales_distilled": 3,
-    "sft_candidates_evaluated": 4501,
-    "sft_accepted": 4501,
+    "sft_candidates_evaluated": 4637,
+    "sft_accepted": 4637,
     "sft_rejected_by_verifier": 0,
-    "dpo_candidates_evaluated": 189,
-    "dpo_accepted": 189,
+    "dpo_candidates_evaluated": 199,
+    "dpo_accepted": 199,
     "dpo_rejected_by_verifier": 0,
     "reasoning_trace_coverage_rate": 1.0,
     "zero_leakage_enforced": true

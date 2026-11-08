@@ -217,7 +217,7 @@ IV_CENTRAL_LINE_CE_EVENTS: list[tuple[str, str]] = [
 ]
 
 PRECAUTION_ORDER_CATALOG_ITEMS: list[tuple[str, str]] = [
-    ("Aspiration Precautions", "38881693.00"),
+    ("Aspiration Precautions", "2780633.00"),
     ("Fall Precautions", "38884839.00"),
     ("Hip Precautions", "38885579.00"),
     ("Isolation", "2958766.00"),
@@ -225,7 +225,7 @@ PRECAUTION_ORDER_CATALOG_ITEMS: list[tuple[str, str]] = [
     ("Seizure Precautions", "38888573.00"),
     ("Spinal Precautions", "38888949.00"),
     ("Sternal Precautions", "274704793.00"),
-    ("Suicide Precautions", "38889485.00"),
+    ("Suicide Precautions", "4149527.00"),
     ("Weight Bearing Status/Precautions", "38890609.00"),
 ]
 

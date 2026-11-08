@@ -1346,7 +1346,7 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert ET.fromstring(prec_dq).find("query_list").attrib.get("xCount") == "1"
     assert len(PRECAUTION_ORDER_CATALOG_ITEMS) == 10
     assert 'name="Order Catalog" type="1" uuid="ca672220-76a6-4601-bc0f-f0104e07874c"' in prec_dq
-    assert 'display="Suicide Precautions" text="38889485.00"' in prec_dq
+    assert 'display="Suicide Precautions" text="4149527.00"' in prec_dq
     assert 'display="Fall Precautions" text="38884839.00"' in prec_dq
 
     # 6. 1:1 Observation & Video Monitoring Orders, Wound Care Consult Orders, and Diet Orders
