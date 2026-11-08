@@ -168,6 +168,74 @@ BLADDER_BOWEL_CE_EVENTS: list[tuple[str, str]] = [
     ("Urinary Catheter Type", "712510.00"),
 ]
 
+BATHING_HYGIENE_CE_EVENTS: list[tuple[str, str]] = [
+    ("Bath Type", "54993041.00"),
+    ("Bathing Refused Reason", "54993005.00"),
+]
+
+NUTRITION_ASSESSMENT_CE_EVENTS: list[tuple[str, str]] = [
+    ("Nutrition Assessment and Plan - Text", "67666795.00"),
+    ("Nutrition Assessment and Plan Form", "64892683.00"),
+    ("Nutrition Assessment and Plan - Task", "141031257.00"),
+    ("Nutrition Assessment Completed", "54134057.00"),
+    ("Nutrition Evaluation - Form", "40691519.00"),
+    ("Nutrition Evaluation - Task", "141031285.00"),
+    ("Nutrition Evaluation - Text", "21564454.00"),
+    ("Nutritional Screening - Form", "359275439.00"),
+    ("Body Mass Index", "705277.00"),
+    ("Body Mass Index Measured", "4154132.00"),
+    ("Body Mass Index Estimated", "4154144.00"),
+    ("Body Mass Index Nutrition", "18837898.00"),
+    ("Home Diet", "705140.00"),
+    ("Nutrition Risk Factors", "16721672.00"),
+    ("Nutritional Risk Factors", "705249.00"),
+    ("Weight Measured", "704352.00"),
+]
+
+PHARMACY_INTERVENTIONS_CE_EVENTS: list[tuple[str, str]] = [
+    ("Pharmacy Clinical Interventions Form", "4203579.00"),
+    ("Intervention Type Pharmacy", "4203582.00"),
+    ("Associated Order(s) Pharmacy", "4203585.00"),
+    ("Pharmacy Order Initiated By", "4203588.00"),
+    ("Clinical Importance Pharmacy", "4203591.00"),
+    ("Prescriber Response Pharmacy", "4203594.00"),
+    ("Patient Clinical Outcome Pharmacy", "4203597.00"),
+    ("Pharmacist Intervention Time", "4203600.00"),
+    ("Pharmacoeconomic Impact", "4203603.00"),
+    ("Pharmacy Prescribing Physician", "4203606.00"),
+]
+
+IV_CENTRAL_LINE_CE_EVENTS: list[tuple[str, str]] = [
+    ("Peripheral IV Activity:", "22055797.00"),
+    ("Central IV #1", "4153930.00"),
+    ("Central IV #1 Access Type", "4153933.00"),
+    ("Central IV #1 Activity", "4153936.00"),
+    ("Central IV #1 Catheter Size/Length", "4153939.00"),
+]
+
+PRECAUTION_ORDER_CATALOG_ITEMS: list[tuple[str, str]] = [
+    ("Aspiration Precautions", "38881693.00"),
+    ("Fall Precautions", "38884839.00"),
+    ("Hip Precautions", "38885579.00"),
+    ("Isolation", "2958766.00"),
+    ("Neutropenic Precautions", "38886875.00"),
+    ("Seizure Precautions", "38888573.00"),
+    ("Spinal Precautions", "38888949.00"),
+    ("Sternal Precautions", "274704793.00"),
+    ("Suicide Precautions", "38889485.00"),
+    ("Weight Bearing Status/Precautions", "38890609.00"),
+]
+
+OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS: list[tuple[str, str]] = [
+    ("Patient Observation Needs (1:1, Enhanced Supervision, Close Observation)", "257629611.00"),
+    ("Continuous Video Monitoring", "257630227.00"),
+]
+
+WOUND_CONSULT_ORDER_CATALOG_ITEMS: list[tuple[str, str]] = [
+    ("Consult to Wound Care", "20266108.00"),
+    ("Consult to Wound Care Specialist", "4457342.00"),
+]
+
 DEPRECATED_CWC_UUIDS: set[str] = {
     "db2565e2-c861-4171-b9e7-3133a75e336b",
     "1a7bbb05-a797-42d6-b5f4-0bb86ff51608",
@@ -708,7 +776,10 @@ class DA2ReportGenerator:
             w in low for w in ("active inpatient", "current inpatient", "midnight census", "currently admitted", "inhouse")
         )
 
-        is_cssrs = any(w in low for w in ("cssrs", "c-ssrs", "columbia", "suicide"))
+        is_cssrs = (
+            any(w in low for w in ("cssrs", "c-ssrs", "columbia", "suicide"))
+            and not ("suicide precaution" in low and not any(w in low for w in ("cssrs", "c-ssrs", "columbia", "screening")))
+        )
         is_provider_clinical_notes = (
             any(
                 w in low
@@ -800,7 +871,11 @@ class DA2ReportGenerator:
 
         # Domain and sub-entity element expansion from general clinical/financial semantics
         low_req = interp.request_text.lower()
-        is_cssrs = any(k in low_req for k in ("cssrs", "c-ssrs", "columbia", "suicide"))
+        is_meta_question = any(k in low_req for k in ("where is", "where are", "which table", "which column"))
+        is_cssrs = (
+            any(k in low_req for k in ("cssrs", "c-ssrs", "columbia", "suicide"))
+            and not ("suicide precaution" in low_req and not any(k in low_req for k in ("cssrs", "c-ssrs", "columbia", "screening")))
+        )
         is_rehab_therapy_minutes = (
             any(k in low_req for k in ("therapy minutes by discipline", "pt, ot, and slp", "pt/ot/slp", "rehab therapy minutes"))
             and not any(k in low_req for k in ("reconcil", "cpt", "benefit order"))
@@ -819,7 +894,7 @@ class DA2ReportGenerator:
                     "gg0130 oral",
                 )
             )
-            and not any(k in low_req for k in ("where is", "which table", "which column"))
+            and not is_meta_question
         )
         is_bladder_bowel = (
             (
@@ -865,12 +940,10 @@ class DA2ReportGenerator:
                     )
                 )
             )
+            and not is_meta_question
             and not any(
                 k in low_req
                 for k in (
-                    "where is",
-                    "which table",
-                    "which column",
                     "cauti",
                     "culture",
                     "order",
@@ -886,12 +959,73 @@ class DA2ReportGenerator:
                 )
             )
         )
+        is_bathing_hygiene = (
+            any(k in low_req for k in ("bathing", "bath type", "bathing refused", "daily hygiene", "chucks/wipes", "bed bath", "shower"))
+            and not is_oral_care
+            and not is_bladder_bowel
+            and not is_meta_question
+        )
+        is_nutrition_assessment = (
+            (
+                any(k in low_req for k in ("nutrition assessment", "nutritional screening", "nutrition evaluation", "dietary risk", "nutrition risk"))
+                or (("bmi" in low_req or "body mass index" in low_req) and any(k in low_req for k in ("nutrition", "weight", "bariatric", "diet")))
+            )
+            and not is_meta_question
+        )
+        is_pharmacy_interventions = (
+            any(k in low_req for k in ("pharmacy clinical intervention", "pharmacy intervention", "pharmacist intervention", "pharmacoeconomic", "prescriber response"))
+            and not is_meta_question
+        )
+        is_iv_central_line = (
+            any(k in low_req for k in ("peripheral iv", "central line", "central iv", "central venous", "picc line"))
+            and not any(k in low_req for k in ("order", "orders"))
+            and not is_meta_question
+        )
+        is_precaution_orders = (
+            any(
+                k in low_req
+                for k in (
+                    "precaution order",
+                    "precaution orders",
+                    "isolation order",
+                    "isolation orders",
+                    "fall precaution",
+                    "aspiration precaution",
+                    "seizure precaution",
+                    "suicide precaution",
+                    "hip precaution",
+                    "sternal precaution",
+                )
+            )
+            and not is_meta_question
+        )
+        is_observation_orders = (
+            any(k in low_req for k in ("1:1 observation", "video monitoring", "patient observation needs", "close observation", "sitter order"))
+            and not is_meta_question
+        )
+        is_wound_consult_orders = (
+            "wound" in low_req
+            and "consult" in low_req
+            and ("order" in low_req or "orders" in low_req)
+            and not is_meta_question
+        )
+        is_diet_orders = (
+            any(k in low_req for k in ("diet report", "diet order", "diet orders", "dietary order", "dietary orders", "npo", "tube feeding order"))
+            and "allergy" not in low_req
+            and not is_nutrition_assessment
+            and not is_meta_question
+        )
+        is_targeted_order_report = is_precaution_orders or is_observation_orders or is_wound_consult_orders or is_diet_orders
         is_census_risk_indicators = (
             any(
                 k in low_req for k in ("wound", "catheter", "fall risk", "morse", "braden", "risk indicators")
             )
             and not is_oral_care
             and not is_bladder_bowel
+            and not is_bathing_hygiene
+            and not is_iv_central_line
+            and not is_targeted_order_report
+            and not ("order" in low_req and "census" not in low_req)
             and not any(k in low_req for k in ("resuscitation", "code status", "where are", "which column"))
         )
         is_revenue_charge_reconciliation = any(
@@ -910,16 +1044,24 @@ class DA2ReportGenerator:
                     "fppe",
                 )
             )
-            and not any(k in low_req for k in ("where is", "which table", "which column"))
+            and not is_meta_question
         )
-        has_targeted_template = (
-            is_cssrs
-            or is_rehab_therapy_minutes
+        is_custom_ce_template = (
+            is_rehab_therapy_minutes
             or is_census_risk_indicators
             or is_revenue_charge_reconciliation
             or is_provider_clinical_notes
             or is_oral_care
             or is_bladder_bowel
+            or is_bathing_hygiene
+            or is_nutrition_assessment
+            or is_pharmacy_interventions
+            or is_iv_central_line
+        )
+        has_targeted_template = (
+            is_cssrs
+            or is_custom_ce_template
+            or is_targeted_order_report
             or any(
                 k in low_req
                 for k in (
@@ -1075,7 +1217,58 @@ class DA2ReportGenerator:
                     "value_semantics_and_guardrails": "Live-verified CWC Encounter element",
                 })
 
-        if is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes or is_oral_care or is_bladder_bowel:
+        if is_targeted_order_report:
+            all_elements.clear()
+            seen_names.clear()
+            order_cols = [
+                ("Enc Id", "5ef4381c-6344-43c4-81b5-2c18cd6bcb70", "vc (STRING)", "ENCOUNTER.ENCNTR_ID", "Encounter", None),
+                ("Enc Financial Num", "1a4ee2f6-2ed1-48b3-9d79-974352b9fabf", "vc (STRING)", "ENCNTR_ALIAS.ALIAS", "Encounter", 319),
+                ("Person MRN", "12db87ba-4466-4682-8f6c-28adf9a8c8d3", "vc (STRING)", "PERSON_ALIAS.ALIAS", "Person", 4),
+                ("Person Name Full Format", "12b363ca-f0d2-4a5d-afe3-3225de181f5f", "vc (STRING)", "PERSON.NAME_FULL_FORMATTED", "Person", None),
+                ("Enc Loc Facility", "b09f6eab-aa80-4110-a4af-3dcbbd00384b", "vc (STRING)", "ENCOUNTER.LOC_FACILITY_CD", "Encounter", 220),
+                ("Enc Loc Nurse Unit", "75267dc7-d5c6-437b-aa34-98e46bbc5db1", "vc (STRING)", "ENCOUNTER.LOC_NURSE_UNIT_CD", "Encounter", 220),
+                ("Enc Loc Room", "e52b4716-00f9-42ab-8a04-8ba1e9ea1ece", "vc (STRING)", "ENCOUNTER.LOC_ROOM_CD", "Encounter", 220),
+                ("Bed Loc", "219ba43a-c7ee-44a4-8e79-052d4a5703da", "vc (STRING)", "ENCOUNTER.LOC_BED_CD", "Encounter", 220),
+                ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "ENCNTR_PRSNL_RELTN.PRSNL_PERSON_ID", "Encounter", 333),
+                ("Enc Type", "10b02c36-ff84-47d6-a825-ea142281a547", "vc (STRING)", "ENCOUNTER.ENCNTR_TYPE_CD", "Encounter", 71),
+                ("Enc Status", "7161959f-72cd-46bb-b6f6-2b177edd0469", "vc (STRING)", "ENCOUNTER.ENCNTR_STATUS_CD", "Encounter", 261),
+                ("Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a", "dq8 (DATETIME)", "ENCOUNTER.REG_DT_TM", "Encounter", None),
+                ("Enc Discharge Dt/Tm", "1d44a53e-cba7-4ddf-80c4-d86205e30e0d", "dq8 (DATETIME)", "ENCOUNTER.DISCH_DT_TM", "Encounter", None),
+                ("Order Id", "0081bf6a-b747-49ad-be49-e193d5b3bc93", "vc (STRING)", "ORDERS.ORDER_ID", "Orders", None),
+                ("Order Catalog", "ca672220-76a6-4601-bc0f-f0104e07874c", "vc (STRING)", "ORDERS.CATALOG_CD", "Orders", 200),
+                ("Order Catalog Type", "97f18dc3-faf9-42d5-a47a-999fe7cdf944", "vc (STRING)", "ORDERS.CATALOG_TYPE_CD", "Orders", 6000),
+                ("Order Mnemonic", "7120df4c-b25b-4595-badb-79dedda7f9aa", "vc (STRING)", "ORDERS.ORDER_MNEMONIC", "Orders", 200),
+                ("Order Detail Display", "a371d5d0-f1a0-41f0-a2af-aeeceef175e2", "vc (STRING)", "ORDERS.CLINICAL_DISPLAY_LINE", "Orders", None),
+                ("Order Status", "1d1ee0d5-6e14-462f-bb27-2939048ea0bd", "vc (STRING)", "ORDERS.ORDER_STATUS_CD", "Orders", 6004),
+                ("Order Dt/Tm", "db8be1e0-6f63-4851-8f87-163fae80ead3", "dq8 (DATETIME)", "ORDERS.ORIG_ORDER_DT_TM", "Orders", None),
+                ("Order Start Dt/Tm", "5de804b0-ae7b-4044-9735-f897f5b46a23", "dq8 (DATETIME)", "ORDERS.CURRENT_START_DT_TM", "Orders", None),
+            ]
+            target_order_cat = None
+            target_order_cat_types = None
+            if is_precaution_orders:
+                target_order_cat = PRECAUTION_ORDER_CATALOG_ITEMS
+            elif is_observation_orders:
+                target_order_cat = OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS
+            elif is_wound_consult_orders:
+                target_order_cat = WOUND_CONSULT_ORDER_CATALOG_ITEMS
+            elif is_diet_orders:
+                target_order_cat_types = [("Dietary", "2511.00"), ("Nutritional Services", "636067.00")]
+            for cname, cuuid, ctype, vtarget, subent, cset in order_cols:
+                seen_names.add(cname)
+                all_elements.append({
+                    "da2_field_name": cname,
+                    "da2_domain": "CWC Encounter",
+                    "da2_bus_view_subentity": subent,
+                    "v500_target": vtarget,
+                    "ccl_data_type": ctype,
+                    "code_set": cset,
+                    "element_uuid": cuuid,
+                    "primary_order_catalog": target_order_cat if cname == "Order Catalog" else None,
+                    "primary_order_catalog_types": target_order_cat_types if cname == "Order Catalog Type" else None,
+                    "value_semantics_and_guardrails": "Live-verified CWC Encounter orders element",
+                })
+
+        if is_custom_ce_template:
             all_elements.clear()
             seen_names.clear()
             if is_provider_clinical_notes:
@@ -1130,6 +1323,14 @@ class DA2ReportGenerator:
                 target_ce_events = ORAL_CARE_CE_EVENTS
             elif is_bladder_bowel:
                 target_ce_events = BLADDER_BOWEL_CE_EVENTS
+            elif is_bathing_hygiene:
+                target_ce_events = BATHING_HYGIENE_CE_EVENTS
+            elif is_nutrition_assessment:
+                target_ce_events = NUTRITION_ASSESSMENT_CE_EVENTS
+            elif is_pharmacy_interventions:
+                target_ce_events = PHARMACY_INTERVENTIONS_CE_EVENTS
+            elif is_iv_central_line:
+                target_ce_events = IV_CENTRAL_LINE_CE_EVENTS
             elif is_provider_clinical_notes:
                 target_ce_events = PROVIDER_CLINICAL_NOTES_CE_EVENTS
             elif is_census_risk_indicators:
@@ -1187,12 +1388,12 @@ class DA2ReportGenerator:
 
         # Ensure CE version/status fields are present whenever any CE field is selected
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in all_elements)
-        if has_ce and not (is_cssrs or is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes or is_oral_care or is_bladder_bowel):
+        if has_ce and not (is_cssrs or is_custom_ce_template or is_targeted_order_report):
             add_elem("CE Result Status")
             add_elem("CE Valid Until Dt Tm")
 
         if interp.recommended_strategy == "two_dataset_birt_join" and not (
-            is_cssrs or is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes or is_oral_care or is_bladder_bowel
+            is_cssrs or is_custom_ce_template or is_targeted_order_report
         ):
             # Split into Primary (Encounter / Clinical) and Secondary (Financial / Charges or second child list)
             fin_elements = [
@@ -1572,6 +1773,36 @@ class DA2ReportGenerator:
                 '</filter>'
             )
             qual_body = f'<operator type="AND"><operator type="AND">{qual_body}{f_ce_stat}</operator>{f_ce_valid}</operator>'
+
+        primary_ord_cat = next((el.get("primary_order_catalog") for el in elements if el.get("primary_order_catalog")), None)
+        if primary_ord_cat:
+            o_vals = "".join(
+                f'<value display="{html.escape(o_disp, quote=True)}" text="{html.escape(o_cd, quote=True)}"/>'
+                for o_disp, o_cd in primary_ord_cat
+            )
+            f_ord_cat = (
+                '<filter joinType="0" mode="0" prompt_element_uuid="ca672220-76a6-4601-bc0f-f0104e07874c" prompt_type="0" useIndex="1">'
+                '<element name="Order Catalog" type="1" uuid="ca672220-76a6-4601-bc0f-f0104e07874c"/>'
+                '<operator type="IN"/>'
+                f'<values type="LIST" xCount="{len(primary_ord_cat)}">{o_vals}</values>'
+                '</filter>'
+            )
+            qual_body = f'<operator type="AND">{qual_body}{f_ord_cat}</operator>'
+
+        primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
+        if primary_ord_cat_types:
+            ot_vals = "".join(
+                f'<value display="{html.escape(o_disp, quote=True)}" text="{html.escape(o_cd, quote=True)}"/>'
+                for o_disp, o_cd in primary_ord_cat_types
+            )
+            f_ord_type = (
+                '<filter joinType="0" mode="0" prompt_element_uuid="97f18dc3-faf9-42d5-a47a-999fe7cdf944" prompt_type="0" useIndex="1">'
+                '<element name="Order Catalog Type" type="1" uuid="97f18dc3-faf9-42d5-a47a-999fe7cdf944"/>'
+                '<operator type="IN"/>'
+                f'<values type="LIST" xCount="{len(primary_ord_cat_types)}">{ot_vals}</values>'
+                '</filter>'
+            )
+            qual_body = f'<operator type="AND">{qual_body}{f_ord_type}</operator>'
 
         primary_ce_events = next((el.get("primary_ce_events") for el in elements if el.get("primary_ce_events")), None)
         if primary_ce_events and not any(sq[0] == "WishD" for sq in inline_subqueries):
@@ -3076,6 +3307,30 @@ class DA2ReportGenerator:
             return "Outpatient_Slot_Utilization_Summary"
         if ("appointment" in low or "scheduling" in low) and ("no-show" in low or "no show" in low or "cancel" in low):
             return "Appointment_No_Show_Cancellation_Audit"
+        if any(
+            w in low
+            for w in (
+                "precaution order",
+                "precaution orders",
+                "isolation order",
+                "isolation orders",
+                "fall precaution",
+                "aspiration precaution",
+                "seizure precaution",
+                "suicide precaution",
+                "hip precaution",
+                "sternal precaution",
+            )
+        ):
+            return "Inpatient_Precaution_Orders_Report"
+        if any(w in low for w in ("1:1 observation", "video monitoring", "patient observation needs", "close observation", "sitter order")):
+            return "One_To_One_Observation_Orders_Report"
+        if "wound" in low and "consult" in low and ("order" in low or "orders" in low):
+            return "Wound_Care_Consult_Orders_Report"
+        if any(w in low for w in ("diet report", "diet order", "diet orders", "dietary order", "dietary orders", "npo", "tube feeding order")) and "allergy" not in low:
+            return "Diet_And_Nutrition_Orders_Report"
+        if "diet" in low and "allergy" in low:
+            return "Dietary_Food_Allergy_Reconciliation_Report"
         if any(w in low for w in ("c-ssrs", "cssrs", "columbia", "suicide")):
             return "CSSRS_Suicide_Screening_Audit"
         if any(w in low for w in ("oral care", "oral hygiene", "mouth care", "teeth brushing", "denture care")):
@@ -3105,6 +3360,14 @@ class DA2ReportGenerator:
             )
         ):
             return "Bladder_Bowel_Management_Report"
+        if any(w in low for w in ("bathing", "bath type", "bathing refused", "daily hygiene", "chucks/wipes")):
+            return "Bathing_Hygiene_Documentation_Report"
+        if any(w in low for w in ("peripheral iv", "central line", "central iv", "central venous", "picc line")):
+            return "Peripheral_Central_IV_Catheter_Report"
+        if any(w in low for w in ("nutrition assessment", "nutritional screening", "nutrition evaluation", "dietary risk", "nutrition risk")):
+            return "Inpatient_Nutrition_Assessment_Report"
+        if any(w in low for w in ("pharmacy clinical intervention", "pharmacy intervention", "pharmacist intervention", "pharmacoeconomic")):
+            return "Pharmacy_Clinical_Interventions_Report"
         if any(w in low for w in ("cauti", "indwelling urinary", "foley")):
             return "CAUTI_Catheter_Surveillance_Audit"
         if any(w in low for w in ("pressure injury", "hapi", "braden")) or ("wound" in low and "assessment" in low):
@@ -3117,7 +3380,11 @@ class DA2ReportGenerator:
             return "Pain_Medication_Reassessment_Audit"
         if any(w in low for w in ("opioid", "mme", "pdmp", "benzodiazepine")):
             return "Opioid_MME_Surveillance_Audit"
-        if "bcma" in low or "missed med" in low:
+        if any(w in low for w in ("late medication", "late dose", "late doses", "late mar")):
+            return "Late_Medication_Administration_Audit"
+        if any(w in low for w in ("missed medication", "missed med", "overdue medication task", "overdue task")):
+            return "Missed_Medication_Task_Audit"
+        if "bcma" in low:
             return "BCMA_Medication_Administration_Audit"
         if "pharmacy" in low and "verif" in low:
             return "Pharmacy_Order_Verification_Audit"
@@ -3127,7 +3394,25 @@ class DA2ReportGenerator:
             return "Provider_Note_Timeliness_Audit"
         if "resuscitation" in low or "code status" in low:
             return "Inpatient_Code_Status_Census"
-        if ("active" in low and "census" in low) or any(w in low for w in ("active inpatient", "current inpatient", "midnight census")):
+        if ("him" in low or "coding" in low or "drg" in low or "poa" in low) and ("diagnosis" in low or "diagnoses" in low or "icd" in low):
+            return "HIM_Diagnosis_Extract_Report"
+        if any(w in low for w in ("health plan", "health plans", "insurance plan", "primary and secondary insurance", "payer")) and not any(w in low for w in ("charge", "payment", "adjustment", "revenue", "benefit order")):
+            return "Encounter_Health_Plans_Report"
+        if (
+            ("active" in low and "census" in low)
+            or "midnight census" in low
+            or (
+                any(w in low for w in ("active inpatient", "current inpatient"))
+                and not any(
+                    w in low
+                    for w in (
+                        "order", "orders", "culture", "diagnosis", "diagnoses", "icd",
+                        "medication", "mar", "vitals", "allergy", "allergies", "note", "notes",
+                        "charge", "charges", "surgery", "surgical",
+                    )
+                )
+            )
+        ):
             return "Active_Inpatient_Encounter_Census"
         if "discharge disposition" in low:
             return "Discharge_Disposition_Summary"

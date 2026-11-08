@@ -5,8 +5,8 @@
     "harvested_business_views_lv_count": 58,
     "harvested_business_view_categories_count": 154,
     "harvested_da2_elements_with_uuids_count": 2601,
-    "harvested_coded_filter_value_pairs_count": 6435,
-    "canonical_queries_and_reports_count": 29
+    "harvested_coded_filter_value_pairs_count": 6668,
+    "canonical_queries_and_reports_count": 36
   },
   "cclquery_xml_specification": {
     "root_element": "<cclquery version=\"1.0\">",
@@ -16831,6 +16831,288 @@
         "Per Rel Type (Code Set 351)": {
           "Default Guarantor": "1150",
           "Guarantor": "1155"
+        }
+      }
+    },
+    {
+      "id": "oral_care_documentation_and_hygiene_audit",
+      "title": "Inpatient Oral Care & Oral Hygiene Documentation Audit",
+      "artifact_type": "birt_dareport_and_cclquery",
+      "da2_domain": "CWC Encounter",
+      "domain_uuid": "a67e07c5-0244-4b28-a146-7523f6090016",
+      "query_uuid": "99c4e812-3f71-4a89-9b41-72a9184bc109",
+      "business_views_used": [
+        "CWC Encounter",
+        "CWC Clinical Event",
+        "CWC Person"
+      ],
+      "v500_and_rc_tables_joined": [
+        "ENCOUNTER",
+        "PERSON",
+        "CLINICAL_EVENT"
+      ],
+      "selected_elements": [
+        "Enc Id",
+        "Enc Financial Num",
+        "Person MRN",
+        "Person Name Full Format",
+        "Enc Loc Facility",
+        "Enc Loc Nurse Unit",
+        "Enc Loc Room",
+        "Bed Loc",
+        "Enc Attending Phys",
+        "CE Event",
+        "CE Result Value",
+        "CE End Dt/Tm",
+        "CE Performed Prsnl Name",
+        "CE Result Status"
+      ],
+      "qualification_filter_highlights": {
+        "CE Event (Code Set 72)": {
+          "Oral Care": "700579",
+          "Oral Care Assistance": "4153864",
+          "Oral Hygiene": "19860587",
+          "Oral Hygiene Toothbrushing": "19018432",
+          "GG0130A1 Oral Hygiene Self-Care Admit": "159500391",
+          "GG0130A3 Oral Hygiene Self-Care Disch": "159500419"
+        }
+      }
+    },
+    {
+      "id": "bladder_bowel_management_and_continence_audit",
+      "title": "Inpatient Bladder & Bowel Management, PVR Scan Volume, and Continence Audit",
+      "artifact_type": "birt_dareport_and_cclquery",
+      "da2_domain": "CWC Encounter",
+      "domain_uuid": "a67e07c5-0244-4b28-a146-7523f6090016",
+      "query_uuid": "9ac4e812-3f71-4a89-9b41-72a9184bc110",
+      "business_views_used": [
+        "CWC Encounter",
+        "CWC Clinical Event",
+        "CWC Person"
+      ],
+      "v500_and_rc_tables_joined": [
+        "ENCOUNTER",
+        "PERSON",
+        "CLINICAL_EVENT"
+      ],
+      "selected_elements": [
+        "Enc Id",
+        "Enc Financial Num",
+        "Person MRN",
+        "Person Name Full Format",
+        "Enc Loc Facility",
+        "Enc Loc Nurse Unit",
+        "Enc Loc Room",
+        "Bed Loc",
+        "Enc Attending Phys",
+        "CE Event",
+        "CE Result Value",
+        "CE End Dt/Tm",
+        "CE Performed Prsnl Name",
+        "CE Result Status"
+      ],
+      "qualification_filter_highlights": {
+        "CE Event (Code Set 72)": {
+          "Bladder Scan Volume": "704017",
+          "Bladder Continence LTC": "21837758",
+          "Bowel Continence LTC": "21837746",
+          "Bowel Elimination": "36383823",
+          "H2000 Bladder Continence": "149108707",
+          "H0400 Bowel Continence": "149108727"
+        }
+      }
+    },
+    {
+      "id": "inpatient_nutrition_assessment_and_bmi_audit",
+      "title": "Inpatient Nutrition Assessment, Dietary Risk Factors & BMI Clinical Audit",
+      "artifact_type": "birt_dareport_and_cclquery",
+      "da2_domain": "CWC Encounter",
+      "domain_uuid": "a67e07c5-0244-4b28-a146-7523f6090016",
+      "query_uuid": "9bc4e812-3f71-4a89-9b41-72a9184bc111",
+      "business_views_used": [
+        "CWC Encounter",
+        "CWC Clinical Event",
+        "CWC Person"
+      ],
+      "v500_and_rc_tables_joined": [
+        "ENCOUNTER",
+        "PERSON",
+        "CLINICAL_EVENT"
+      ],
+      "selected_elements": [
+        "Enc Financial Num",
+        "Person MRN",
+        "Person Name Full Format",
+        "Enc Loc Facility",
+        "Enc Loc Nurse Unit",
+        "CE Event",
+        "CE Result Value",
+        "CE End Dt/Tm",
+        "CE Performed Prsnl Name"
+      ],
+      "qualification_filter_highlights": {
+        "CE Event (Code Set 72)": {
+          "Nutrition Assessment and Plan Form": "64892683",
+          "Nutrition Evaluation - Form": "40691519",
+          "Nutritional Screening - Form": "359275439",
+          "Body Mass Index": "705277",
+          "Body Mass Index Measured": "4154132",
+          "Nutrition Risk Factors": "16721672"
+        }
+      }
+    },
+    {
+      "id": "pharmacy_clinical_interventions_detail_audit",
+      "title": "Pharmacy Clinical Interventions, Prescriber Response & Pharmacoeconomic Impact Audit",
+      "artifact_type": "birt_dareport_and_cclquery",
+      "da2_domain": "CWC Encounter",
+      "domain_uuid": "a67e07c5-0244-4b28-a146-7523f6090016",
+      "query_uuid": "9cc4e812-3f71-4a89-9b41-72a9184bc112",
+      "business_views_used": [
+        "CWC Encounter",
+        "CWC Clinical Event",
+        "CWC Personnel"
+      ],
+      "v500_and_rc_tables_joined": [
+        "ENCOUNTER",
+        "PERSON",
+        "CLINICAL_EVENT",
+        "PRSNL"
+      ],
+      "selected_elements": [
+        "Enc Financial Num",
+        "Person Name Full Format",
+        "Enc Loc Facility",
+        "Enc Loc Nurse Unit",
+        "CE Event",
+        "CE Result Value",
+        "CE End Dt/Tm",
+        "CE Performed Prsnl Name"
+      ],
+      "qualification_filter_highlights": {
+        "CE Event (Code Set 72)": {
+          "Pharmacy Clinical Interventions Form": "4203579",
+          "Intervention Type Pharmacy": "4203582",
+          "Clinical Importance Pharmacy": "4203591",
+          "Prescriber Response Pharmacy": "4203594",
+          "Pharmacist Intervention Time": "4203600"
+        }
+      }
+    },
+    {
+      "id": "bathing_and_daily_hygiene_documentation_audit",
+      "title": "Inpatient Bathing Type & Daily Hygiene Refusal Documentation Audit",
+      "artifact_type": "birt_dareport_and_cclquery",
+      "da2_domain": "CWC Encounter",
+      "domain_uuid": "a67e07c5-0244-4b28-a146-7523f6090016",
+      "query_uuid": "9dc4e812-3f71-4a89-9b41-72a9184bc113",
+      "business_views_used": [
+        "CWC Encounter",
+        "CWC Clinical Event",
+        "CWC Person"
+      ],
+      "v500_and_rc_tables_joined": [
+        "ENCOUNTER",
+        "PERSON",
+        "CLINICAL_EVENT"
+      ],
+      "selected_elements": [
+        "Enc Financial Num",
+        "Person MRN",
+        "Person Name Full Format",
+        "Enc Loc Facility",
+        "Enc Loc Nurse Unit",
+        "Enc Loc Room",
+        "CE Event",
+        "CE Result Value",
+        "CE End Dt/Tm",
+        "CE Performed Prsnl Name"
+      ],
+      "qualification_filter_highlights": {
+        "CE Event (Code Set 72)": {
+          "Bath Type": "54993041",
+          "Bathing Refused Reason": "54993005"
+        }
+      }
+    },
+    {
+      "id": "peripheral_iv_and_central_line_catheter_surveillance",
+      "title": "Peripheral IV & Central Venous Line (CVL) Catheter Access & Activity Surveillance",
+      "artifact_type": "birt_dareport_and_cclquery",
+      "da2_domain": "CWC Encounter",
+      "domain_uuid": "a67e07c5-0244-4b28-a146-7523f6090016",
+      "query_uuid": "9ec4e812-3f71-4a89-9b41-72a9184bc114",
+      "business_views_used": [
+        "CWC Encounter",
+        "CWC Clinical Event",
+        "CWC Person"
+      ],
+      "v500_and_rc_tables_joined": [
+        "ENCOUNTER",
+        "PERSON",
+        "CLINICAL_EVENT"
+      ],
+      "selected_elements": [
+        "Enc Financial Num",
+        "Person MRN",
+        "Person Name Full Format",
+        "Enc Loc Facility",
+        "Enc Loc Nurse Unit",
+        "CE Event",
+        "CE Result Value",
+        "CE End Dt/Tm",
+        "CE Performed Prsnl Name"
+      ],
+      "qualification_filter_highlights": {
+        "CE Event (Code Set 72)": {
+          "Peripheral IV Activity:": "22055797",
+          "Central IV #1": "4153930",
+          "Central IV #1 Access Type": "4153933",
+          "Central IV #1 Activity": "4153936",
+          "Central IV #1 Catheter Size/Length": "4153939"
+        }
+      }
+    },
+    {
+      "id": "inpatient_precaution_and_isolation_orders_audit",
+      "title": "Inpatient Fall, Aspiration, Seizure, Suicide & Isolation Precaution Orders Audit",
+      "artifact_type": "birt_dareport_and_cclquery",
+      "da2_domain": "CWC Encounter",
+      "domain_uuid": "a67e07c5-0244-4b28-a146-7523f6090016",
+      "query_uuid": "9fc4e812-3f71-4a89-9b41-72a9184bc115",
+      "business_views_used": [
+        "CWC Encounter",
+        "CWC Orders",
+        "CWC Person"
+      ],
+      "v500_and_rc_tables_joined": [
+        "ENCOUNTER",
+        "PERSON",
+        "ORDERS"
+      ],
+      "selected_elements": [
+        "Enc Financial Num",
+        "Person MRN",
+        "Person Name Full Format",
+        "Enc Loc Facility",
+        "Enc Loc Nurse Unit",
+        "Enc Loc Room",
+        "Order Id",
+        "Order Catalog",
+        "Order Mnemonic",
+        "Order Clinical Display Line",
+        "Order Status",
+        "Order Dt/Tm"
+      ],
+      "qualification_filter_highlights": {
+        "Order Catalog (Code Set 200)": {
+          "Aspiration Precautions": "38881693",
+          "Fall Precautions": "38884839",
+          "Hip Precautions": "38885579",
+          "Seizure Precautions": "38888573",
+          "Sternal Precautions": "274704793",
+          "Suicide Precautions": "38889485",
+          "Isolation": "2958766"
         }
       }
     }

@@ -42,7 +42,7 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [57],
     },
     {
-        "phrases": ["census", "admit", "admission", "inpatient", "disch", "discharge", "length of stay", "los", "active encounter"],
+        "phrases": ["census", "admit", "admitted", "admission", "admissions", "inpatient", "inpatients", "disch", "discharge", "discharged", "discharges", "length of stay", "los", "active encounter", "active encounters"],
         "v500": [
             ("ENCOUNTER", "ENCNTR_ID"),
             ("ENCOUNTER", "REG_DT_TM"),
@@ -53,11 +53,11 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
             ("ENCOUNTER", "DISCH_DISPOSITION_CD"),
             ("ENCOUNTER", "ACTIVE_IND"),
         ],
-        "da2": ["Enc Id", "Enc Encounter Number", "Enc Admit Dt Tm", "Enc Disch Dt Tm", "Enc Type", "Enc Status", "Enc Disch Disposition", "Enc Active Ind"],
+        "da2": ["Enc Id", "Enc Registration Dt/Tm", "Enc Inpatient Admit Dt/Tm", "Enc Discharge Dt/Tm", "Enc Type", "Enc Status", "Enc Discharge Disp", "Enc Active Ind"],
         "code_sets": [71, 69, 261, 19],
     },
     {
-        "phrases": ["facility", "nurse unit", "nursing unit", "unit", "room", "bed", "location", "clinic"],
+        "phrases": ["facility", "facilities", "nurse unit", "nursing unit", "unit", "units", "room", "rooms", "bed", "beds", "location", "locations", "clinic", "clinics"],
         "v500": [
             ("ENCOUNTER", "LOC_FACILITY_CD"),
             ("ENCOUNTER", "LOC_NURSE_UNIT_CD"),
@@ -69,23 +69,28 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [220],
     },
     {
-        "phrases": ["attending", "admitting", "physician", "provider", "doctor", "prsnl", "clinician", "therapist"],
+        "phrases": ["attending", "admitting", "physician", "physicians", "provider", "providers", "doctor", "doctors", "prsnl", "clinician", "clinicians", "therapist", "therapists"],
         "v500": [
             ("ENCNTR_PRSNL_RELTN", "PRSNL_PERSON_ID"),
             ("ENCNTR_PRSNL_RELTN", "ENCNTR_PRSNL_R_CD"),
             ("PRSNL", "NAME_FULL_FORMATTED"),
             ("PRSNL", "POSITION_CD"),
         ],
-        "da2": ["Enc Prsnl Reltn Name", "Enc Prsnl Reltn Type", "Prsnl Full Name", "Prsnl Position"],
+        "da2": ["Enc Attending Phys", "Enc Pl Relationship Type", "Prsnl Name Full Format", "Prsnl Position"],
         "code_sets": [333, 88],
     },
     {
         "phrases": [
-            "clinical event", "result", "vital", "assessment", "powerform", "flowsheet",
-            "iview", "fim", "care", "irf-pai", "therapy minutes", "treatment minutes", "dta", "observation",
+            "clinical event", "clinical events", "result", "results", "vital", "vitals", "vital signs",
+            "assessment", "assessments", "powerform", "powerforms", "flowsheet", "flowsheets",
+            "iview", "fim", "care tool", "irf-pai", "therapy minutes", "treatment minutes", "dta", "observation",
             "cssrs", "c-ssrs", "columbia", "suicide", "suicidal", "phq-9", "phq9", "morse", "braden",
             "responses", "form completed", "completed form",
-            "oral care", "oral hygiene", "bladder/bowel", "bowel/bladder", "bladder scan", "bladder management", "bowel management", "bowel movement", "bowel elimination", "toileting", "incontinence", "continence",
+            "oral care", "oral hygiene", "bladder/bowel", "bowel/bladder", "bladder scan", "bladder management",
+            "bowel management", "bowel movement", "bowel elimination", "toileting", "incontinence", "continence",
+            "bathing", "bath type", "daily hygiene", "nutrition assessment", "nutritional screening",
+            "bmi", "body mass index", "central line", "central iv", "peripheral iv",
+            "pharmacy intervention", "pharmacy interventions", "clinical intervention", "clinical interventions",
         ],
         "v500": [
             ("CLINICAL_EVENT", "EVENT_ID"),
@@ -160,7 +165,13 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [8, 53, 72],
     },
     {
-        "phrases": ["order", "medication order", "opioid", "benzo", "benzodiazepine", "lab order", "order detail", "oe_format", "indication"],
+        "phrases": [
+            "order", "orders", "medication order", "medication orders", "opioid", "opioids",
+            "benzo", "benzodiazepine", "lab order", "lab orders", "order detail", "order details",
+            "oe_format", "indication", "precaution", "precautions", "isolation",
+            "diet order", "diet orders", "diet report", "consult order", "consult orders",
+            "1:1 observation", "video monitoring",
+        ],
         "v500": [
             ("ORDERS", "ORDER_ID"),
             ("ORDERS", "CATALOG_CD"),
@@ -175,7 +186,11 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [200, 6000, 6003, 6004],
     },
     {
-        "phrases": ["mar", "bcma", "medication administration", "med admin", "barcode", "missed dose", "late dose", "administered", "dosage"],
+        "phrases": [
+            "mar", "bcma", "medication administration", "medication administrations", "med admin",
+            "barcode", "missed dose", "missed doses", "late dose", "late doses",
+            "late medication", "administered", "dosage",
+        ],
         "v500": [
             ("MED_ADMIN_EVENT", "MED_ADMIN_EVENT_ID"),
             ("MED_ADMIN_EVENT", "EVENT_TYPE_CD"),
@@ -191,7 +206,7 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [4002, 54, 8],
     },
     {
-        "phrases": ["task", "overdue", "task_activity", "not done", "prn", "scheduled task"],
+        "phrases": ["task", "tasks", "overdue", "task_activity", "not done", "prn", "scheduled task", "scheduled tasks"],
         "v500": [
             ("TASK_ACTIVITY", "TASK_ID"),
             ("TASK_ACTIVITY", "TASK_STATUS_CD"),
@@ -203,7 +218,11 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [79],
     },
     {
-        "phrases": ["appointment", "schedule", "scheduling", "no show", "no-show", "cancel", "check in", "check out", "sch_appt"],
+        "phrases": [
+            "appointment", "appointments", "appt", "appts", "scheduling",
+            "no show", "no-show", "cancellation", "check in", "check-in", "check out", "check-out",
+            "sch_appt", "slot", "slots", "outpatient schedule", "clinic schedule", "therapy schedule",
+        ],
         "v500": [
             ("SCH_APPT", "SCH_APPT_ID"),
             ("SCH_APPT", "BEG_DT_TM"),
@@ -219,7 +238,7 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [14232, 14233],
     },
     {
-        "phrases": ["charge", "cpt", "cdm", "revenue", "billed", "gross price", "quantity", "payment", "adjustment", "gl", "benefit order", "payer", "health plan"],
+        "phrases": ["charge", "charges", "cpt", "cdm", "revenue", "billed", "gross price", "quantity", "quantities", "payment", "payments", "adjustment", "adjustments", "gl", "benefit order", "bo_hp_reltn"],
         "v500": [
             ("CHARGE", "CHARGE_ITEM_ID"),
             ("CHARGE", "CHARGE_DESCRIPTION"),
@@ -241,7 +260,21 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [],
     },
     {
-        "phrases": ["diagnosis", "icd", "icd-10", "principal diagnosis", "admitting diagnosis", "nomenclature"],
+        "phrases": ["health plan", "health plans", "insurance", "payer", "payor", "subscriber", "plan type", "financial class"],
+        "v500": [
+            ("HEALTH_PLAN", "PLAN_NAME"),
+            ("HEALTH_PLAN", "PLAN_TYPE_CD"),
+            ("ENCNTR_PLAN_RELTN", "PRIORITY_SEQ"),
+            ("ENCNTR_PLAN_RELTN", "VERIFY_STATUS_CD"),
+            ("ENCOUNTER", "FINANCIAL_CLASS_CD"),
+        ],
+        "da2": [
+            "HP Plan Name", "HP Plan Type", "HP E R Priority Seq", "HP E R Verify Status", "HP Financial Class",
+        ],
+        "code_sets": [354, 367, 27137],
+    },
+    {
+        "phrases": ["diagnosis", "diagnoses", "icd", "icd-10", "icd10", "principal diagnosis", "admitting diagnosis", "final diagnosis", "nomenclature", "drg", "poa", "present on admission"],
         "v500": [
             ("DIAGNOSIS", "DIAGNOSIS_ID"),
             ("DIAGNOSIS", "DIAG_TYPE_CD"),
@@ -443,7 +476,7 @@ class MillenniumInterpreter:
         for sig in CONCEPT_SIGNALS:
             matched_phrase = False
             for phr in sig["phrases"]:
-                if phr in low:
+                if re.search(rf"(?<![a-z0-9]){re.escape(phr)}(?![a-z0-9])", low):
                     matched_phrase = True
                     break
             if matched_phrase:
@@ -476,7 +509,7 @@ class MillenniumInterpreter:
         # Also scan V500 table & column names / definitions directly for exact technical token hits
         for tname, tinfo in self._tables.items():
             t_low = tname.lower()
-            t_hit = t_low in low or t_low in tokens
+            t_hit = bool(re.search(rf"(?<![a-z0-9]){re.escape(t_low)}(?![a-z0-9])", low)) or t_low in tokens
             for cinfo in tinfo.get("columns", []):
                 cname = cinfo["name"]
                 c_low = cname.lower()
@@ -511,11 +544,15 @@ class MillenniumInterpreter:
                 da2_rec = self._da2_by_name.get("Person Name Full Format")
             if not da2_rec:
                 # Look up by exact v500_target table.column prefix first, falling back to table prefix only if no da2_hint
+                allow_cwf_adj_pay = any(w in low for w in ("adjustment", "adjustments", "payment", "payments", "cwf"))
                 da2_rec = next(
                     (
                         e for e in self._da2_elements
-                        if (e["v500_target"].startswith(f"{tbl}.{col}") and ("guarantor" in low or e["da2_field_name"] != "Acct Guarantor Name"))
-                        or (not da2_hint and e["v500_target"].startswith(tbl) and ("guarantor" in low or e["da2_field_name"] != "Acct Guarantor Name"))
+                        if (
+                            (e["v500_target"].startswith(f"{tbl}.{col}") or (not da2_hint and e["v500_target"].startswith(tbl)))
+                            and ("guarantor" in low or e["da2_field_name"] != "Acct Guarantor Name")
+                            and (allow_cwf_adj_pay or e.get("da2_domain") not in ("CWF GS Adjustments", "CWF GS Payments", "CWF GS Revenue"))
+                        )
                     ),
                     None,
                 )
@@ -784,14 +821,14 @@ class MillenniumInterpreter:
                 candidate_pairs.pop((tbl_u, "UPDT_DT_TM"), None)
 
         # Identifier & Alias disambiguation (MRN CS 4 vs FIN CS 319)
-        if any(w in low for w in ("mrn", "medical record number", "cmrn", "person_alias")):
+        if any(re.search(rf"(?<![a-z0-9]){re.escape(w)}(?![a-z0-9])", low) for w in ("mrn", "medical record number", "cmrn", "person_alias")):
             candidate_pairs[("PERSON_ALIAS", "ALIAS")] = (9.7, "Person MRN")
             triggered_cs.add(4)
         elif strict_precision:
             candidate_pairs.pop(("PERSON_ALIAS", "ALIAS"), None)
             candidate_pairs.pop(("PERSON_ALIAS", "PERSON_ALIAS_TYPE_CD"), None)
 
-        if any(w in low for w in ("fin", "financial number", "account number", "encounter number", "encntr_alias")):
+        if any(re.search(rf"(?<![a-z0-9]){re.escape(w)}(?![a-z0-9])", low) for w in ("fin", "financial number", "account number", "encounter number", "encntr_alias")):
             candidate_pairs[("ENCNTR_ALIAS", "ALIAS")] = (9.7, "Enc FIN")
             triggered_cs.add(319)
         elif strict_precision:
