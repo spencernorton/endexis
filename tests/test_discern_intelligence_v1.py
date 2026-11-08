@@ -1399,6 +1399,24 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert 'display="Fall Precautions" text="38884839.00"' in combined_ord_ce.queries[0].daquery_xml
     assert 'display="Intervention Type Pharmacy" text="4203582.00"' in combined_ord_ce.queries[1].daquery_xml
 
+    combined_prec_video = gen.generate(
+        "Build a report of fall precaution orders and continuous video monitoring orders for active inpatients."
+    )
+    assert combined_prec_video.verification.is_valid
+    assert 'display="Fall Precautions" text="38884839.00"' in combined_prec_video.queries[0].daquery_xml
+    assert 'display="Continuous Video Monitoring" text="257630227.00"' in combined_prec_video.queries[0].daquery_xml
+
+    combined_prec_mar = gen.generate(
+        "Build an Inpatient Precaution Orders report (Aspiration, Fall, Seizure, Suicide Precautions) and a Late Medication Administration Audit showing scheduled date/time vs administered date/time."
+    )
+    assert combined_prec_mar.verification.is_valid, f"Combined precaution+MAR invalid: {combined_prec_mar.verification.errors}"
+    assert len(combined_prec_mar.queries) == 2
+    assert combined_prec_mar.execution_strategy == "two_dataset_birt_join"
+    assert 'display="Suicide Precautions" text="4149527.00"' in combined_prec_mar.queries[0].daquery_xml
+    q2_mar_names = [e["da2_field_name"] for e in combined_prec_mar.queries[1].selected_elements]
+    assert "Med Adm Sch Dt/Tm" in q2_mar_names or "Task Atv Scheduled Dt/Tm" in q2_mar_names
+    assert "Med Adm Dt/Tm" in q2_mar_names or "Med Adm Beg Dt/Tm" in q2_mar_names
+
     # 7. Word-boundary & domain isolation regression checks
     hp_bundle = gen.generate(
         "Build an Encounter Health Plans and Payer Coverage report for active inpatients showing primary and secondary insurance plans."

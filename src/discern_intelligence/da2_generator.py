@@ -1246,16 +1246,15 @@ class DA2ReportGenerator:
                 ("Order Dt/Tm", "db8be1e0-6f63-4851-8f87-163fae80ead3", "dq8 (DATETIME)", "ORDERS.ORIG_ORDER_DT_TM", "Orders", None),
                 ("Order Start Dt/Tm", "5de804b0-ae7b-4044-9735-f897f5b46a23", "dq8 (DATETIME)", "ORDERS.CURRENT_START_DT_TM", "Orders", None),
             ]
-            target_order_cat = None
-            target_order_cat_types = None
+            combined_order_cat: list[tuple[str, str]] = []
             if is_precaution_orders:
-                target_order_cat = PRECAUTION_ORDER_CATALOG_ITEMS
-            elif is_observation_orders:
-                target_order_cat = OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS
-            elif is_wound_consult_orders:
-                target_order_cat = WOUND_CONSULT_ORDER_CATALOG_ITEMS
-            elif is_diet_orders:
-                target_order_cat_types = [("Dietary", "2511.00"), ("Nutritional Services", "636067.00")]
+                combined_order_cat.extend(PRECAUTION_ORDER_CATALOG_ITEMS)
+            if is_observation_orders:
+                combined_order_cat.extend(OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS)
+            if is_wound_consult_orders:
+                combined_order_cat.extend(WOUND_CONSULT_ORDER_CATALOG_ITEMS)
+            target_order_cat = combined_order_cat or None
+            target_order_cat_types = [("Dietary", "2511.00"), ("Nutritional Services", "636067.00")] if is_diet_orders else None
             for cname, cuuid, ctype, vtarget, subent, cset in order_cols:
                 seen_names.add(cname)
                 all_elements.append({
@@ -1270,6 +1269,14 @@ class DA2ReportGenerator:
                     "primary_order_catalog_types": target_order_cat_types if cname == "Order Catalog Type" else None,
                     "value_semantics_and_guardrails": "Live-verified CWC Encounter orders element",
                 })
+            if any(k in low_req for k in ("medication administration", "med admin", "late medication", "missed dose", "late dose", "bcma", "barcode", "scheduled task", "overdue task")):
+                for cm in interp.matched_columns:
+                    if cm.da2_field_name and cm.da2_field_name.startswith(("Med Adm", "Task Atv", "CE Med")):
+                        add_elem(cm.da2_field_name)
+                if "scheduled" in low_req:
+                    add_elem("Med Adm Sch Dt/Tm")
+                add_elem("Med Adm Dt/Tm")
+                add_elem("Med Adm Event Id")
 
         if is_custom_ce_template:
             if not is_targeted_order_report:
@@ -1321,26 +1328,25 @@ class DA2ReportGenerator:
                     ("CE Result Status", "7ccf3fe5-568a-4015-82e0-fd370a98426e", "vc (STRING)", "CLINICAL_EVENT.RESULT_STATUS_CD", "Clinical Event", 8),
                     ("CE Valid Until Dt/Tm", "871b99b7-e872-4db0-8762-d663c933ad76", "dq8 (DATETIME)", "CLINICAL_EVENT.VALID_UNTIL_DT_TM", "Clinical Event", None),
                 ]
-            if is_oral_care and is_bladder_bowel:
-                target_ce_events = ORAL_CARE_CE_EVENTS + BLADDER_BOWEL_CE_EVENTS
-            elif is_oral_care:
-                target_ce_events = ORAL_CARE_CE_EVENTS
-            elif is_bladder_bowel:
-                target_ce_events = BLADDER_BOWEL_CE_EVENTS
-            elif is_bathing_hygiene:
-                target_ce_events = BATHING_HYGIENE_CE_EVENTS
-            elif is_nutrition_assessment:
-                target_ce_events = NUTRITION_ASSESSMENT_CE_EVENTS
-            elif is_pharmacy_interventions:
-                target_ce_events = PHARMACY_INTERVENTIONS_CE_EVENTS
-            elif is_iv_central_line:
-                target_ce_events = IV_CENTRAL_LINE_CE_EVENTS
-            elif is_provider_clinical_notes:
+            if is_provider_clinical_notes:
                 target_ce_events = PROVIDER_CLINICAL_NOTES_CE_EVENTS
-            elif is_census_risk_indicators:
-                target_ce_events = CENSUS_RISK_CE_EVENTS
             else:
-                target_ce_events = REHAB_THERAPY_CE_EVENTS
+                composed_ce: list[tuple[str, str]] = []
+                for flag, ev_group in (
+                    (is_oral_care, ORAL_CARE_CE_EVENTS),
+                    (is_bladder_bowel, BLADDER_BOWEL_CE_EVENTS),
+                    (is_bathing_hygiene, BATHING_HYGIENE_CE_EVENTS),
+                    (is_nutrition_assessment, NUTRITION_ASSESSMENT_CE_EVENTS),
+                    (is_pharmacy_interventions, PHARMACY_INTERVENTIONS_CE_EVENTS),
+                    (is_iv_central_line, IV_CENTRAL_LINE_CE_EVENTS),
+                    (is_census_risk_indicators, CENSUS_RISK_CE_EVENTS),
+                    (is_rehab_therapy_minutes, REHAB_THERAPY_CE_EVENTS),
+                ):
+                    if flag:
+                        for pair in ev_group:
+                            if pair not in composed_ce:
+                                composed_ce.append(pair)
+                target_ce_events = composed_ce or REHAB_THERAPY_CE_EVENTS
             for cname, cuuid, ctype, vtarget, subent, cset in base_clin_cols:
                 if cname in seen_names:
                     continue
@@ -1398,9 +1404,12 @@ class DA2ReportGenerator:
             add_elem("CE Result Status")
             add_elem("CE Valid Until Dt Tm")
 
+        has_combined_order_and_mar = is_targeted_order_report and any(
+            e["da2_field_name"].startswith(("Med Adm", "Task Atv", "CE Med")) for e in all_elements
+        )
         if (interp.recommended_strategy == "two_dataset_birt_join" and not (
             is_cssrs or is_custom_ce_template or is_targeted_order_report
-        )) or (is_targeted_order_report and is_custom_ce_template):
+        )) or (is_targeted_order_report and is_custom_ce_template) or has_combined_order_and_mar:
             # Split into Primary (Encounter / Clinical) and Secondary (Financial / Charges or second child list)
             fin_elements = [
                 e for e in all_elements
@@ -1418,7 +1427,7 @@ class DA2ReportGenerator:
             ]
             # If the split was triggered by two clinical child lists (e.g. CE + Prsnl/Sch/Task) rather than CWF:
             if len(fin_elements) <= 2:
-                secondary_prefixes = ("CE ", "CE Med ")
+                secondary_prefixes = ("CE ", "CE Med ", "Med Adm", "Task Atv") if has_combined_order_and_mar else ("CE ", "CE Med ")
                 fin_elements = [
                     e for e in all_elements
                     if e["da2_field_name"] in {"Enc Id", "Enc Encounter Number"}
@@ -1781,6 +1790,8 @@ class DA2ReportGenerator:
             qual_body = f'<operator type="AND"><operator type="AND">{qual_body}{f_ce_stat}</operator>{f_ce_valid}</operator>'
 
         primary_ord_cat = next((el.get("primary_order_catalog") for el in elements if el.get("primary_order_catalog")), None)
+        primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
+        f_ord_cat = ""
         if primary_ord_cat:
             o_vals = "".join(
                 f'<value display="{html.escape(o_disp, quote=True)}" text="{html.escape(o_cd, quote=True)}"/>'
@@ -1793,9 +1804,7 @@ class DA2ReportGenerator:
                 f'<values type="LIST" xCount="{len(primary_ord_cat)}">{o_vals}</values>'
                 '</filter>'
             )
-            qual_body = f'<operator type="AND">{qual_body}{f_ord_cat}</operator>'
-
-        primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
+        f_ord_type = ""
         if primary_ord_cat_types:
             ot_vals = "".join(
                 f'<value display="{html.escape(o_disp, quote=True)}" text="{html.escape(o_cd, quote=True)}"/>'
@@ -1808,6 +1817,11 @@ class DA2ReportGenerator:
                 f'<values type="LIST" xCount="{len(primary_ord_cat_types)}">{ot_vals}</values>'
                 '</filter>'
             )
+        if f_ord_cat and f_ord_type:
+            qual_body = f'<operator type="AND">{qual_body}<operator paren="true" type="OR">{f_ord_cat}{f_ord_type}</operator></operator>'
+        elif f_ord_cat:
+            qual_body = f'<operator type="AND">{qual_body}{f_ord_cat}</operator>'
+        elif f_ord_type:
             qual_body = f'<operator type="AND">{qual_body}{f_ord_type}</operator>'
 
         primary_ce_events = next((el.get("primary_ce_events") for el in elements if el.get("primary_ce_events")), None)
