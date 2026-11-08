@@ -127,7 +127,7 @@ FIELD_INTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "Order Catalog Type": ("catalog type", "order department", "order category type", "orders.catalog_type_cd"),
     "Order Activity Type": ("activity type", "order activity", "orders.activity_type_cd"),
     "Order Status": ("order status", "orders.order_status_cd", "canceled", "voided", "discontinued", "ordered"),
-    "CE Event": ("ce event", "clinical event", "charted", "flowsheet", "iview", "powerform", "vital", "score", "event_cd"),
+    "CE Event": ("ce event", "clinical event", "charted", "flowsheet", "iview", "powerform", "vital", "score", "event_cd", "oral care", "oral hygiene", "bladder", "bowel", "toileting", "incontinence"),
     "CE Result Status": ("result status", "auth (verified)", "modified", "altered", "in error", "unauth", "result_status_cd"),
     "DTA Mnemonic": ("dta", "discrete task assay", "assay mnemonic", "task assay"),
     "Pl Position": ("position", "provider role", "personnel position", "staff role", "prsnl.position_cd"),

@@ -85,6 +85,7 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
             "iview", "fim", "care", "irf-pai", "therapy minutes", "treatment minutes", "dta", "observation",
             "cssrs", "c-ssrs", "columbia", "suicide", "suicidal", "phq-9", "phq9", "morse", "braden",
             "responses", "form completed", "completed form",
+            "oral care", "oral hygiene", "bladder/bowel", "bowel/bladder", "bladder scan", "bladder management", "bowel management", "bowel movement", "bowel elimination", "toileting", "incontinence", "continence",
         ],
         "v500": [
             ("CLINICAL_EVENT", "EVENT_ID"),

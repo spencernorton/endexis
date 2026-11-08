@@ -1188,3 +1188,76 @@ def test_derive_report_name_and_scheduling_summary_precision() -> None:
     )
     assert not bad_ver.is_valid
     assert any("ColumnDomainException" in err for err in bad_ver.errors)
+
+
+def test_oral_care_and_bladder_bowel_reports_and_ltca_owner_group() -> None:
+    from discern_intelligence.da2_generator import (
+        BLADDER_BOWEL_CE_EVENTS,
+        ORAL_CARE_CE_EVENTS,
+        VERIFIED_CWC_ENCOUNTER_UUIDS,
+    )
+    from discern_intelligence.knowledge import resolve_da2_filter_value
+
+    gen = DA2ReportGenerator()
+
+    # 1. Oral Care Report with LTCA owner group resolution
+    oral_req = (
+        "Build an Oral Care Report for inpatient encounters showing patient name, MRN, FIN, "
+        "facility, nurse unit, room/bed, oral care and oral hygiene documentation events, "
+        "result values, performed date/time, and charting clinician for LTCA TEST_TX."
+    )
+    oral_bundle = gen.generate(oral_req)
+    assert oral_bundle.report_name == "Oral_Care_Documentation_Report"
+    assert oral_bundle.owner_group_display == "LTCA TEST_TX"
+    assert oral_bundle.verification.is_valid, f"Oral care bundle invalid: {oral_bundle.verification.errors}"
+    oral_dq = oral_bundle.queries[0].daquery_xml
+    assert "owner_group_display=\"LTCA TEST_TX\"" in oral_dq
+    assert len(ORAL_CARE_CE_EVENTS) == 21
+    for disp, cv in ORAL_CARE_CE_EVENTS:
+        assert f"display=\"{disp}\" text=\"{cv}\"" in oral_dq
+    for el_node in ET.fromstring(oral_dq).findall(".//element"):
+        u = el_node.attrib.get("uuid", "")
+        if u:
+            assert u in VERIFIED_CWC_ENCOUNTER_UUIDS
+
+    # 2. Bladder / Bowel Report
+    bb_req = (
+        "Build a Bladder/Bowel Report for inpatient encounters including bladder management, "
+        "bladder scan PVR volume, urinary catheter output, bowel elimination, bowel movement status, "
+        "and bowel/bladder retraining assessments."
+    )
+    bb_bundle = gen.generate(bb_req, owner_group_display="LTCA TEST_TX")
+    assert bb_bundle.report_name == "Bladder_Bowel_Management_Report"
+    assert bb_bundle.owner_group_display == "LTCA TEST_TX"
+    assert bb_bundle.verification.is_valid, f"Bladder/Bowel bundle invalid: {bb_bundle.verification.errors}"
+    bb_dq = bb_bundle.queries[0].daquery_xml
+    assert len(BLADDER_BOWEL_CE_EVENTS) >= 55
+    assert "display=\"Bladder Scan Volume\" text=\"704017.00\"" in bb_dq
+    assert "display=\"Bowel Continence LTC\" text=\"21837746.00\"" in bb_dq
+    assert "display=\"Bowel Elimination\" text=\"36383823.00\"" in bb_dq
+    for el_node in ET.fromstring(bb_dq).findall(".//element"):
+        u = el_node.attrib.get("uuid", "")
+        if u:
+            assert u in VERIFIED_CWC_ENCOUNTER_UUIDS
+
+    # 3. Filter value catalog resolution for newly harvested live DA2 CE Event (Code Set 72) values
+    oral_hits = resolve_da2_filter_value("Oral Care", da2_field_name="CE Event", code_set=72)
+    assert oral_hits and oral_hits[0]["da2_field_name"] == "CE Event"
+    assert oral_hits[0]["matched_code_values"].get("Oral Care") == "700579"
+
+    bb_hits = resolve_da2_filter_value("Bladder Scan Volume", da2_field_name="CE Event", code_set=72)
+    assert bb_hits and bb_hits[0]["da2_field_name"] == "CE Event"
+    assert bb_hits[0]["matched_code_values"].get("Bladder Scan Volume") == "704017"
+
+    # 4. Verify null/zero sentinels are rejected and competing order/diagnosis intents are not hijacked
+    from discern_intelligence.knowledge import load_da2_filter_value_catalog
+    ce_dmap = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]["CE Event"]["display_to_code_value"]
+    assert "Null" not in ce_dmap and "0" not in ce_dmap
+    assert all(str(v).isdigit() and int(v) > 0 for v in ce_dmap.values())
+
+    stool_orders_bundle = gen.generate("Build a stool culture orders report for active inpatients.")
+    assert stool_orders_bundle.report_name != "Bladder_Bowel_Management_Report"
+    assert any(e["da2_field_name"].startswith(("Order ", "Ord ")) for e in stool_orders_bundle.queries[0].selected_elements)
+
+    bladder_dx_bundle = gen.generate("Build a bladder diagnosis report with ICD-10 codes for active inpatients.")
+    assert bladder_dx_bundle.report_name != "Bladder_Bowel_Management_Report"

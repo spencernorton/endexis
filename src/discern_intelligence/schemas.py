@@ -249,6 +249,10 @@ class TenantConfig:
                 )
                 if m_unquoted:
                     resolved_owner = m_unquoted.group(1).strip()
+                else:
+                    m_ltca = re.search(r"\b(LTCA\s+[A-Z0-9]{3,8}_[A-Z]{2})\b", request_text)
+                    if m_ltca:
+                        resolved_owner = re.sub(r"\s+", " ", m_ltca.group(1)).strip()
         if not resolved_owner:
             resolved_owner = cfg.owner_group_display or DEFAULT_OWNER_GROUP_DISPLAY
 
