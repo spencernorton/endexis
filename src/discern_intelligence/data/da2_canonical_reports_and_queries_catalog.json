@@ -16023,13 +16023,7 @@
       "qualification_filter_highlights": {
         "CE Event (Code Set 72)": {
           "Urinary Catheter Activity Type": "712525",
-          "Urinary Catheter Type": "712533",
-          "Urinary Catheter Indication": "19866492",
-          "Central Line Activity Type": "19871110",
-          "Central Line Catheter Type": "19871134",
-          "Central Line Insertion Date/Time": "19871212",
-          "Peripheral IV Activity": "709739",
-          "Peripheral IV Site": "709760"
+          "Urinary Catheter Type": "712510"
         }
       }
     },
@@ -16103,8 +16097,7 @@
       ],
       "qualification_filter_highlights": {
         "Order Catalog (Code Set 200)": {
-          "Resuscitation Status": "2958523",
-          "Code Status": "2958515"
+          "Resuscitation Status": "2958523"
         },
         "Order Catalog Type (Code Set 6000)": {
           "Admit/Transfer/Discharge": "636727",
@@ -16582,7 +16575,7 @@
       "qualification_filter_highlights": {
         "CE Event (Code Set 72)": {
           "Urinary Catheter Activity Type": "712525",
-          "Urinary Catheter Placement Date": "29719031"
+          "Urinary Catheter Placement Date": "3678084"
         }
       }
     },
@@ -16613,10 +16606,7 @@
         "CE Performed Dt/Tm"
       ],
       "qualification_filter_highlights": {
-        "CE Event (Code Set 72)": {
-          "Pressure Ulcer Stage": "2798718",
-          "Braden Scale Total Score": "2797130"
-        }
+        "CE Event (Code Set 72)": {}
       }
     },
     {
@@ -16869,12 +16859,7 @@
       ],
       "qualification_filter_highlights": {
         "CE Event (Code Set 72)": {
-          "Oral Care": "700579",
-          "Oral Care Assistance": "4153864",
-          "Oral Hygiene": "19860587",
-          "Oral Hygiene Toothbrushing": "19018432",
-          "GG0130A1 Oral Hygiene Self-Care Admit": "159500391",
-          "GG0130A3 Oral Hygiene Self-Care Disch": "159500419"
+          "Oral Care": "700579"
         }
       }
     },
@@ -16914,11 +16899,8 @@
       "qualification_filter_highlights": {
         "CE Event (Code Set 72)": {
           "Bladder Scan Volume": "704017",
-          "Bladder Continence LTC": "21837758",
           "Bowel Continence LTC": "21837746",
-          "Bowel Elimination": "36383823",
-          "H2000 Bladder Continence": "149108707",
-          "H0400 Bowel Continence": "149108727"
+          "Bowel Elimination": "36383823"
         }
       }
     },
@@ -16955,8 +16937,8 @@
           "Nutrition Assessment and Plan Form": "64892683",
           "Nutrition Evaluation - Form": "40691519",
           "Nutritional Screening - Form": "359275439",
-          "Body Mass Index": "705277",
-          "Body Mass Index Measured": "4154132",
+          "Body Mass Index": "64759777",
+          "Body Mass Index Measured": "60301285",
           "Nutrition Risk Factors": "16721672"
         }
       }
@@ -16991,7 +16973,7 @@
       ],
       "qualification_filter_highlights": {
         "CE Event (Code Set 72)": {
-          "Pharmacy Clinical Interventions Form": "4203579",
+          "Pharmacy Clinical Interventions Form": "4203612",
           "Intervention Type Pharmacy": "4203582",
           "Clinical Importance Pharmacy": "4203591",
           "Prescriber Response Pharmacy": "4203594",
@@ -17031,7 +17013,11 @@
       "qualification_filter_highlights": {
         "CE Event (Code Set 72)": {
           "Bath Type": "54993041",
-          "Bathing Refused Reason": "54993005"
+          "Bathing Refused Reason": "54993005",
+          "GG0130 Personal Hygiene": "252186263",
+          "GG0130 Shower, Bathe Self": "29729947",
+          "WeeFIM Bathing": "83630627",
+          "WeeFIM Grooming": "83630601"
         }
       }
     },
@@ -17065,11 +17051,11 @@
       ],
       "qualification_filter_highlights": {
         "CE Event (Code Set 72)": {
-          "Peripheral IV Activity:": "22055797",
+          "Peripheral IV Activity:": "17022182",
           "Central IV #1": "4153930",
-          "Central IV #1 Access Type": "4153933",
-          "Central IV #1 Activity": "4153936",
-          "Central IV #1 Catheter Size/Length": "4153939"
+          "Central IV #1 Access Type": "4170586",
+          "Central IV #1 Activity": "4170574",
+          "Central IV #1 Catheter Size/Length": "4170580"
         }
       }
     },
@@ -17106,12 +17092,12 @@
       ],
       "qualification_filter_highlights": {
         "Order Catalog (Code Set 200)": {
-          "Aspiration Precautions": "38881693",
+          "Aspiration Precautions": "2780633",
           "Fall Precautions": "38884839",
           "Hip Precautions": "38885579",
           "Seizure Precautions": "38888573",
           "Sternal Precautions": "274704793",
-          "Suicide Precautions": "38889485",
+          "Suicide Precautions": "4149527",
           "Isolation": "2958766"
         }
       }
