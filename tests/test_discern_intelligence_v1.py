@@ -1390,6 +1390,15 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert diet_ord_bundle.verification.is_valid
     assert 'name="Order Catalog Type" type="1" uuid="97f18dc3-faf9-42d5-a47a-999fe7cdf944"' in diet_ord_bundle.queries[0].daquery_xml
 
+    combined_ord_ce = gen.generate(
+        "Build a report of inpatient precaution orders and pharmacy clinical interventions for active inpatients."
+    )
+    assert combined_ord_ce.verification.is_valid, f"Combined order+CE invalid: {combined_ord_ce.verification.errors}"
+    assert len(combined_ord_ce.queries) == 2
+    assert combined_ord_ce.execution_strategy == "two_dataset_birt_join"
+    assert 'display="Fall Precautions" text="38884839.00"' in combined_ord_ce.queries[0].daquery_xml
+    assert 'display="Intervention Type Pharmacy" text="4203582.00"' in combined_ord_ce.queries[1].daquery_xml
+
     # 7. Word-boundary & domain isolation regression checks
     hp_bundle = gen.generate(
         "Build an Encounter Health Plans and Payer Coverage report for active inpatients showing primary and secondary insurance plans."

@@ -1272,8 +1272,9 @@ class DA2ReportGenerator:
                 })
 
         if is_custom_ce_template:
-            all_elements.clear()
-            seen_names.clear()
+            if not is_targeted_order_report:
+                all_elements.clear()
+                seen_names.clear()
             if is_provider_clinical_notes:
                 base_clin_cols = [
                     ("Enc Id", "5ef4381c-6344-43c4-81b5-2c18cd6bcb70", "vc (STRING)", "ENCOUNTER.ENCNTR_ID", "Encounter", None),
@@ -1341,6 +1342,8 @@ class DA2ReportGenerator:
             else:
                 target_ce_events = REHAB_THERAPY_CE_EVENTS
             for cname, cuuid, ctype, vtarget, subent, cset in base_clin_cols:
+                if cname in seen_names:
+                    continue
                 seen_names.add(cname)
                 all_elements.append({
                     "da2_field_name": cname,
@@ -1395,9 +1398,9 @@ class DA2ReportGenerator:
             add_elem("CE Result Status")
             add_elem("CE Valid Until Dt Tm")
 
-        if interp.recommended_strategy == "two_dataset_birt_join" and not (
+        if (interp.recommended_strategy == "two_dataset_birt_join" and not (
             is_cssrs or is_custom_ce_template or is_targeted_order_report
-        ):
+        )) or (is_targeted_order_report and is_custom_ce_template):
             # Split into Primary (Encounter / Clinical) and Secondary (Financial / Charges or second child list)
             fin_elements = [
                 e for e in all_elements
