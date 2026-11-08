@@ -1394,6 +1394,15 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert diet_ord_bundle.report_name == "Diet_And_Nutrition_Orders_Report"
     assert diet_ord_bundle.verification.is_valid
     assert 'name="Order Catalog Type" type="1" uuid="97f18dc3-faf9-42d5-a47a-999fe7cdf944"' in diet_ord_bundle.queries[0].daquery_xml
+    assert "CWC_ORDERS.CATALOG_CD IN (" in prec_bundle.queries[0].ejs_v500_sql
+    assert "38884839" in prec_bundle.queries[0].ejs_v500_sql
+    assert "CWC_ORDERS.CATALOG_TYPE_CD IN (2511, 636067)" in diet_ord_bundle.queries[0].ejs_v500_sql
+    combined_prec_diet = gen.generate(
+        "Build a report of inpatient fall precaution orders and dysphagia diet orders for active inpatients."
+    )
+    assert combined_prec_diet.verification.is_valid
+    assert "(CWC_ORDERS.CATALOG_CD IN (" in combined_prec_diet.queries[0].ejs_v500_sql
+    assert "OR CWC_ORDERS.CATALOG_TYPE_CD IN (2511, 636067))" in combined_prec_diet.queries[0].ejs_v500_sql
 
     combined_ord_ce = gen.generate(
         "Build a report of inpatient precaution orders and pharmacy clinical interventions for active inpatients."

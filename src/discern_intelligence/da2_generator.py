@@ -2181,6 +2181,24 @@ class DA2ReportGenerator:
                 "CWC_ENCOUNTER.ENCNTR_ID = CWC_ORDERS.ENCNTR_ID",
                 "CWC_ORDERS.ACTIVE_IND = 1",
             ])
+            primary_ord_cat = next((el.get("primary_order_catalog") for el in elements if el.get("primary_order_catalog")), None)
+            primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
+            cat_sql = (
+                f"CWC_ORDERS.CATALOG_CD IN ({', '.join(cv.split('.')[0] for _, cv in primary_ord_cat)})"
+                if primary_ord_cat
+                else ""
+            )
+            type_sql = (
+                f"CWC_ORDERS.CATALOG_TYPE_CD IN ({', '.join(cv.split('.')[0] for _, cv in primary_ord_cat_types)})"
+                if primary_ord_cat_types
+                else ""
+            )
+            if cat_sql and type_sql:
+                where_clauses.append(f"({cat_sql} OR {type_sql})")
+            elif cat_sql:
+                where_clauses.append(cat_sql)
+            elif type_sql:
+                where_clauses.append(type_sql)
 
         if has_chg:
             select_exprs.extend([
