@@ -68,6 +68,106 @@ PROVIDER_CLINICAL_NOTES_CE_EVENTS: list[tuple[str, str]] = [
     ("Admission Note-Physician", "2820507.00"),
 ]
 
+ORAL_CARE_CE_EVENTS: list[tuple[str, str]] = [
+    ("Oral Care", "700579.00"),
+    ("Oral Care Activities Assistance", "54993095.00"),
+    ("Oral Care Activity Tolerance", "54993131.00"),
+    ("Oral Care Assisted By", "54993113.00"),
+    ("Oral Care Equipment", "54993077.00"),
+    ("Oral Care Position", "54993059.00"),
+    ("Oral Care Refused Nurse Notified", "54992969.00"),
+    ("Oral Care Refused Reason", "54992951.00"),
+    ("Oral Care TAR - Task", "141012929.00"),
+    ("Oral care with Tube Feedings - Task", "141012963.00"),
+    ("Oral Cavity Abnormalities Nutrition", "1230611.00"),
+    ("Oral Health Risk Assessment Performed", "239606339.00"),
+    ("Oral Hygiene - Task", "141012947.00"),
+    ("Oral Hygiene Care Provided", "273798305.00"),
+    ("Oral Hygiene Help/Support", "273798345.00"),
+    ("Oral Hygiene Recommendation", "54695777.00"),
+    ("Oral Hygiene Support Effort", "273798387.00"),
+    ("Oral Membrane Description", "32860555.00"),
+    ("GG0130 Oral Hygiene", "26956578.00"),
+    ("GG0130 Oral Hygiene Goal", "26958885.00"),
+    ("Teeth", "711231.00"),
+]
+
+BLADDER_BOWEL_CE_EVENTS: list[tuple[str, str]] = [
+    ("Bladder", "4156084.00"),
+    ("Bladder Distention", "703453.00"),
+    ("Bladder Level of Assistance", "29726813.00"),
+    ("Bladder Management", "36780603.00"),
+    ("Bladder Mgmt Assisted By", "54988353.00"),
+    ("Bladder Program", "71106187.00"),
+    ("Bladder Scan", "3347001.00"),
+    ("Bladder Scan - Form", "60911153.00"),
+    ("Bladder Scan - Text", "3946157.00"),
+    ("Bladder Scan Form", "3347000.00"),
+    ("Bladder Scan PVR - Text", "60911161.00"),
+    ("Bladder Scan Volume", "704017.00"),
+    ("Bladder Training Milestone", "30719389.00"),
+    ("Bowel and Bladder Management RTF", "51739009.00"),
+    ("Bowel And Bladder Program Plan", "100981525.00"),
+    ("Bowel and Bladder Retraining", "43692291.00"),
+    ("Bowel and Bladder Retraining Asse - Task", "141026771.00"),
+    ("Bowel Continence LTC", "21837746.00"),
+    ("Bowel Dysfunction Plan of Care", "20004851.00"),
+    ("Bowel Elimination", "36383823.00"),
+    ("Bowel Elimination Description", "21058692.00"),
+    ("Bowel Habits", "71105635.00"),
+    ("Bowel Incontinence Interventions", "22048034.00"),
+    ("Bowel Incontinence Product(s) Used", "21377299.00"),
+    ("Bowel Incontinence Supplies Used", "21058731.00"),
+    ("Bowel Level of Assistance", "29726795.00"),
+    ("Bowel Level of Assistance Goal", "30463709.00"),
+    ("Bowel Management", "29718937.00"),
+    ("Bowel Management", "36779499.00"),
+    ("Bowel Management Device", "54988199.00"),
+    ("Bowel Mgmt Activity Assisted", "54988389.00"),
+    ("Bowel Mgmt Assisted By", "54988407.00"),
+    ("Bowel Monitoring LTC - Task", "141011345.00"),
+    ("Bowel Movement Amount", "22046351.00"),
+    ("Bowel Movement Last Date", "703492.00"),
+    ("Bowel Movement Location", "30452529.00"),
+    ("Bowel Movement Location", "36779951.00"),
+    ("Bowel Movement Status", "71241245.00"),
+    ("Bowel Movement Type", "30452633.00"),
+    ("Bowel Movements Last Date Post DC", "38117123.00"),
+    ("Bowel Ostomy Type", "63162613.00"),
+    ("Bowel Program", "29718955.00"),
+    ("Bowel Program Repeated, Continued", "30452509.00"),
+    ("Bowel Program Repeated, Continued", "36779933.00"),
+    ("Bowel Program Tolerance", "54988425.00"),
+    ("Bowel Protocol Effective", "229637239.00"),
+    ("Bowel Sounds", "3374546.00"),
+    ("Bowel Sounds Absent", "3672148.00"),
+    ("Bowel Sounds All Quadrants", "703706.00"),
+    ("Bowel Sounds Grid", "704041.00"),
+    ("Bowel Sounds LLQ", "703700.00"),
+    ("Bowel Sounds LUQ", "703694.00"),
+    ("Bowel Sounds RLQ", "703703.00"),
+    ("Bowel Sounds RUQ", "703697.00"),
+    ("Bowel Status Adequate", "21357613.00"),
+    ("Bowel Training Milestone", "30719419.00"),
+    ("Bowel/Bladder Concerns", "4166149.00"),
+    ("Bowel/Bladder Retraining Asmt LTC - Form", "101283737.00"),
+    ("Bowel/Bladder Retraining Asmt LTC - Text", "101283751.00"),
+    ("Frequency of Urination", "1508509.00"),
+    ("Frequent Urination", "71106211.00"),
+    ("GG0130 Toileting Hygiene", "26956593.00"),
+    ("GG0170 Toilet Transfer", "26956608.00"),
+    ("GG0170 Toilet Transfer Goal", "26958981.00"),
+    ("Indwelling Catheter", "4361873.00"),
+    ("Indwelling Catheter Care", "22272998.00"),
+    ("Urinary Catheter Activity Type", "712525.00"),
+    ("Urinary Catheter Activity:", "22047597.00"),
+    ("Urinary Catheter Care", "21862887.00"),
+    ("Urinary Catheter Indications", "16730125.00"),
+    ("Urinary Catheter Output:", "22047794.00"),
+    ("Urinary Catheter Placement Date", "3678084.00"),
+    ("Urinary Catheter Type", "712510.00"),
+]
+
 DEPRECATED_CWC_UUIDS: set[str] = {
     "db2565e2-c861-4171-b9e7-3133a75e336b",
     "1a7bbb05-a797-42d6-b5f4-0bb86ff51608",
@@ -705,9 +805,95 @@ class DA2ReportGenerator:
             any(k in low_req for k in ("therapy minutes by discipline", "pt, ot, and slp", "pt/ot/slp", "rehab therapy minutes"))
             and not any(k in low_req for k in ("reconcil", "cpt", "benefit order"))
         )
-        is_census_risk_indicators = any(
-            k in low_req for k in ("wound", "catheter", "fall risk", "morse", "braden", "risk indicators")
-        ) and not any(k in low_req for k in ("resuscitation", "code status", "where are", "which column"))
+        is_oral_care = (
+            any(
+                k in low_req
+                for k in (
+                    "oral care",
+                    "oral hygiene",
+                    "mouth care",
+                    "teeth brushing",
+                    "denture care",
+                    "oral cavity",
+                    "oral health risk",
+                    "gg0130 oral",
+                )
+            )
+            and not any(k in low_req for k in ("where is", "which table", "which column"))
+        )
+        is_bladder_bowel = (
+            (
+                any(
+                    k in low_req
+                    for k in (
+                        "bladder/bowel",
+                        "bowel/bladder",
+                        "bladder and bowel",
+                        "bowel and bladder",
+                        "bladder management",
+                        "bowel management",
+                        "bladder scan",
+                        "bowel movement",
+                        "bowel elimination",
+                        "bowel continence",
+                        "bowel incontinence",
+                        "bladder program",
+                        "bowel program",
+                        "toileting",
+                        "post-void residual",
+                    )
+                )
+                or (
+                    ("bladder" in low_req or "bowel" in low_req)
+                    and any(
+                        k in low_req
+                        for k in (
+                            "management",
+                            "elimination",
+                            "continence",
+                            "incontinence",
+                            "retraining",
+                            "scan",
+                            "program",
+                            "movement",
+                            "assistance",
+                            "hygiene",
+                            "documentation",
+                            "flowsheet",
+                            "iview",
+                        )
+                    )
+                )
+            )
+            and not any(
+                k in low_req
+                for k in (
+                    "where is",
+                    "which table",
+                    "which column",
+                    "cauti",
+                    "culture",
+                    "order",
+                    "orders",
+                    "diagnosis",
+                    "diagnoses",
+                    "icd-10",
+                    "icd10",
+                    "cancer",
+                    "neoplasm",
+                    "biopsy",
+                    "pathology",
+                )
+            )
+        )
+        is_census_risk_indicators = (
+            any(
+                k in low_req for k in ("wound", "catheter", "fall risk", "morse", "braden", "risk indicators")
+            )
+            and not is_oral_care
+            and not is_bladder_bowel
+            and not any(k in low_req for k in ("resuscitation", "code status", "where are", "which column"))
+        )
         is_revenue_charge_reconciliation = any(
             k in low_req for k in ("revenue/charge reconciliation", "revenue and charge reconciliation", "charge reconciliation")
         )
@@ -732,6 +918,8 @@ class DA2ReportGenerator:
             or is_census_risk_indicators
             or is_revenue_charge_reconciliation
             or is_provider_clinical_notes
+            or is_oral_care
+            or is_bladder_bowel
             or any(
                 k in low_req
                 for k in (
@@ -887,7 +1075,7 @@ class DA2ReportGenerator:
                     "value_semantics_and_guardrails": "Live-verified CWC Encounter element",
                 })
 
-        if is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes:
+        if is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes or is_oral_care or is_bladder_bowel:
             all_elements.clear()
             seen_names.clear()
             if is_provider_clinical_notes:
@@ -936,11 +1124,18 @@ class DA2ReportGenerator:
                     ("CE Result Status", "7ccf3fe5-568a-4015-82e0-fd370a98426e", "vc (STRING)", "CLINICAL_EVENT.RESULT_STATUS_CD", "Clinical Event", 8),
                     ("CE Valid Until Dt/Tm", "871b99b7-e872-4db0-8762-d663c933ad76", "dq8 (DATETIME)", "CLINICAL_EVENT.VALID_UNTIL_DT_TM", "Clinical Event", None),
                 ]
-            target_ce_events = (
-                PROVIDER_CLINICAL_NOTES_CE_EVENTS
-                if is_provider_clinical_notes
-                else (CENSUS_RISK_CE_EVENTS if is_census_risk_indicators else REHAB_THERAPY_CE_EVENTS)
-            )
+            if is_oral_care and is_bladder_bowel:
+                target_ce_events = ORAL_CARE_CE_EVENTS + BLADDER_BOWEL_CE_EVENTS
+            elif is_oral_care:
+                target_ce_events = ORAL_CARE_CE_EVENTS
+            elif is_bladder_bowel:
+                target_ce_events = BLADDER_BOWEL_CE_EVENTS
+            elif is_provider_clinical_notes:
+                target_ce_events = PROVIDER_CLINICAL_NOTES_CE_EVENTS
+            elif is_census_risk_indicators:
+                target_ce_events = CENSUS_RISK_CE_EVENTS
+            else:
+                target_ce_events = REHAB_THERAPY_CE_EVENTS
             for cname, cuuid, ctype, vtarget, subent, cset in base_clin_cols:
                 seen_names.add(cname)
                 all_elements.append({
@@ -992,12 +1187,12 @@ class DA2ReportGenerator:
 
         # Ensure CE version/status fields are present whenever any CE field is selected
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in all_elements)
-        if has_ce and not (is_cssrs or is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes):
+        if has_ce and not (is_cssrs or is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes or is_oral_care or is_bladder_bowel):
             add_elem("CE Result Status")
             add_elem("CE Valid Until Dt Tm")
 
         if interp.recommended_strategy == "two_dataset_birt_join" and not (
-            is_cssrs or is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes
+            is_cssrs or is_rehab_therapy_minutes or is_census_risk_indicators or is_revenue_charge_reconciliation or is_provider_clinical_notes or is_oral_care or is_bladder_bowel
         ):
             # Split into Primary (Encounter / Clinical) and Secondary (Financial / Charges or second child list)
             fin_elements = [
@@ -1900,7 +2095,7 @@ class DA2ReportGenerator:
                     "calc_clinical_category",
                     "Clinical Discipline / Risk Category",
                     "string",
-                    'var ev = ((row["CE Event"] || "") + ""); /(consult|consultation)/i.test(ev) ? "Initial Consult Note" : (/(progress note)/i.test(ev) ? "Progress Note" : (/(history and physical|admission note)/i.test(ev) ? "Admission / H&amp;P Note" : (/(^pt |physical therapy)/i.test(ev) ? "PT (Physical Therapy)" : (/(^ot |occupational therapy)/i.test(ev) ? "OT (Occupational Therapy)" : (/(^slp|speech)/i.test(ev) ? "SLP (Speech-Language)" : (/(morse|fall)/i.test(ev) ? "Fall Risk (Morse)" : (/(braden|wound|incision)/i.test(ev) ? "Wound / Pressure Injury" : (/(catheter|urinary)/i.test(ev) ? "Indwelling Catheter" : (/(cssrs|suicid)/i.test(ev) ? "Suicide Risk (C-SSRS)" : "Clinical / Financial Detail")))))))))',
+                    'var ev = ((row["CE Event"] || "") + ""); /(consult|consultation)/i.test(ev) ? "Initial Consult Note" : (/(progress note)/i.test(ev) ? "Progress Note" : (/(history and physical|admission note)/i.test(ev) ? "Admission / H&amp;P Note" : (/(^pt |physical therapy)/i.test(ev) ? "PT (Physical Therapy)" : (/(^ot |occupational therapy)/i.test(ev) ? "OT (Occupational Therapy)" : (/(^slp|speech)/i.test(ev) ? "SLP (Speech-Language)" : (/(morse|fall)/i.test(ev) ? "Fall Risk (Morse)" : (/(braden|wound|incision)/i.test(ev) ? "Wound / Pressure Injury" : (/(oral care|oral hygiene|oral cavity|oral health|oral membrane|teeth)/i.test(ev) ? "Oral Care / Hygiene" : (/(bowel|stool|ostomy)/i.test(ev) ? "Bowel Elimination / Continence" : (/(bladder|urination|toilet)/i.test(ev) ? "Bladder / Urinary Elimination" : (/(catheter|urinary)/i.test(ev) ? "Indwelling Catheter" : (/(cssrs|suicid)/i.test(ev) ? "Suicide Risk (C-SSRS)" : "Clinical / Financial Detail"))))))))))))',
                 ),
             ]
             if is_cssrs:
@@ -2883,6 +3078,33 @@ class DA2ReportGenerator:
             return "Appointment_No_Show_Cancellation_Audit"
         if any(w in low for w in ("c-ssrs", "cssrs", "columbia", "suicide")):
             return "CSSRS_Suicide_Screening_Audit"
+        if any(w in low for w in ("oral care", "oral hygiene", "mouth care", "teeth brushing", "denture care")):
+            return "Oral_Care_Documentation_Report"
+        if (
+            any(
+                w in low
+                for w in (
+                    "bladder/bowel",
+                    "bowel/bladder",
+                    "bladder and bowel",
+                    "bowel and bladder",
+                    "bladder management",
+                    "bowel management",
+                    "bladder scan",
+                    "bowel movement",
+                    "bowel elimination",
+                    "bowel continence",
+                    "bowel incontinence",
+                    "toileting",
+                    "post-void residual",
+                )
+            )
+            and not any(
+                w in low
+                for w in ("cauti", "culture", "order", "orders", "diagnosis", "diagnoses", "icd-10", "icd10", "cancer", "neoplasm")
+            )
+        ):
+            return "Bladder_Bowel_Management_Report"
         if any(w in low for w in ("cauti", "indwelling urinary", "foley")):
             return "CAUTI_Catheter_Surveillance_Audit"
         if any(w in low for w in ("pressure injury", "hapi", "braden")) or ("wound" in low and "assessment" in low):
