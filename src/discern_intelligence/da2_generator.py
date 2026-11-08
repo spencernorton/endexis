@@ -963,9 +963,10 @@ class DA2ReportGenerator:
             )
         )
         is_bathing_hygiene = (
-            any(k in low_req for k in ("bathing", "bath type", "bathing refused", "daily hygiene", "chucks/wipes", "bed bath", "shower"))
-            and not is_oral_care
-            and not is_bladder_bowel
+            (
+                any(k in low_req for k in ("bathing", "bath type", "bathing refused", "bed bath", "shower", "weefim bathing", "weefim grooming"))
+                or ("daily hygiene" in low_req and not is_oral_care)
+            )
             and not is_meta_question
         )
         is_nutrition_assessment = (
@@ -981,7 +982,7 @@ class DA2ReportGenerator:
         )
         is_iv_central_line = (
             any(k in low_req for k in ("peripheral iv", "central line", "central iv", "central venous", "picc line"))
-            and not any(k in low_req for k in ("order", "orders"))
+            and not any(k in low_req for k in ("iv order", "iv orders", "picc order", "central line order"))
             and not is_meta_question
         )
         is_precaution_orders = (
@@ -1013,9 +1014,11 @@ class DA2ReportGenerator:
             and not is_meta_question
         )
         is_diet_orders = (
-            any(k in low_req for k in ("diet report", "diet order", "diet orders", "dietary order", "dietary orders", "npo", "tube feeding order"))
+            (
+                any(k in low_req for k in ("diet order", "diet orders", "dietary order", "dietary orders", "tube feeding order"))
+                or (any(k in low_req for k in ("diet report", "npo")) and not is_nutrition_assessment)
+            )
             and "allergy" not in low_req
-            and not is_nutrition_assessment
             and not is_meta_question
         )
         is_targeted_order_report = is_precaution_orders or is_observation_orders or is_wound_consult_orders or is_diet_orders

@@ -1296,6 +1296,11 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     for disp, cv in BATHING_HYGIENE_CE_EVENTS:
         assert f'display="{disp}" text="{cv}"' in bath_dq
 
+    oral_plus_bath = gen.generate("Build an oral care and bathing documentation audit for active inpatients.")
+    assert oral_plus_bath.verification.is_valid
+    assert 'display="Oral Care" text="700579.00"' in oral_plus_bath.queries[0].daquery_xml
+    assert 'display="Bath Type" text="54993041.00"' in oral_plus_bath.queries[0].daquery_xml
+
     # 2. Inpatient Nutrition Assessment & Malnutrition Audit
     nutr_req = (
         "Build an Inpatient Nutrition Assessment and Malnutrition report showing nutrition risk screening, "
