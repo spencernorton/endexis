@@ -963,9 +963,10 @@ class DA2ReportGenerator:
             )
         )
         is_bathing_hygiene = (
-            any(k in low_req for k in ("bathing", "bath type", "bathing refused", "daily hygiene", "chucks/wipes", "bed bath", "shower"))
-            and not is_oral_care
-            and not is_bladder_bowel
+            (
+                any(k in low_req for k in ("bathing", "bath type", "bathing refused", "bed bath", "shower", "weefim bathing", "weefim grooming"))
+                or ("daily hygiene" in low_req and not is_oral_care)
+            )
             and not is_meta_question
         )
         is_nutrition_assessment = (
@@ -981,7 +982,7 @@ class DA2ReportGenerator:
         )
         is_iv_central_line = (
             any(k in low_req for k in ("peripheral iv", "central line", "central iv", "central venous", "picc line"))
-            and not any(k in low_req for k in ("order", "orders"))
+            and not any(k in low_req for k in ("iv order", "iv orders", "picc order", "central line order"))
             and not is_meta_question
         )
         is_precaution_orders = (
@@ -1013,9 +1014,11 @@ class DA2ReportGenerator:
             and not is_meta_question
         )
         is_diet_orders = (
-            any(k in low_req for k in ("diet report", "diet order", "diet orders", "dietary order", "dietary orders", "npo", "tube feeding order"))
+            (
+                any(k in low_req for k in ("diet order", "diet orders", "dietary order", "dietary orders", "tube feeding order"))
+                or (any(k in low_req for k in ("diet report", "npo")) and not is_nutrition_assessment)
+            )
             and "allergy" not in low_req
-            and not is_nutrition_assessment
             and not is_meta_question
         )
         is_targeted_order_report = is_precaution_orders or is_observation_orders or is_wound_consult_orders or is_diet_orders
@@ -1221,6 +1224,10 @@ class DA2ReportGenerator:
                 })
 
         if is_targeted_order_report:
+            pre_mar_elements = [
+                e for e in all_elements
+                if e.get("da2_field_name", "").startswith(("Med Adm", "Task Atv", "CE Med"))
+            ]
             all_elements.clear()
             seen_names.clear()
             order_cols = [
@@ -1232,7 +1239,7 @@ class DA2ReportGenerator:
                 ("Enc Loc Nurse Unit", "75267dc7-d5c6-437b-aa34-98e46bbc5db1", "vc (STRING)", "ENCOUNTER.LOC_NURSE_UNIT_CD", "Encounter", 220),
                 ("Enc Loc Room", "e52b4716-00f9-42ab-8a04-8ba1e9ea1ece", "vc (STRING)", "ENCOUNTER.LOC_ROOM_CD", "Encounter", 220),
                 ("Bed Loc", "219ba43a-c7ee-44a4-8e79-052d4a5703da", "vc (STRING)", "ENCOUNTER.LOC_BED_CD", "Encounter", 220),
-                ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "ENCNTR_PRSNL_RELTN.PRSNL_PERSON_ID", "Encounter", 333),
+                ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)", "Encounter Functions", None),
                 ("Enc Type", "10b02c36-ff84-47d6-a825-ea142281a547", "vc (STRING)", "ENCOUNTER.ENCNTR_TYPE_CD", "Encounter", 71),
                 ("Enc Status", "7161959f-72cd-46bb-b6f6-2b177edd0469", "vc (STRING)", "ENCOUNTER.ENCNTR_STATUS_CD", "Encounter", 261),
                 ("Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a", "dq8 (DATETIME)", "ENCOUNTER.REG_DT_TM", "Encounter", None),
@@ -1246,16 +1253,15 @@ class DA2ReportGenerator:
                 ("Order Dt/Tm", "db8be1e0-6f63-4851-8f87-163fae80ead3", "dq8 (DATETIME)", "ORDERS.ORIG_ORDER_DT_TM", "Orders", None),
                 ("Order Start Dt/Tm", "5de804b0-ae7b-4044-9735-f897f5b46a23", "dq8 (DATETIME)", "ORDERS.CURRENT_START_DT_TM", "Orders", None),
             ]
-            target_order_cat = None
-            target_order_cat_types = None
+            combined_order_cat: list[tuple[str, str]] = []
             if is_precaution_orders:
-                target_order_cat = PRECAUTION_ORDER_CATALOG_ITEMS
-            elif is_observation_orders:
-                target_order_cat = OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS
-            elif is_wound_consult_orders:
-                target_order_cat = WOUND_CONSULT_ORDER_CATALOG_ITEMS
-            elif is_diet_orders:
-                target_order_cat_types = [("Dietary", "2511.00"), ("Nutritional Services", "636067.00")]
+                combined_order_cat.extend(PRECAUTION_ORDER_CATALOG_ITEMS)
+            if is_observation_orders:
+                combined_order_cat.extend(OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS)
+            if is_wound_consult_orders:
+                combined_order_cat.extend(WOUND_CONSULT_ORDER_CATALOG_ITEMS)
+            target_order_cat = combined_order_cat or None
+            target_order_cat_types = [("Dietary", "2511.00"), ("Nutritional Services", "636067.00")] if is_diet_orders else None
             for cname, cuuid, ctype, vtarget, subent, cset in order_cols:
                 seen_names.add(cname)
                 all_elements.append({
@@ -1270,10 +1276,43 @@ class DA2ReportGenerator:
                     "primary_order_catalog_types": target_order_cat_types if cname == "Order Catalog Type" else None,
                     "value_semantics_and_guardrails": "Live-verified CWC Encounter orders element",
                 })
+            has_mar_audit_intent = bool(pre_mar_elements) or any(
+                k in low_req
+                for k in (
+                    "medication administration",
+                    "med admin",
+                    "late medication",
+                    "late dose",
+                    "late doses",
+                    "late mar",
+                    "missed medication",
+                    "missed med",
+                    "missed dose",
+                    "overdue medication task",
+                    "overdue task",
+                    "scheduled task",
+                    "bcma",
+                    "barcode",
+                )
+            )
+            if has_mar_audit_intent:
+                for e in pre_mar_elements:
+                    ename = e["da2_field_name"]
+                    if ename not in seen_names:
+                        seen_names.add(ename)
+                        all_elements.append(e)
+                for cm in interp.matched_columns:
+                    if cm.da2_field_name and cm.da2_field_name.startswith(("Med Adm", "Task Atv", "CE Med")):
+                        add_elem(cm.da2_field_name)
+                if any(w in low_req for w in ("scheduled", "late", "missed", "overdue")):
+                    add_elem("Med Adm Sch Dt/Tm")
+                add_elem("Med Adm Dt/Tm")
+                add_elem("Med Adm Event Id")
 
         if is_custom_ce_template:
-            all_elements.clear()
-            seen_names.clear()
+            if not is_targeted_order_report:
+                all_elements.clear()
+                seen_names.clear()
             if is_provider_clinical_notes:
                 base_clin_cols = [
                     ("Enc Id", "5ef4381c-6344-43c4-81b5-2c18cd6bcb70", "vc (STRING)", "ENCOUNTER.ENCNTR_ID", "Encounter", None),
@@ -1306,7 +1345,7 @@ class DA2ReportGenerator:
                     ("Enc Loc Nurse Unit", "75267dc7-d5c6-437b-aa34-98e46bbc5db1", "vc (STRING)", "ENCOUNTER.LOC_NURSE_UNIT_CD", "Encounter", 220),
                     ("Enc Loc Room", "e52b4716-00f9-42ab-8a04-8ba1e9ea1ece", "vc (STRING)", "ENCOUNTER.LOC_ROOM_CD", "Encounter", 220),
                     ("Bed Loc", "219ba43a-c7ee-44a4-8e79-052d4a5703da", "vc (STRING)", "ENCOUNTER.LOC_BED_CD", "Encounter", 220),
-                    ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "ENCNTR_PRSNL_RELTN.PRSNL_PERSON_ID", "Encounter", 333),
+                    ("Enc Attending Phys", "beb01385-36a9-4371-93e2-68056229e216", "vc (STRING)", "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)", "Encounter Functions", None),
                     ("Enc Type", "10b02c36-ff84-47d6-a825-ea142281a547", "vc (STRING)", "ENCOUNTER.ENCNTR_TYPE_CD", "Encounter", 71),
                     ("Enc Status", "7161959f-72cd-46bb-b6f6-2b177edd0469", "vc (STRING)", "ENCOUNTER.ENCNTR_STATUS_CD", "Encounter", 261),
                     ("Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a", "dq8 (DATETIME)", "ENCOUNTER.REG_DT_TM", "Encounter", None),
@@ -1320,27 +1359,28 @@ class DA2ReportGenerator:
                     ("CE Result Status", "7ccf3fe5-568a-4015-82e0-fd370a98426e", "vc (STRING)", "CLINICAL_EVENT.RESULT_STATUS_CD", "Clinical Event", 8),
                     ("CE Valid Until Dt/Tm", "871b99b7-e872-4db0-8762-d663c933ad76", "dq8 (DATETIME)", "CLINICAL_EVENT.VALID_UNTIL_DT_TM", "Clinical Event", None),
                 ]
-            if is_oral_care and is_bladder_bowel:
-                target_ce_events = ORAL_CARE_CE_EVENTS + BLADDER_BOWEL_CE_EVENTS
-            elif is_oral_care:
-                target_ce_events = ORAL_CARE_CE_EVENTS
-            elif is_bladder_bowel:
-                target_ce_events = BLADDER_BOWEL_CE_EVENTS
-            elif is_bathing_hygiene:
-                target_ce_events = BATHING_HYGIENE_CE_EVENTS
-            elif is_nutrition_assessment:
-                target_ce_events = NUTRITION_ASSESSMENT_CE_EVENTS
-            elif is_pharmacy_interventions:
-                target_ce_events = PHARMACY_INTERVENTIONS_CE_EVENTS
-            elif is_iv_central_line:
-                target_ce_events = IV_CENTRAL_LINE_CE_EVENTS
-            elif is_provider_clinical_notes:
+            if is_provider_clinical_notes:
                 target_ce_events = PROVIDER_CLINICAL_NOTES_CE_EVENTS
-            elif is_census_risk_indicators:
-                target_ce_events = CENSUS_RISK_CE_EVENTS
             else:
-                target_ce_events = REHAB_THERAPY_CE_EVENTS
+                composed_ce: list[tuple[str, str]] = []
+                for flag, ev_group in (
+                    (is_oral_care, ORAL_CARE_CE_EVENTS),
+                    (is_bladder_bowel, BLADDER_BOWEL_CE_EVENTS),
+                    (is_bathing_hygiene, BATHING_HYGIENE_CE_EVENTS),
+                    (is_nutrition_assessment, NUTRITION_ASSESSMENT_CE_EVENTS),
+                    (is_pharmacy_interventions, PHARMACY_INTERVENTIONS_CE_EVENTS),
+                    (is_iv_central_line, IV_CENTRAL_LINE_CE_EVENTS),
+                    (is_census_risk_indicators, CENSUS_RISK_CE_EVENTS),
+                    (is_rehab_therapy_minutes, REHAB_THERAPY_CE_EVENTS),
+                ):
+                    if flag:
+                        for pair in ev_group:
+                            if pair not in composed_ce:
+                                composed_ce.append(pair)
+                target_ce_events = composed_ce or REHAB_THERAPY_CE_EVENTS
             for cname, cuuid, ctype, vtarget, subent, cset in base_clin_cols:
+                if cname in seen_names:
+                    continue
                 seen_names.add(cname)
                 all_elements.append({
                     "da2_field_name": cname,
@@ -1395,9 +1435,12 @@ class DA2ReportGenerator:
             add_elem("CE Result Status")
             add_elem("CE Valid Until Dt Tm")
 
-        if interp.recommended_strategy == "two_dataset_birt_join" and not (
+        has_combined_order_and_mar = is_targeted_order_report and any(
+            e["da2_field_name"].startswith(("Med Adm", "Task Atv", "CE Med")) for e in all_elements
+        )
+        if (interp.recommended_strategy == "two_dataset_birt_join" and not (
             is_cssrs or is_custom_ce_template or is_targeted_order_report
-        ):
+        )) or (is_targeted_order_report and is_custom_ce_template) or has_combined_order_and_mar:
             # Split into Primary (Encounter / Clinical) and Secondary (Financial / Charges or second child list)
             fin_elements = [
                 e for e in all_elements
@@ -1415,7 +1458,7 @@ class DA2ReportGenerator:
             ]
             # If the split was triggered by two clinical child lists (e.g. CE + Prsnl/Sch/Task) rather than CWF:
             if len(fin_elements) <= 2:
-                secondary_prefixes = ("CE ", "CE Med ")
+                secondary_prefixes = ("CE ", "CE Med ", "Med Adm", "Task Atv") if has_combined_order_and_mar else ("CE ", "CE Med ")
                 fin_elements = [
                     e for e in all_elements
                     if e["da2_field_name"] in {"Enc Id", "Enc Encounter Number"}
@@ -1778,6 +1821,8 @@ class DA2ReportGenerator:
             qual_body = f'<operator type="AND"><operator type="AND">{qual_body}{f_ce_stat}</operator>{f_ce_valid}</operator>'
 
         primary_ord_cat = next((el.get("primary_order_catalog") for el in elements if el.get("primary_order_catalog")), None)
+        primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
+        f_ord_cat = ""
         if primary_ord_cat:
             o_vals = "".join(
                 f'<value display="{html.escape(o_disp, quote=True)}" text="{html.escape(o_cd, quote=True)}"/>'
@@ -1790,9 +1835,7 @@ class DA2ReportGenerator:
                 f'<values type="LIST" xCount="{len(primary_ord_cat)}">{o_vals}</values>'
                 '</filter>'
             )
-            qual_body = f'<operator type="AND">{qual_body}{f_ord_cat}</operator>'
-
-        primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
+        f_ord_type = ""
         if primary_ord_cat_types:
             ot_vals = "".join(
                 f'<value display="{html.escape(o_disp, quote=True)}" text="{html.escape(o_cd, quote=True)}"/>'
@@ -1805,6 +1848,11 @@ class DA2ReportGenerator:
                 f'<values type="LIST" xCount="{len(primary_ord_cat_types)}">{ot_vals}</values>'
                 '</filter>'
             )
+        if f_ord_cat and f_ord_type:
+            qual_body = f'<operator type="AND">{qual_body}<operator paren="true" type="OR">{f_ord_cat}{f_ord_type}</operator></operator>'
+        elif f_ord_cat:
+            qual_body = f'<operator type="AND">{qual_body}{f_ord_cat}</operator>'
+        elif f_ord_type:
             qual_body = f'<operator type="AND">{qual_body}{f_ord_type}</operator>'
 
         primary_ce_events = next((el.get("primary_ce_events") for el in elements if el.get("primary_ce_events")), None)
@@ -2126,6 +2174,8 @@ class DA2ReportGenerator:
         ]
 
         q_up = q_name.upper()
+        if any(e["da2_field_name"] == "Enc Attending Phys" for e in elements):
+            select_exprs.append("  CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID) AS Enc_Attending_Phys")
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in elements)
         has_orders = any(e["da2_field_name"].startswith("Order ") for e in elements)
         has_chg = any(e["da2_field_name"].startswith(("Chg ", "BO ", "Rev ")) for e in elements) or domain == "CWF GS Revenue"
@@ -2159,6 +2209,24 @@ class DA2ReportGenerator:
                 "CWC_ENCOUNTER.ENCNTR_ID = CWC_ORDERS.ENCNTR_ID",
                 "CWC_ORDERS.ACTIVE_IND = 1",
             ])
+            primary_ord_cat = next((el.get("primary_order_catalog") for el in elements if el.get("primary_order_catalog")), None)
+            primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
+            cat_sql = (
+                f"CWC_ORDERS.CATALOG_CD IN ({', '.join(cv.split('.')[0] for _, cv in primary_ord_cat)})"
+                if primary_ord_cat
+                else ""
+            )
+            type_sql = (
+                f"CWC_ORDERS.CATALOG_TYPE_CD IN ({', '.join(cv.split('.')[0] for _, cv in primary_ord_cat_types)})"
+                if primary_ord_cat_types
+                else ""
+            )
+            if cat_sql and type_sql:
+                where_clauses.append(f"({cat_sql} OR {type_sql})")
+            elif cat_sql:
+                where_clauses.append(cat_sql)
+            elif type_sql:
+                where_clauses.append(type_sql)
 
         if has_chg:
             select_exprs.extend([

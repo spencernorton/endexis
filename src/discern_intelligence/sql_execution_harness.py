@@ -65,6 +65,7 @@ SYNTHETIC_CODE_VALUES: dict[int, tuple[int, str, str]] = {
 def normalize_oracle_ejs_sql_for_sqlite(sql_text: str) -> str:
     """Rewrites Oracle package-qualified function calls into SQLite scalar UDF identifiers."""
     out = re.sub(r"\bCWC_ENC_FUNC\.GET_FIN_NBR\s*\(", "CWC_ENC_FUNC__GET_FIN_NBR(", sql_text, flags=re.I)
+    out = re.sub(r"\bCWC_ENC_FUNC\.GET_ATTEND_PHYS_NAME\s*\(", "CWC_ENC_FUNC__GET_ATTEND_PHYS_NAME(", out, flags=re.I)
     out = re.sub(r"\bCWC_PER_FUNC\.GET_MRN\s*\(", "CWC_PER_FUNC__GET_MRN(", out, flags=re.I)
     out = re.sub(r"\bCWC_PERSON_FUNC\.GET_MRN\s*\(", "CWC_PER_FUNC__GET_MRN(", out, flags=re.I)
     return out
@@ -135,6 +136,7 @@ def create_synthetic_v500_connection() -> sqlite3.Connection:
     conn.create_function("TO_DATE", 2, _to_date)
     conn.create_function("NVL", 2, _nvl)
     conn.create_function("CWC_ENC_FUNC__GET_FIN_NBR", 1, _get_fin_nbr)
+    conn.create_function("CWC_ENC_FUNC__GET_ATTEND_PHYS_NAME", 1, lambda enc_id: f"ATTENDING-MD-{int(float(enc_id or 0)):04d}")
     conn.create_function("CWC_PER_FUNC__GET_MRN", 3, _get_mrn)
 
     cur = conn.cursor()
@@ -198,6 +200,7 @@ def create_synthetic_v500_connection() -> sqlite3.Connection:
             ENCNTR_ID INTEGER,
             PERSON_ID INTEGER,
             CATALOG_CD INTEGER,
+            CATALOG_TYPE_CD INTEGER,
             ORDER_MNEMONIC TEXT,
             CLINICAL_DISPLAY_LINE TEXT,
             ORDER_STATUS_CD INTEGER,
@@ -399,7 +402,7 @@ def create_synthetic_v500_connection() -> sqlite3.Connection:
     cur.execute(
         """
         INSERT INTO V500.ORDERS VALUES (
-            70001, 50001, 1001, 200002, 'Vancomycin 1000 mg IV', '1000 mg IV q12h', 2550,
+            70001, 50001, 1001, 200002, 2516, 'Vancomycin 1000 mg IV', '1000 mg IV q12h', 2550,
             '2026-10-01 09:30:00', '2026-10-01 09:30:00', 1
         )
         """
@@ -407,7 +410,7 @@ def create_synthetic_v500_connection() -> sqlite3.Connection:
     cur.execute(
         """
         INSERT INTO V500.ORDERS VALUES (
-            70002, 50001, 1001, 200003, 'Morphine 4 mg IV PRN', '4 mg IV q4h PRN Pain', 2545,
+            70002, 50001, 1001, 200003, 2516, 'Morphine 4 mg IV PRN', '4 mg IV q4h PRN Pain', 2545,
             '2026-09-29 22:00:00', '2026-10-02 08:00:00', 1
         )
         """
@@ -415,8 +418,16 @@ def create_synthetic_v500_connection() -> sqlite3.Connection:
     cur.execute(
         """
         INSERT INTO V500.ORDERS VALUES (
-            70003, 50001, 1001, 200001, 'Lactate Stat', 'Stat Lab', 2542,
+            70003, 50001, 1001, 200001, 2513, 'Lactate Stat', 'Stat Lab', 2542,
             '2026-10-01 11:00:00', '2026-10-01 11:05:00', 1
+        )
+        """
+    )
+    cur.execute(
+        """
+        INSERT INTO V500.ORDERS VALUES (
+            70004, 50003, 1003, 38884839, 2511, 'Fall Precautions', 'Fall Precautions Active', 2550,
+            '2026-10-03 08:00:00', '2026-10-03 08:00:00', 1
         )
         """
     )

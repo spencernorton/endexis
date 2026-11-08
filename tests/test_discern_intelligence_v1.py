@@ -1296,6 +1296,11 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     for disp, cv in BATHING_HYGIENE_CE_EVENTS:
         assert f'display="{disp}" text="{cv}"' in bath_dq
 
+    oral_plus_bath = gen.generate("Build an oral care and bathing documentation audit for active inpatients.")
+    assert oral_plus_bath.verification.is_valid
+    assert 'display="Oral Care" text="700579.00"' in oral_plus_bath.queries[0].daquery_xml
+    assert 'display="Bath Type" text="54993041.00"' in oral_plus_bath.queries[0].daquery_xml
+
     # 2. Inpatient Nutrition Assessment & Malnutrition Audit
     nutr_req = (
         "Build an Inpatient Nutrition Assessment and Malnutrition report showing nutrition risk screening, "
@@ -1348,6 +1353,23 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert 'name="Order Catalog" type="1" uuid="ca672220-76a6-4601-bc0f-f0104e07874c"' in prec_dq
     assert 'display="Suicide Precautions" text="4149527.00"' in prec_dq
     assert 'display="Fall Precautions" text="38884839.00"' in prec_dq
+    assert "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)" in prec_bundle.queries[0].ejs_v500_sql
+    assert "ENCNTR_PRSNL_RELTN" not in prec_bundle.queries[0].ejs_v500_sql
+    att_el = next(e for e in prec_bundle.queries[0].selected_elements if e["da2_field_name"] == "Enc Attending Phys")
+    assert att_el["element_uuid"] == "beb01385-36a9-4371-93e2-68056229e216"
+    assert att_el["da2_bus_view_subentity"] == "Encounter Functions"
+    assert att_el["v500_target"] == "CWC_ENC_FUNC.GET_ATTEND_PHYS_NAME(CWC_ENCOUNTER.ENCNTR_ID)"
+    from discern_intelligence.sql_execution_harness import create_synthetic_v500_connection, execute_and_verify_ejs_sql
+    conn_ord = create_synthetic_v500_connection()
+    try:
+        conn_ord.executescript(
+            "CREATE TABLE IF NOT EXISTS V500.ENCNTR_PRSNL_RELTN (ENCNTR_PRSNL_RELTN_ID INTEGER PRIMARY KEY, ENCNTR_ID INTEGER, PRSNL_PERSON_ID INTEGER, ENCNTR_PRSNL_R_CD INTEGER, ACTIVE_IND INTEGER);"
+            "INSERT INTO V500.ENCNTR_PRSNL_RELTN VALUES (1, 1001, 9001, 1119, 1), (2, 1001, 9002, 1116, 1), (3, 1001, 9003, 1119, 1);"
+        )
+        ord_exec = execute_and_verify_ejs_sql(prec_bundle.queries[0].ejs_v500_sql, conn=conn_ord)
+        assert ord_exec["executed"] and ord_exec["non_empty"] and ord_exec["fanout_safe"], f"Order grain fan-out failed: {ord_exec}"
+    finally:
+        conn_ord.close()
 
     # 6. 1:1 Observation & Video Monitoring Orders, Wound Care Consult Orders, and Diet Orders
     obs_bundle = gen.generate(
@@ -1372,6 +1394,53 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     assert diet_ord_bundle.report_name == "Diet_And_Nutrition_Orders_Report"
     assert diet_ord_bundle.verification.is_valid
     assert 'name="Order Catalog Type" type="1" uuid="97f18dc3-faf9-42d5-a47a-999fe7cdf944"' in diet_ord_bundle.queries[0].daquery_xml
+    assert "CWC_ORDERS.CATALOG_CD IN (" in prec_bundle.queries[0].ejs_v500_sql
+    assert "38884839" in prec_bundle.queries[0].ejs_v500_sql
+    assert "CWC_ORDERS.CATALOG_TYPE_CD IN (2511, 636067)" in diet_ord_bundle.queries[0].ejs_v500_sql
+    combined_prec_diet = gen.generate(
+        "Build a report of inpatient fall precaution orders and dysphagia diet orders for active inpatients."
+    )
+    assert combined_prec_diet.verification.is_valid
+    assert "(CWC_ORDERS.CATALOG_CD IN (" in combined_prec_diet.queries[0].ejs_v500_sql
+    assert "OR CWC_ORDERS.CATALOG_TYPE_CD IN (2511, 636067))" in combined_prec_diet.queries[0].ejs_v500_sql
+
+    combined_ord_ce = gen.generate(
+        "Build a report of inpatient precaution orders and pharmacy clinical interventions for active inpatients."
+    )
+    assert combined_ord_ce.verification.is_valid, f"Combined order+CE invalid: {combined_ord_ce.verification.errors}"
+    assert len(combined_ord_ce.queries) == 2
+    assert combined_ord_ce.execution_strategy == "two_dataset_birt_join"
+    assert 'display="Fall Precautions" text="38884839.00"' in combined_ord_ce.queries[0].daquery_xml
+    assert 'display="Intervention Type Pharmacy" text="4203582.00"' in combined_ord_ce.queries[1].daquery_xml
+
+    combined_prec_video = gen.generate(
+        "Build a report of fall precaution orders and continuous video monitoring orders for active inpatients."
+    )
+    assert combined_prec_video.verification.is_valid
+    assert 'display="Fall Precautions" text="38884839.00"' in combined_prec_video.queries[0].daquery_xml
+    assert 'display="Continuous Video Monitoring" text="257630227.00"' in combined_prec_video.queries[0].daquery_xml
+
+    combined_prec_mar = gen.generate(
+        "Build an Inpatient Precaution Orders report (Aspiration, Fall, Seizure, Suicide Precautions) and a Late Medication Administration Audit showing scheduled date/time vs administered date/time."
+    )
+    assert combined_prec_mar.verification.is_valid, f"Combined precaution+MAR invalid: {combined_prec_mar.verification.errors}"
+    assert len(combined_prec_mar.queries) == 2
+    assert combined_prec_mar.execution_strategy == "two_dataset_birt_join"
+    assert 'display="Suicide Precautions" text="4149527.00"' in combined_prec_mar.queries[0].daquery_xml
+    q2_mar_names = [e["da2_field_name"] for e in combined_prec_mar.queries[1].selected_elements]
+    assert "Med Adm Sch Dt/Tm" in q2_mar_names or "Task Atv Scheduled Dt/Tm" in q2_mar_names
+    assert "Med Adm Dt/Tm" in q2_mar_names or "Med Adm Beg Dt/Tm" in q2_mar_names
+    for alias_prompt in (
+        "Fall precaution orders and late MAR audit for active inpatients.",
+        "Fall precaution orders and missed medication audit for active inpatients.",
+    ):
+        alias_bundle = gen.generate(alias_prompt)
+        assert alias_bundle.verification.is_valid, f"Combined alias invalid for {alias_prompt}: {alias_bundle.verification.errors}"
+        assert len(alias_bundle.queries) == 2
+        assert alias_bundle.execution_strategy == "two_dataset_birt_join"
+        assert 'display="Fall Precautions" text="38884839.00"' in alias_bundle.queries[0].daquery_xml
+        alias_q2 = [e["da2_field_name"] for e in alias_bundle.queries[1].selected_elements]
+        assert "Med Adm Sch Dt/Tm" in alias_q2 and "Med Adm Dt/Tm" in alias_q2
 
     # 7. Word-boundary & domain isolation regression checks
     hp_bundle = gen.generate(
@@ -1408,9 +1477,39 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
     prec_hits = resolve_da2_filter_value("Fall Precautions", da2_field_name="Order Catalog", code_set=200)
     assert prec_hits and prec_hits[0]["matched_code_values"].get("Fall Precautions") == "38884839"
 
-    # 9. Deterministic cross-check of v2.2 SFT training code_values against da2_filter_value_catalog.json
+    # 9. Deterministic cross-check of runtime constants and v2.2 SFT training code_values against da2_filter_value_catalog.json
     from discern_intelligence.knowledge import load_da2_filter_value_catalog
-    fvc_fields = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+    from discern_intelligence.interpreter import MillenniumInterpreter
+    interp = MillenniumInterpreter()
+    res_sing = interp.interpret("List benzodiazepine")
+    res_plur = interp.interpret("List benzodiazepines")
+    res_short_plur = interp.interpret("List benzos")
+    for res_b in (res_sing, res_plur, res_short_plur):
+        b_tables = {c.table for c in res_b.matched_columns}
+        b_cs = {cs["code_set"] for cs in res_b.matched_code_sets}
+        assert "ORDERS" in b_tables, f"ORDERS missing for {res_b.request_text}: {b_tables}"
+        assert {200, 6000, 6003, 6004}.issubset(b_cs), f"Order code sets missing for {res_b.request_text}: {b_cs}"
+
+    fvc_root = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]
+    fvc_fields = fvc_root["fields"]
+    assert fvc_root["total_coded_value_pairs"] == sum(len(v["display_to_code_value"]) for v in fvc_fields.values()) == sum(v["count"] for v in fvc_fields.values()) == 6678
+    ce_fmap = fvc_fields["CE Event"]["display_to_code_value"]
+    oc_fmap = fvc_fields["Order Catalog"]["display_to_code_value"]
+    for runtime_ce_list in (
+        BATHING_HYGIENE_CE_EVENTS,
+        NUTRITION_ASSESSMENT_CE_EVENTS,
+        PHARMACY_INTERVENTIONS_CE_EVENTS,
+        IV_CENTRAL_LINE_CE_EVENTS,
+    ):
+        for disp, cv in runtime_ce_list:
+            assert ce_fmap.get(disp) == cv.split(".")[0], f"Runtime CE Event mismatch for {disp}: {cv} vs {ce_fmap.get(disp)}"
+    for runtime_oc_list in (
+        PRECAUTION_ORDER_CATALOG_ITEMS,
+        OBSERVATION_MONITORING_ORDER_CATALOG_ITEMS,
+        WOUND_CONSULT_ORDER_CATALOG_ITEMS,
+    ):
+        for disp, cv in runtime_oc_list:
+            assert oc_fmap.get(disp) == cv.split(".")[0], f"Runtime Order Catalog mismatch for {disp}: {cv} vs {oc_fmap.get(disp)}"
     sft_rows = [
         json.loads(line)
         for line in (Path(__file__).resolve().parents[1] / "data" / "sft_train_v1.jsonl").read_text(encoding="utf-8").splitlines()
