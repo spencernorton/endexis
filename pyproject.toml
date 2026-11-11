@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "endexis"
-version = "2.2.1"
+version = "2.2.2"
 description = "Endexis — Tenant-Agnostic Clinical & Financial Analytics, DA2, V500, CCL, and BIRT 4.4.2 Compiler"
 readme = "README.md"
 requires-python = ">=3.11"

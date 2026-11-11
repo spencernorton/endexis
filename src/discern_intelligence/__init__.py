@@ -47,7 +47,7 @@ from .knowledge import (
     resolve_da2_view_or_alias,
 )
 
-__version__ = "2.2.1"
+__version__ = "2.2.2"
 __all__ = [
     "DEFAULT_OWNER_GROUP_DISPLAY",
     "TenantConfig",
