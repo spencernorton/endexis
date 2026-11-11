@@ -4,7 +4,6 @@ Report Generator and Deterministic Verifier.
 """
 from __future__ import annotations
 
-import functools
 import html
 import re
 import io
@@ -639,22 +638,28 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
 }
 
 VERIFIED_CWC_ENCOUNTER_UUIDS: set[str] = {v[1] for v in LIVE_CWC_ELEMENT_MAP.values()}
-# DA2 compares these with an upper-case _KEY column (Person Name Last -> PERSON.NAME_LAST_KEY in DA2's own SQL),
-# so an Is Like pattern for them is upper-cased.
-LIKE_UPPER_CASE_FIELDS: set[str] = {"Person Name Last"}
+# Free-text DA2 elements that take an Is Like pattern. They are named, not derived: the shipped catalogs call coded
+# and numeric elements text too ("vc / cv"), and their V500 columns are often wrong (Person Name Last -> PERSON_ID).
+LIKE_TEXT_FIELDS: frozenset[str] = frozenset({
+    "Person Name Last", "Person Name Full Format", "CE Result Value", "Enc Reason for Visit", "Enc Financial Num",
+    "Dx 1 Desc", "Alg Nom Source String", "Chg Description", "Order Clinical Display", "Order AS Mnemonic",
+    "HP Plan Name", "Per Addr City", "Per Addr Zip", "Sch App Description",
+})
+# DA2 compares these with a Cerner _KEY column (Person Name Last -> CWC_PERSON.NAME_LAST_KEY in DA2's own SQL): the
+# name upper-cased, without spaces or punctuation. Their patterns get the same treatment.
+LIKE_KEY_FIELDS: frozenset[str] = frozenset({"Person Name Last"})
 
 
-@functools.cache
-def like_text_fields() -> frozenset[str]:
-    """The fields generate(like_filters=...) takes: verified CWC Encounter text ("vc") elements that have no code value
-    map (coded fields take value_filters' exact values) and aren't dates."""
-    coded = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
-    ccl_type = {e["da2_field_name"]: str(e.get("ccl_data_type") or "").lower() for e in load_da2_elements()}
-    return frozenset(
-        name for name, (live, uid, typ) in LIVE_CWC_ELEMENT_MAP.items()
-        if live == name and uid in VERIFIED_CWC_ENCOUNTER_UUIDS and typ != "2"  # "2": a date, whatever the catalog says
-        and name not in coded and ccl_type.get(name, "").startswith("vc")
-    )
+def like_pattern(name: str, pattern: str) -> str:
+    """The Is Like pattern generate(like_filters=...) writes for this field. ValueError if the field or pattern won't do."""
+    if name not in LIKE_TEXT_FIELDS:
+        raise ValueError(f"No verified DA2 text field {name!r}")
+    pattern = str(pattern).strip()
+    if name in LIKE_KEY_FIELDS:
+        pattern = re.sub(r"[^0-9A-Za-z%_]", "", pattern).upper()
+    if not pattern.strip("%_ ") or len(pattern) > 100 or not pattern.isprintable():
+        raise ValueError(f"Unusable {name!r} pattern: {pattern!r}")
+    return pattern
 
 
 CSSRS_INLINE_SUBQUERIES: list[tuple[str, str, list[tuple[str, str]]]] = [
@@ -786,7 +791,8 @@ class DA2ReportGenerator:
         like_filters: DA2 text field name -> DA2 "Is Like" pattern with % wildcards, e.g. {"Person Name Last": "%SM%"}.
         Each becomes an Is Like filter in the .daquery only (DA2 matches the pattern as written, case included); the
         reference SQL, the CCL and the standalone .rptdesign don't carry it, so it is listed in
-        value_filters_not_in_reference. Only verified CWC Encounter text elements work; anything else raises ValueError."""
+        value_filters_not_in_reference. Only LIKE_TEXT_FIELDS work, and like_pattern() says how each pattern is written;
+        anything else raises ValueError."""
         vfilters = self._resolve_value_filters(value_filters) + self._resolve_like_filters(like_filters)
         eff_tenant = TenantConfig.resolve_for_request(
             request_text=request_text,
@@ -911,13 +917,7 @@ class DA2ReportGenerator:
     def _resolve_like_filters(like_filters: dict[str, str] | None) -> list[dict[str, Any]]:
         out = []
         for name, pattern in (like_filters or {}).items():
-            if name not in like_text_fields():
-                raise ValueError(f"No verified DA2 text field {name!r}")
-            pattern = str(pattern).strip()
-            if not pattern.strip("%_ ") or len(pattern) > 100:
-                raise ValueError(f"Unusable {name!r} pattern: {pattern!r}")
-            if name in LIKE_UPPER_CASE_FIELDS:
-                pattern = pattern.upper()
+            pattern = like_pattern(name, pattern)
             out.append({"name": name, "uuid": LIVE_CWC_ELEMENT_MAP[name][1], "values": [], "target": None,
                         "like": pattern, "text": f"{name} is like '{pattern}'"})
         return out
