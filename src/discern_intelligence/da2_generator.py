@@ -4,6 +4,7 @@ Report Generator and Deterministic Verifier.
 """
 from __future__ import annotations
 
+import functools
 import html
 import re
 import io
@@ -643,6 +644,19 @@ VERIFIED_CWC_ENCOUNTER_UUIDS: set[str] = {v[1] for v in LIVE_CWC_ELEMENT_MAP.val
 LIKE_UPPER_CASE_FIELDS: set[str] = {"Person Name Last"}
 
 
+@functools.cache
+def like_text_fields() -> frozenset[str]:
+    """The fields generate(like_filters=...) takes: verified CWC Encounter text ("vc") elements that have no code value
+    map (coded fields take value_filters' exact values) and aren't dates."""
+    coded = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+    ccl_type = {e["da2_field_name"]: str(e.get("ccl_data_type") or "").lower() for e in load_da2_elements()}
+    return frozenset(
+        name for name, (live, uid, typ) in LIVE_CWC_ELEMENT_MAP.items()
+        if live == name and uid in VERIFIED_CWC_ENCOUNTER_UUIDS and typ != "2"  # "2": a date, whatever the catalog says
+        and name not in coded and ccl_type.get(name, "").startswith("vc")
+    )
+
+
 CSSRS_INLINE_SUBQUERIES: list[tuple[str, str, list[tuple[str, str]]]] = [
     (
         "WishD",
@@ -893,23 +907,19 @@ class DA2ReportGenerator:
             })
         return out
 
-    def _resolve_like_filters(self, like_filters: dict[str, str] | None) -> list[dict[str, Any]]:
-        coded = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+    @staticmethod
+    def _resolve_like_filters(like_filters: dict[str, str] | None) -> list[dict[str, Any]]:
         out = []
         for name, pattern in (like_filters or {}).items():
-            live = LIVE_CWC_ELEMENT_MAP.get(name)
-            # Text only: a "vc" element without a code value map. Coded fields take value_filters' exact values.
-            text = str((self._da2_catalog.get(name) or {}).get("ccl_data_type") or "").lower().startswith("vc")
-            if not live or live[0] != name or live[1] not in VERIFIED_CWC_ENCOUNTER_UUIDS or not text or name in coded \
-                    or live[2] == "2":  # a date, whatever the catalog's type says
+            if name not in like_text_fields():
                 raise ValueError(f"No verified DA2 text field {name!r}")
             pattern = str(pattern).strip()
             if not pattern.strip("%_ ") or len(pattern) > 100:
                 raise ValueError(f"Unusable {name!r} pattern: {pattern!r}")
             if name in LIKE_UPPER_CASE_FIELDS:
                 pattern = pattern.upper()
-            out.append({"name": name, "uuid": live[1], "values": [], "target": None, "like": pattern,
-                        "text": f"{name} is like '{pattern}'"})
+            out.append({"name": name, "uuid": LIVE_CWC_ELEMENT_MAP[name][1], "values": [], "target": None,
+                        "like": pattern, "text": f"{name} is like '{pattern}'"})
         return out
 
     @staticmethod
