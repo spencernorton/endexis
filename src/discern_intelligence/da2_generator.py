@@ -638,6 +638,9 @@ LIVE_CWC_ELEMENT_MAP: dict[str, tuple[str, str, str]] = {
 }
 
 VERIFIED_CWC_ENCOUNTER_UUIDS: set[str] = {v[1] for v in LIVE_CWC_ELEMENT_MAP.values()}
+# DA2 compares these with an upper-case _KEY column (Person Name Last -> PERSON.NAME_LAST_KEY in DA2's own SQL),
+# so an Is Like pattern for them is upper-cased.
+LIKE_UPPER_CASE_FIELDS: set[str] = {"Person Name Last"}
 
 
 CSSRS_INLINE_SUBQUERIES: list[tuple[str, str, list[tuple[str, str]]]] = [
@@ -761,10 +764,16 @@ class DA2ReportGenerator:
         facility_display: str | None = None,
         tenant_config: TenantConfig | None = None,
         value_filters: dict[str, list[str]] | None = None,
+        like_filters: dict[str, str] | None = None,
     ) -> DA2UploadableBundle:
         """value_filters: DA2 field name -> display values to keep, e.g. {"Enc Type": ["Inpatient"]}. Each becomes an
-        IN-list filter. Only fields with a harvested display -> code value map work; anything else raises ValueError."""
-        vfilters = self._resolve_value_filters(value_filters)
+        IN-list filter. Only fields with a harvested display -> code value map work; anything else raises ValueError.
+
+        like_filters: DA2 text field name -> DA2 "Is Like" pattern with % wildcards, e.g. {"Person Name Last": "%SM%"}.
+        Each becomes an Is Like filter in the .daquery only (DA2 matches the pattern as written, case included); the
+        reference SQL, the CCL and the standalone .rptdesign don't carry it, so it is listed in
+        value_filters_not_in_reference. Only verified CWC Encounter text elements work; anything else raises ValueError."""
+        vfilters = self._resolve_value_filters(value_filters) + self._resolve_like_filters(like_filters)
         eff_tenant = TenantConfig.resolve_for_request(
             request_text=request_text,
             base_config=tenant_config or self._tenant_config,
@@ -882,6 +891,25 @@ class DA2ReportGenerator:
                 "target": target if re.fullmatch(r"[A-Z0-9_]+\.[A-Z0-9_]+_CD", target) else None,
                 "text": f"{name} in ({', '.join(d for d, _ in values)})",
             })
+        return out
+
+    def _resolve_like_filters(self, like_filters: dict[str, str] | None) -> list[dict[str, Any]]:
+        coded = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+        out = []
+        for name, pattern in (like_filters or {}).items():
+            live = LIVE_CWC_ELEMENT_MAP.get(name)
+            # Text only: a "vc" element without a code value map. Coded fields take value_filters' exact values.
+            text = str((self._da2_catalog.get(name) or {}).get("ccl_data_type") or "").lower().startswith("vc")
+            if not live or live[0] != name or live[1] not in VERIFIED_CWC_ENCOUNTER_UUIDS or not text or name in coded \
+                    or live[2] == "2":  # a date, whatever the catalog's type says
+                raise ValueError(f"No verified DA2 text field {name!r}")
+            pattern = str(pattern).strip()
+            if not pattern.strip("%_ ") or len(pattern) > 100:
+                raise ValueError(f"Unusable {name!r} pattern: {pattern!r}")
+            if name in LIKE_UPPER_CASE_FIELDS:
+                pattern = pattern.upper()
+            out.append({"name": name, "uuid": live[1], "values": [], "target": None, "like": pattern,
+                        "text": f"{name} is like '{pattern}'"})
         return out
 
     @staticmethod
@@ -2014,6 +2042,15 @@ class DA2ReportGenerator:
                 f'<value display="{html.escape(d, quote=True)}" text="{c}.00"/>' for d, c in vf["values"]
             )
             v_name = html.escape(LIVE_CWC_ELEMENT_MAP[vf["name"]][0], quote=True)
+            if vf.get("like"):  # the shape DA2 itself writes for an Is Like qualification
+                f_val = (
+                    f'<filter joinType="0" mode="0" useIndex="1"><element name="{v_name}" type="3" uuid="{vf["uuid"]}"/>'
+                    '<operator type="LIKE"/>'
+                    f'<values type="LIST" xCount="1"><value text="{html.escape(vf["like"], quote=True)}"/></values>'
+                    '</filter>'
+                )
+                qual_body = f'<operator type="AND">{qual_body}{f_val}</operator>'
+                continue
             f_val = (
                 f'<filter joinType="0" mode="0" prompt_element_uuid="{vf["uuid"]}" prompt_type="0" useIndex="1">'
                 f'<element name="{v_name}" type="1" uuid="{vf["uuid"]}"/>'
@@ -2191,7 +2228,8 @@ class DA2ReportGenerator:
                 '        </filter>',
             ])
 
-        for vf in value_filters or []:
+        # Is Like filters stay out: this format's operator code for LIKE isn't known (only op 8 = LIST, 10 = DATE).
+        for vf in (vf for vf in value_filters or [] if not vf.get("like")):
             v_name = html.escape(vf["name"], quote=True)
             v_uuid = self._da2_catalog.get(vf["name"], {}).get("element_uuid", vf["uuid"])
             filter_blocks.extend([

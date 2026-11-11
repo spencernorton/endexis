@@ -1602,3 +1602,35 @@ def test_v2_2_1_whole_word_forms_mar_and_value_filters() -> None:
                 {"Prsnl Position": ["X"]}):  # Prsnl Position's live element is another field
         with pytest.raises(ValueError):
             gen.generate(req, value_filters=bad)
+
+
+def test_v2_2_2_like_filters() -> None:
+    gen = DA2ReportGenerator()
+    req = "Active census with FIN and nurse unit"
+    plain = gen.generate(req, report_name="Like_Values")
+    b = gen.generate(req, report_name="Like_Values", like_filters={"Person Name Last": "%o'b%", "CE Result Value": "%Yes%"})
+    assert b.verification.is_valid, b.verification.errors
+    q = b.queries[0]
+    likes = {f.find("element").get("name"): f for f in ET.fromstring(q.daquery_xml).iter()
+             if f.tag.startswith("filter") and f.find("operator") is not None and f.find("operator").get("type") == "LIKE"}
+    # The shape DA2's own View Query XML shows for an Is Like qualification.
+    last = likes["Person Name Last"]
+    assert last.attrib == {"joinType": "0", "mode": "0", "useIndex": "1"}
+    assert last.find("element").get("uuid") == "2e9a30aa-c98f-4d50-9f5e-8d642c169fe8"
+    assert [(v.get("type"), v.get("xCount")) for v in last.iter("values")] == [("LIST", "1")]
+    assert [v.attrib for v in last.iter("value")] == [{"text": "%O'B%"}]  # NAME_LAST_KEY is upper case
+    assert [v.get("text") for v in likes["CE Result Value"].iter("value")] == ["%Yes%"]  # as written
+    assert "Person Name Last is like '%O'B%'" in q.filters and "CE Result Value is like '%Yes%'" in q.filters
+    # In the .daquery only: no SQL, CCL or standalone .rptdesign query for it, and the bundle says so.
+    assert q.ejs_v500_sql == plain.queries[0].ejs_v500_sql and b.equivalent_ccl == plain.equivalent_ccl
+    assert "%Yes%" not in b.rptdesign_xml
+    assert b.value_filters_not_in_reference == ["Person Name Last is like '%O'B%'", "CE Result Value is like '%Yes%'"]
+    # Next to an IN list, each keeps its own reference status.
+    both = gen.generate(req, value_filters={"Enc Type": ["Inpatient"]}, like_filters={"Person Name Last": "SM%"})
+    assert both.value_filters_not_in_reference == ["Person Name Last is like 'SM%'"]
+
+    # Coded, numeric and date fields, unknown fields and empty patterns are refused.
+    for bad in ({"Enc Type": "%In%"}, {"CE Event": "%food%"}, {"Enc Id": "%1%"}, {"Enc Registration Dt/Tm": "%1%"},
+                {"Nope": "%x%"}, {"Person Name Last": "%%"}, {"Person Name Last": " "}, {"Person Name Last": "x" * 101}):
+        with pytest.raises(ValueError):
+            gen.generate(req, like_filters=bad)
