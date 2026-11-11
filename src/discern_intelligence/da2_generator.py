@@ -14,7 +14,7 @@ from typing import Any
 
 from .ccl_compiler import CCLCompiler
 from .interpreter import MillenniumInterpreter
-from .knowledge import load_da2_canonical_reports_catalog, load_da2_elements
+from .knowledge import load_da2_canonical_reports_catalog, load_da2_elements, load_da2_filter_value_catalog, load_v500_tables
 from .schemas import (
     DEFAULT_OWNER_GROUP_DISPLAY,
     DA2QuerySpec,
@@ -760,7 +760,11 @@ class DA2ReportGenerator:
         owner_group_display: str | None = None,
         facility_display: str | None = None,
         tenant_config: TenantConfig | None = None,
+        value_filters: dict[str, list[str]] | None = None,
     ) -> DA2UploadableBundle:
+        """value_filters: DA2 field name -> display values to keep, e.g. {"Enc Type": ["Inpatient"]}. Each becomes an
+        IN-list filter. Only fields with a harvested display -> code value map work; anything else raises ValueError."""
+        vfilters = self._resolve_value_filters(value_filters)
         eff_tenant = TenantConfig.resolve_for_request(
             request_text=request_text,
             base_config=tenant_config or self._tenant_config,
@@ -769,9 +773,6 @@ class DA2ReportGenerator:
             facility_display=facility_display,
         )
         interp = self._interpreter.interpret(request_text, tenancy=eff_tenant.tenancy)
-        ccl_prog = self._ccl_compiler.compile(
-            request_text, tenancy=interp.inferred_tenancy, interpretation=interp
-        )
         r_name = report_name or self._derive_report_name(request_text)
         report_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.report:{r_name}"))
         low = request_text.lower()
@@ -798,7 +799,17 @@ class DA2ReportGenerator:
             )
             and not any(w in low for w in ("where is", "which table", "which column"))
         )
-        queries, birt_join_key = self._build_da2_query_specs(r_name, interp, is_active_census, owner_group_display=eff_tenant.owner_group_display)
+        queries, birt_join_key = self._build_da2_query_specs(
+            r_name, interp, is_active_census, owner_group_display=eff_tenant.owner_group_display, value_filters=vfilters
+        )
+        # The value maps are CWC Encounter elements: a design with no CWC Encounter query carries none of them, and the
+        # reference CCL follows the DA2 files.
+        if not any(q.da2_domain == "CWC Encounter" for q in queries):
+            vfilters = []
+        ccl_prog = self._ccl_compiler.compile(
+            request_text, tenancy=interp.inferred_tenancy, interpretation=interp,
+            value_filters=[(vf["target"], [c for _, c in vf["values"]]) for vf in vfilters if vf["target"]],
+        )
         eff_strategy = "two_dataset_birt_join" if (len(queries) == 2 and birt_join_key) else "single_domain_oda"
         rptdesign_xml = self._render_rptdesign_xml(
             report_name=r_name,
@@ -835,7 +846,48 @@ class DA2ReportGenerator:
             equivalent_ccl=ccl_prog.source_code,
             verification=verification,
             owner_group_display=eff_tenant.owner_group_display,
+            value_filters_not_in_reference=[
+                vf["text"] for vf in vfilters
+                if vf["target"] not in ccl_prog.value_filters_applied
+                or any(q.da2_domain == "CWC Encounter" and self._sql_in_list(vf) not in q.ejs_v500_sql for q in queries)
+            ],
         )
+
+    def _resolve_value_filters(self, value_filters: dict[str, list[str]] | None) -> list[dict[str, Any]]:
+        if not value_filters:
+            return []
+        fields = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+        out = []
+        for name, displays in value_filters.items():
+            live = LIVE_CWC_ELEMENT_MAP.get(name)
+            # A live element under another name (Prsnl Position -> Enc Pl Relationship Type) would filter the wrong field.
+            if name not in fields or not live or live[0] != name or live[1] not in VERIFIED_CWC_ENCOUNTER_UUIDS:
+                raise ValueError(f"No verified DA2 value map for {name!r}")
+            vmap = {html.unescape(str(d)).strip().lower(): (html.unescape(str(d)).strip(), str(cv))
+                    for d, cv in fields[name]["display_to_code_value"].items()}
+            unknown = [d for d in displays if str(d).strip().lower() not in vmap]
+            if unknown or not displays:
+                raise ValueError(f"Unknown {name!r} values: {unknown or 'none given'}")
+            values = list(dict.fromkeys(vmap[str(d).strip().lower()] for d in displays))
+            values = [(d, str(int(float(cv)))) for d, cv in values]
+            target = (self._da2_catalog.get(name) or {}).get("v500_target") or ""
+            table, _, column = target.partition(".")
+            if column not in {c["name"] for c in (load_v500_tables().get(table) or {}).get("columns", [])}:
+                target = ""  # e.g. ENCOUNTER.ENC_ADMIT_TYPE_CD: not a V500 column, so no SQL or CCL for it
+            out.append({
+                "name": name,
+                "uuid": LIVE_CWC_ELEMENT_MAP[name][1],
+                "values": values,
+                # Some catalog targets point at a date or a wildcard; only a *_CD column can take code values.
+                "target": target if re.fullmatch(r"[A-Z0-9_]+\.[A-Z0-9_]+_CD", target) else None,
+                "text": f"{name} in ({', '.join(d for d, _ in values)})",
+            })
+        return out
+
+    @staticmethod
+    def _sql_in_list(vf: dict[str, Any]) -> str:
+        table, column = (vf["target"] or ".").split(".")
+        return f"CWC_{table}.{column} IN ({', '.join(c for _, c in vf['values'])})"
 
     def _build_da2_query_specs(
         self,
@@ -843,6 +895,7 @@ class DA2ReportGenerator:
         interp: InterpretationResult,
         is_active_census: bool,
         owner_group_display: str = DEFAULT_OWNER_GROUP_DISPLAY,
+        value_filters: list[dict[str, Any]] | None = None,
     ) -> tuple[list[DA2QuerySpec], str | None]:
         # Collect unique DA2 elements from matched columns + forms
         all_elements: list[dict[str, Any]] = []
@@ -1505,6 +1558,7 @@ class DA2ReportGenerator:
                 clin_elements,
                 is_active_census=is_active_census,
                 owner_group_display=owner_group_display,
+                value_filters=value_filters,
             )
             q2 = self._make_single_query_spec(
                 f"{report_name}_Secondary_Detail",
@@ -1512,6 +1566,7 @@ class DA2ReportGenerator:
                 fin_elements,
                 is_active_census=is_active_census,
                 owner_group_display=owner_group_display,
+                value_filters=value_filters,
             )
             return [q1, q2], "Enc Id"
 
@@ -1547,6 +1602,7 @@ class DA2ReportGenerator:
             all_elements,
             is_active_census=is_active_census,
             owner_group_display=owner_group_display,
+            value_filters=value_filters,
         )
         return [q_single], None
 
@@ -1557,7 +1613,10 @@ class DA2ReportGenerator:
         elements: list[dict[str, Any]],
         is_active_census: bool,
         owner_group_display: str = DEFAULT_OWNER_GROUP_DISPLAY,
+        value_filters: list[dict[str, Any]] | None = None,
     ) -> DA2QuerySpec:
+        # The value maps are CWC Encounter elements; other domains don't carry them.
+        value_filters = value_filters if domain == "CWC Encounter" else []
         q_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.query:{q_name}"))
         sub_entities = sorted({e.get("da2_bus_view_subentity", "Encounter") for e in elements})
         filters = [
@@ -1598,7 +1657,8 @@ class DA2ReportGenerator:
                 "Chg Process Flag",
                 "Chg Service Dt/Tm Between <Relative Date Range>",
             ])
-        if any("Med Admin" in n or "MAR" in q_name.upper() for n in el_names_set):
+        # "MAR" as its own word of the query name, not inside SUMMARY or PRIMARY
+        if any("Med Admin" in n for n in el_names_set) or {"MAR", "MARS"} & set(re.split(r"[^A-Z0-9]+", q_name.upper())):
             filters.append(
                 "Order Status Not In (Canceled, Voided) [Code Set 6004: 2542, 2553] — NEVER exclude Discontinued (2545) on historical MAR/PRN audits"
             )
@@ -1693,6 +1753,7 @@ class DA2ReportGenerator:
             prompt_name=prompt_name,
             prompt_uuid=prompt_uuid,
             is_active_census=is_active_census,
+            value_filters=value_filters,
         )
         ejs_v500_sql = self._render_ejs_v500_sql(
             q_name=q_name,
@@ -1700,6 +1761,7 @@ class DA2ReportGenerator:
             domain=domain,
             elements=elements,
             is_active_census=is_active_census,
+            value_filters=value_filters,
         )
 
         daquery_xml = self._render_daquery_xml(
@@ -1711,7 +1773,9 @@ class DA2ReportGenerator:
             prompt_uuid=prompt_uuid,
             is_active_census=is_active_census,
             owner_group_display=owner_group_display,
+            value_filters=value_filters,
         )
+        filters.extend(vf["text"] for vf in value_filters or [])
 
         return DA2QuerySpec(
             query_name=q_name,
@@ -1738,6 +1802,7 @@ class DA2ReportGenerator:
         prompt_uuid: str,
         is_active_census: bool,
         owner_group_display: str = DEFAULT_OWNER_GROUP_DISPLAY,
+        value_filters: list[dict[str, Any]] | None = None,
     ) -> str:
         """Renders a native Cerner DA2 .daquery file for File -> Import -> Other -> Query."""
         dom_uuid = "690ff3c7-f0b2-4019-8176-4e26eeff14f0" if domain == "CWC Encounter" else DOMAIN_UUID_MAP.get(domain, "690ff3c7-f0b2-4019-8176-4e26eeff14f0")
@@ -1944,6 +2009,20 @@ class DA2ReportGenerator:
             )
             qual_body = f'<operator type="AND">{qual_body}{f_act}</operator>'
 
+        for vf in value_filters or []:
+            v_vals = "".join(
+                f'<value display="{html.escape(d, quote=True)}" text="{c}.00"/>' for d, c in vf["values"]
+            )
+            v_name = html.escape(LIVE_CWC_ELEMENT_MAP[vf["name"]][0], quote=True)
+            f_val = (
+                f'<filter joinType="0" mode="0" prompt_element_uuid="{vf["uuid"]}" prompt_type="0" useIndex="1">'
+                f'<element name="{v_name}" type="1" uuid="{vf["uuid"]}"/>'
+                '<operator type="IN"/>'
+                f'<values type="LIST" xCount="{len(vf["values"])}">{v_vals}</values>'
+                '</filter>'
+            )
+            qual_body = f'<operator type="AND">{qual_body}{f_val}</operator>'
+
         # Note: Organization/tenant security in DA2 is enforced via the Select Organizations schedule list
         # and/or Enc Loc Facility (b09f6eab-aa80-4110-a4af-3dcbbd00384b); never inject a synthetic Logical Domain ID UUID.
 
@@ -2072,6 +2151,7 @@ class DA2ReportGenerator:
         prompt_name: str,
         prompt_uuid: str,
         is_active_census: bool,
+        value_filters: list[dict[str, Any]] | None = None,
     ) -> str:
         dom_uuid = DOMAIN_UUID_MAP.get(domain, DOMAIN_UUID_MAP["CWC Encounter"])
         esc_qname = html.escape(q_name, quote=True)
@@ -2107,6 +2187,18 @@ class DA2ReportGenerator:
                 '            <value display="Auth (Verified)" text="25"/>',
                 '            <value display="Modified" text="34"/>',
                 '            <value display="Altered" text="35"/>',
+                '          </values>',
+                '        </filter>',
+            ])
+
+        for vf in value_filters or []:
+            v_name = html.escape(vf["name"], quote=True)
+            v_uuid = self._da2_catalog.get(vf["name"], {}).get("element_uuid", vf["uuid"])
+            filter_blocks.extend([
+                '        <filter group="0" joinType="0" mode="0" op="8" type="LIST" useIndex="0">',
+                f'          <element display="{v_name}" name="{v_name}" uuid="{v_uuid}"/>',
+                f'          <values type="LIST" xCount="{len(vf["values"])}">',
+                *(f'            <value display="{html.escape(d, quote=True)}" text="{c}"/>' for d, c in vf["values"]),
                 '          </values>',
                 '        </filter>',
             ])
@@ -2151,6 +2243,7 @@ class DA2ReportGenerator:
         domain: str,
         elements: list[dict[str, Any]],
         is_active_census: bool,
+        value_filters: list[dict[str, Any]] | None = None,
     ) -> str:
         tz_idx = int(getattr(self._tenant_config, "utc_timezone_index", 54) or 54)
         select_exprs = [
@@ -2179,7 +2272,7 @@ class DA2ReportGenerator:
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in elements)
         has_orders = any(e["da2_field_name"].startswith("Order ") for e in elements)
         has_chg = any(e["da2_field_name"].startswith(("Chg ", "BO ", "Rev ")) for e in elements) or domain == "CWF GS Revenue"
-        has_mar = any("MED_ADMIN" in q_up or "MAR_" in q_up or "_MAR" in q_up or e["da2_field_name"].startswith(("Med Admin", "CE Med Admin")) for e in elements)
+        has_mar = "MED_ADMIN" in q_up or bool({"MAR", "MARS"} & set(re.split(r"[^A-Z0-9]+", q_up))) or any(e["da2_field_name"].startswith(("Med Admin", "CE Med Admin")) for e in elements)
         has_surg = any("SURG" in q_up or "PERIOP" in q_up or e["da2_field_name"].startswith("Surg ") for e in elements)
         has_diag = any("DIAG" in q_up or "ICD10" in q_up or "OUTERDX" in q_up or e["da2_field_name"].startswith(("Diag ", "Diagnosis")) for e in elements)
 
@@ -2298,6 +2391,13 @@ class DA2ReportGenerator:
                 "OR UPPER(omf_get_cv_display(CWC_CLINICAL_EVENT.EVENT_CD)) LIKE '%SUICID%' "
                 "OR omf_get_cv_display(CWC_CLINICAL_EVENT.EVENT_CD) = 'Admission History Adult - Form')"
             )
+
+        for vf in value_filters or []:
+            # Only on a table this query already joins; generate() lists the rest as not in the reference SQL.
+            table = (vf["target"] or ".").split(".")[0]
+            # FROM entries can be "V500.ENCOUNTER CWC_ENCOUNTER LEFT OUTER JOIN V500.DIAGNOSIS CWC_DIAGNOSIS ON …"
+            if vf["target"] and any(re.search(rf"(?<!\S)V500\.{table} CWC_{table}(?!\S)", f) for f in from_clauses):
+                where_clauses.append(self._sql_in_list(vf))
 
         sql_lines = [
             f"/* Discern SQL Engine (EJS) v. 3.17.3: {q_name} [{q_uuid}] */",

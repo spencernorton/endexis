@@ -11,6 +11,11 @@ from .knowledge import load_forms_catalog, load_som_summary
 from .schemas import FormOutputResolution
 
 
+def _mentions(text_low: str, term: str) -> bool:
+    """The term at the start of a word, so "charge" matches "charges" and "charged" but not "discharge"."""
+    return bool(re.search(rf"(?<![a-z0-9]){re.escape(term)}", text_low))
+
+
 class FormsAndOutputResolver:
     """Determines the exact V500 tables, payload columns, and DA2 fields for clinical forms & outputs."""
 
@@ -27,7 +32,7 @@ class FormsAndOutputResolver:
             score = 0.0
             for kw in entry.get("keywords", []):
                 kw_low = kw.lower()
-                if kw_low in text_low:
+                if _mentions(text_low, kw_low):
                     # Multi-word exact phrase gets a strong boost
                     score += 4.5 if " " in kw_low else 2.5
                 else:
@@ -38,11 +43,11 @@ class FormsAndOutputResolver:
 
             # Boost if table or payload column names are explicitly mentioned
             for dt in entry.get("definition_tables", []) + entry.get("activity_tables", []):
-                if dt["table"].lower() in text_low:
+                if _mentions(text_low, dt["table"].lower()):
                     score += 5.0
             for pc in entry.get("payload_columns", []):
                 tc = pc["table_column"].lower()
-                if any(part in text_low for part in tc.split(".")):
+                if any(_mentions(text_low, part) for part in tc.split(".")):
                     score += 1.5
 
             if score > 0:

@@ -364,6 +364,7 @@ class CompiledCCLProgram:
     tables_used: list[str]
     code_sets_used: list[dict[str, Any]]
     verification: VerificationReport
+    value_filters_applied: list[str] = field(default_factory=list)  # "TABLE.COLUMN_CD" targets in the PLAN/JOIN
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -402,6 +403,8 @@ class DA2UploadableBundle:
     equivalent_ccl: str
     verification: VerificationReport
     owner_group_display: str = DEFAULT_OWNER_GROUP_DISPLAY
+    # value filters in the DA2 query files that the reference SQL or CCL doesn't carry (their table isn't joined there)
+    value_filters_not_in_reference: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
