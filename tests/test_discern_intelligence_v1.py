@@ -1526,3 +1526,79 @@ def test_v2_2_harvested_reports_and_word_boundary_disambiguation() -> None:
                 disp = pair["display"]
                 cv_int = pair["code_value"].split(".")[0]
                 assert fmap.get(disp) == cv_int, f"SFT mismatch for {field_key} {disp}: {cv_int} vs {fmap.get(disp)}"
+
+
+def test_v2_2_1_whole_word_forms_mar_and_value_filters() -> None:
+    gen = DA2ReportGenerator()
+
+    def cols(b):
+        return [e["da2_field_name"] for e in b.queries[0].selected_elements]
+
+    # "discharge" is not "charge": no charge columns unless charges are asked for.
+    assert not any(c.startswith("Chg ") for c in cols(gen.generate("report. discharge date")))
+    assert any(c.startswith("Chg ") for c in cols(gen.generate("Rehab therapy productivity and charges")))
+    assert not any(c.startswith("Chg ") for c in cols(gen.generate("Patients discharged last month")))
+
+    # "MAR" must be its own word of the query name, not inside SUMMARY.
+    def mar_filter(b):
+        return any(f.startswith("Order Status Not In") for f in b.queries[0].filters)
+
+    summary = gen.generate("Daily unit summary with FIN", report_name="Daily_Unit_Summary")
+    assert not mar_filter(summary)
+    assert "Order Status" not in summary.queries[0].ejs_v500_sql
+    assert mar_filter(gen.generate("MAR audit of PRN doses", report_name="MAR_PRN_Audit"))
+
+    # Value filters reach the .daquery, the filters, the card, the reference SQL and the CCL.
+    req = "Encounters with admit date and nurse unit"
+    plain = gen.generate(req, report_name="Enc_Values")
+    b = gen.generate(req, report_name="Enc_Values", value_filters={"Enc Type": ["Inpatient", "outpatient"]})
+    q = b.queries[0]
+    assert b.verification.is_valid, b.verification.errors
+    root = ET.fromstring(q.daquery_xml.encode())
+    in_filters = [f for f in root.iter("filter") if f.find("element").get("name") == "Enc Type"]
+    assert len(in_filters) == 1 and in_filters[0].find("operator").get("type") == "IN"
+    assert [(v.get("display"), v.get("text")) for v in in_filters[0].iter("value")] == [
+        ("Inpatient", "309308.00"), ("Outpatient", "309309.00")]
+    ET.fromstring(q.cclquery_xml.encode())
+    assert "Enc Type in (Inpatient, Outpatient)" in q.filters
+    assert "`Enc Type in (Inpatient, Outpatient)`" in b.build_card_markdown
+    assert "CWC_ENCOUNTER.ENCNTR_TYPE_CD IN (309308, 309309)" in q.ejs_v500_sql
+    assert "AND e.encntr_type_cd IN (309308, 309309)" in b.equivalent_ccl
+    assert b.value_filters_not_in_reference == []
+    assert plain.queries[0].ejs_v500_sql + "  AND CWC_ENCOUNTER.ENCNTR_TYPE_CD IN (309308, 309309)\n" == q.ejs_v500_sql
+
+    # A table the reference SQL and CCL don't join: the DA2 files carry it, and the bundle says what's missing.
+    o = gen.generate(req, report_name="Enc_Values", value_filters={"Order Status": ["Ordered"]})
+    assert "Order Status in (Ordered)" in o.queries[0].filters
+    assert 'name="Order Status"' in o.queries[0].daquery_xml
+    assert "ORDER_STATUS_CD IN" not in o.queries[0].ejs_v500_sql
+    assert o.value_filters_not_in_reference == ["Order Status in (Ordered)"]
+
+    # A catalog target that isn't a V500 column can't go into the SQL or CCL.
+    from discern_intelligence.knowledge import load_da2_filter_value_catalog
+    fields = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+    admit_type = next(iter(fields["Enc Admit Type"]["display_to_code_value"]))
+    a = gen.generate(req, report_name="Enc_Values", value_filters={"Enc Admit Type": [admit_type]})
+    assert any(f.startswith("Enc Admit Type in (") for f in a.queries[0].filters)
+    assert "ENC_ADMIT_TYPE_CD" not in a.queries[0].ejs_v500_sql + a.equivalent_ccl.upper()
+    assert len(a.value_filters_not_in_reference) == 1
+
+    # The diagnosis outer join rewrites the FROM entry; the encounter table is still there.
+    dx = gen.generate("Active census with FIN and ICD10 diagnosis codes", value_filters={"Enc Type": ["Inpatient"]})
+    assert "LEFT OUTER JOIN" in dx.queries[0].ejs_v500_sql
+    assert "CWC_ENCOUNTER.ENCNTR_TYPE_CD IN (309308)" in dx.queries[0].ejs_v500_sql
+    assert dx.value_filters_not_in_reference == []
+
+    # A design with no CWC Encounter query carries the filter nowhere, and says nothing is missing from the reference.
+    pay = gen.generate("CWF GS Payments transaction extract with FIN and payment amount", value_filters={"Enc Type": ["Inpatient"]})
+    if not any(q.da2_domain == "CWC Encounter" for q in pay.queries):
+        assert not any("Enc Type in (" in f for q in pay.queries for f in q.filters)
+        assert "encntr_type_cd IN" not in pay.equivalent_ccl and pay.value_filters_not_in_reference == []
+
+    # Plural MARs is still MAR.
+    assert mar_filter(gen.generate("PRN MARs review with FIN", report_name="PRN_MARs_Review"))
+
+    for bad in ({"Enc Type": ["Not A Value"]}, {"Enc Type": []}, {"Person Name Last": ["X"]},
+                {"Prsnl Position": ["X"]}):  # Prsnl Position's live element is another field
+        with pytest.raises(ValueError):
+            gen.generate(req, value_filters=bad)

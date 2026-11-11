@@ -67,7 +67,9 @@ class CCLCompiler:
         program_name: str | None = None,
         tenancy: str | None = None,
         interpretation: InterpretationResult | None = None,
+        value_filters: list[tuple[str, list[str]]] | None = None,
     ) -> CompiledCCLProgram:
+        """value_filters: ("TABLE.COLUMN_CD", [code values]) IN lists, added to that table's PLAN/JOIN when it has one."""
         interp = interpretation or self._interpreter.interpret(request_text, tenancy=tenancy)
         prog_name = self._sanitize_program_name(program_name or self._derive_program_name(request_text))
         low = request_text.lower()
@@ -155,6 +157,15 @@ class CCLCompiler:
         # Build FROM clause and PLAN/JOIN clauses
         from_lines = [f"    {TABLE_ALIASES[t]} = {t}" if False else f"    {t} {TABLE_ALIASES[t]}" for t in ordered_tables]
         plan_lines = self._build_plan_join_lines(ordered_tables, is_active_census, is_cssrs=is_cssrs)
+        applied: list[str] = []
+        for target, codes in value_filters or []:
+            table, column = target.split(".")
+            alias = TABLE_ALIASES.get(table)
+            head = next((i for i, ln in enumerate(plan_lines) if ln in (f"PLAN {alias}", f"JOIN {alias}")), None)
+            if alias and table in ordered_tables and head is not None:
+                end = next((i for i in range(head + 1, len(plan_lines)) if not plan_lines[i].startswith(" ")), len(plan_lines))
+                plan_lines.insert(end, f"      AND {alias}.{column.lower()} IN ({', '.join(codes)})")
+                applied.append(target)
 
         tenancy_note = (
             "Standalone / RHO single-tenant domain: compile and execute directly in DVDev / Discern Explorer."
@@ -208,6 +219,7 @@ class CCLCompiler:
             tables_used=ordered_tables,
             code_sets_used=interp.matched_code_sets,
             verification=verification,
+            value_filters_applied=applied,
         )
 
     def _build_plan_join_lines(self, ordered_tables: list[str], is_active_census: bool, is_cssrs: bool = False) -> list[str]:
