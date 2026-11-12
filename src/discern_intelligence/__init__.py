@@ -17,13 +17,16 @@ from .schemas import (
     CompiledCCLProgram,
     DA2QuerySpec,
     DA2UploadableBundle,
+    NeuralCompilationIR,
+    PIPELINE_VERSION,
+    RefinementSpec,
     TenantConfig,
     VerificationReport,
 )
 from .interpreter import MillenniumInterpreter
 from .forms_mapper import FormsAndOutputResolver
 from .ccl_compiler import CCLCompiler
-from .da2_generator import DA2ReportGenerator
+from .da2_generator import DA2ReportGenerator, LIKE_TEXT_FIELDS, like_pattern
 from .neural_compiler import ApolloNeuralCompiler, LocalNeuralCompiler
 from .eval_harness import (
     evaluate_adversarial_v2_benchmark,
@@ -47,9 +50,13 @@ from .knowledge import (
     resolve_da2_view_or_alias,
 )
 
-__version__ = "2.2.2"
+__version__ = "2.3.0"
+PIPELINE_VERSION = "endexis-v2.3-clean-r1"
 __all__ = [
     "DEFAULT_OWNER_GROUP_DISPLAY",
+    "PIPELINE_VERSION",
+    "RefinementSpec",
+    "NeuralCompilationIR",
     "TenantConfig",
     "create_synthetic_v500_connection",
     "execute_and_verify_ejs_sql",
@@ -64,6 +71,8 @@ __all__ = [
     "FormsAndOutputResolver",
     "CCLCompiler",
     "DA2ReportGenerator",
+    "LIKE_TEXT_FIELDS",
+    "like_pattern",
     "LocalNeuralCompiler",
     "ApolloNeuralCompiler",
     "verify_cclquery_xml",

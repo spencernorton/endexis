@@ -63,7 +63,7 @@ pipeline_tag: text-generation
   - Defaults `owner_group_display` to `"TENANT_OWNER_GROUP"` and contains zero hardcoded `Logical Domain ID` or facility filters.
   - Users can specify `--owner-group`, `--facility`, or `--tenant-config` at runtime to target any authorized DA2 environment.
 - **Zero PHI & Zero Client/Regional Data**:
-  - Trained exclusively on sanitized, synthetic, and public schema metadata (`2,606` DA2 elements, `6,458` coded value mappings, `230` V500 tables, `363` Code Sets, `4,501` SFT examples, and `189` contrastive DPO pairs).
+  - Trained exclusively on sanitized, synthetic, and public schema metadata (`2,606` DA2 elements, `6,678` coded value mappings, `230` V500 tables, `363` Code Sets, `5,277` SFT examples, and `648` contrastive DPO pairs).
   - Audited across text, JSON/JSONL corpora, binary `.safetensors` headers/strings, and behavioral canary prompts.
 - **Neuro-Symbolic Verifier-Guided Best-of-N (`N=4`) Routing**:
   - Pairs neural candidate generation with deterministic XML, SQL, CCL, and BIRT 4.4.2 static verifiers (`100.0%` `Pass@1` and `Acc@1` across all 6 zero-leakage holdout evaluation dimensions).
@@ -74,22 +74,47 @@ pipeline_tag: text-generation
 """
 
 
+def _strip_png_metadata(path: Path) -> None:
+    import struct
+    raw = path.read_bytes()
+    sig = b"\x89PNG\r\n\x1a\n"
+    allowed = {b"IHDR", b"PLTE", b"IDAT", b"IEND", b"sRGB", b"gAMA", b"cHRM", b"pHYs", b"bKGD", b"tRNS", b"sBIT"}
+    if not raw.startswith(sig):
+        return
+    out = bytearray(sig)
+    pos = 8
+    changed = False
+    while pos + 8 <= len(raw):
+        length, ctype = struct.unpack(">I4s", raw[pos : pos + 8])
+        end = pos + 12 + length
+        if ctype in allowed:
+            out.extend(raw[pos:end])
+        else:
+            changed = True
+        pos = end
+        if ctype == b"IEND":
+            break
+    if changed:
+        path.write_bytes(bytes(out))
+
+
 def run_stage_public_repo(output_dir: Path, slug: str = "endexis") -> dict[str, Any]:
     if output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    skip_names = {".git", ".gitlab-ci.yml", "AGENTS", "__pycache__", ".pytest_cache", "build", "dist", "endexis.egg-info", "discern_intelligence.egg-info"}
+    skip_names = {".git", ".gitlab-ci.yml", "AGENTS", "AGENTS.md", "STATE.json", ".DS_Store", ".coverage", ".mypy_cache", ".ruff_cache", "__pycache__", ".pytest_cache", "build", "dist", "endexis.egg-info", "discern_intelligence.egg-info"}
     for item in REPO_ROOT.iterdir():
         if item.name in skip_names:
             continue
         dest = output_dir / item.name
         if item.is_dir():
-            shutil.copytree(item, dest, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache", "*.pdf"))
+            shutil.copytree(item, dest, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache"))
         else:
             shutil.copy2(item, dest)
 
-    (output_dir / "MODEL_CARD.md").write_text(generate_model_card(slug=slug), encoding="utf-8")
+    if slug != "endexis" or not (REPO_ROOT / "MODEL_CARD.md").exists():
+        (output_dir / "MODEL_CARD.md").write_text(generate_model_card(slug=slug), encoding="utf-8")
 
     if slug != "endexis":
         pyproj = output_dir / "pyproject.toml"
@@ -97,6 +122,11 @@ def run_stage_public_repo(output_dir: Path, slug: str = "endexis") -> dict[str, 
         ptxt = ptxt.replace('name = "endexis"', f'name = "{slug}"')
         ptxt = ptxt.replace('endexis = "discern_intelligence.cli:main"', f'{slug} = "discern_intelligence.cli:main"')
         pyproj.write_text(ptxt, encoding="utf-8")
+
+    for fig_pdf in (output_dir / "docs").rglob("*.pdf"):
+        fig_pdf.unlink()
+    for fig_png in output_dir.rglob("*.png"):
+        _strip_png_metadata(fig_png)
 
     audit_res = audit_repository_tree(output_dir)
     return {

@@ -14,3 +14,7 @@ venv/
 *.gguf
 *.bin
 .DS_Store
+
+# training artifacts (fetched/built locally, never committed)
+base-qwen3-0.6b-bf16/
+checkpoints/

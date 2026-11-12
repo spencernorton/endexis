@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "title": "Endexis v2.3.0 \u2014 Sealed Post-Freeze Holdout Qualification (N=640)",
+  "subtitle": "Zero-Overlap Paraphrases (396), Collision Traps (132) & Multi-Turn Edits (112) \u2014 Apples-to-Apples",
+  "metrics": [
+    {
+      "key": "strict_pass1",
+      "label": "Strict Pass@1"
+    },
+    {
+      "key": "elem_f1",
+      "label": "Element F1"
+    },
+    {
+      "key": "domain_acc",
+      "label": "Domain Acc"
+    },
+    {
+      "key": "sql_exec1",
+      "label": "SQLite SQL Pass@1"
+    },
+    {
+      "key": "contam_free",
+      "label": "Contam-Free"
+    },
+    {
+      "key": "verifier_all",
+      "label": "XML/CCL/BIRT Valid"
+    }
+  ],
+  "models": [
+    {
+      "name": "Endexis v2.3 Track B (Verifier)",
+      "metrics": {
+        "strict_pass1": 0.2062,
+        "elem_f1": 0.3231,
+        "domain_acc": 0.8438,
+        "sql_exec1": 1.0,
+        "contam_free": 1.0,
+        "verifier_all": 0.9969
+      }
+    },
+    {
+      "name": "Endexis v2.3 Track A (Q8_0)",
+      "metrics": {
+        "strict_pass1": 0.1406,
+        "elem_f1": 0.2761,
+        "domain_acc": 0.8156,
+        "sql_exec1": 0.9719,
+        "contam_free": 0.9078,
+        "verifier_all": 0.7828
+      }
+    },
+    {
+      "name": "Endexis v2.3 Track A (Q4_K_M)",
+      "metrics": {
+        "strict_pass1": 0.1422,
+        "elem_f1": 0.2801,
+        "domain_acc": 0.8047,
+        "sql_exec1": 0.95,
+        "contam_free": 0.8969,
+        "verifier_all": 0.7547
+      }
+    },
+    {
+      "name": "Endexis v2.0 Legacy (322-Row)",
+      "metrics": {
+        "strict_pass1": 0.0,
+        "elem_f1": 0.0,
+        "domain_acc": 0.0,
+        "sql_exec1": 0.0,
+        "contam_free": 0.0,
+        "verifier_all": 0.0
+      }
+    }
+  ]
+}

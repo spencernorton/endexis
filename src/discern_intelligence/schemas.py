@@ -10,6 +10,7 @@ from typing import Any
 import csv
 import tomllib
 
+PIPELINE_VERSION = "endexis-v2.3-clean-r1"
 DEFAULT_OWNER_GROUP_DISPLAY = "TENANT_OWNER_GROUP"
 DEFAULT_UTC_TIMEZONE_INDEX = 54
 DEFAULT_TENANT_CONFIG_FILENAMES = (".endexis.toml", "endexis.toml", "tenant.json")
@@ -283,6 +284,250 @@ class TenantConfig:
         )
 
 
+
+
+@dataclass(frozen=True)
+class RefinementSpec:
+    """
+    First-class multi-turn negative and override refinement specification (`v2.3.0`).
+
+    Supports removing columns (`exclude_columns` / `remove_columns`), removing filters
+    (`exclude_filters` / `remove_filters`), and replacing filter predicates
+    (`override_filters` / `replace_filter_value`) in lockstep across IR, `<cclquery>` XML,
+    `.daquery` XML, EJS V500 SQL, CCL `.prg`, and BIRT `.rptdesign` table bindings.
+    """
+
+    exclude_columns: list[str] = field(default_factory=list)
+    exclude_filters: list[str] = field(default_factory=list)
+    override_filters: dict[str, list[str]] = field(default_factory=dict)
+    prior_selected_elements: list[str] = field(default_factory=list)
+    prior_filters: dict[str, list[str]] = field(default_factory=dict)
+    prior_template_id: str | None = None
+
+    @property
+    def remove_columns(self) -> list[str]:
+        return self.exclude_columns
+
+    @property
+    def remove_filters(self) -> list[str]:
+        return self.exclude_filters
+
+    @property
+    def replace_filter_value(self) -> dict[str, list[str]]:
+        return self.override_filters
+
+    @property
+    def is_empty(self) -> bool:
+        return not (
+            self.exclude_columns
+            or self.exclude_filters
+            or self.override_filters
+            or self.prior_selected_elements
+            or self.prior_filters
+            or self.prior_template_id
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_request(
+        cls,
+        request_text: str = "",
+        explicit: dict[str, Any] | RefinementSpec | None = None,
+        raw: dict[str, Any] | RefinementSpec | None = None,
+        prior_context: dict[str, Any] | None = None,
+    ) -> RefinementSpec:
+        return cls.from_request_or_dict(
+            request_text=request_text,
+            raw=explicit if explicit is not None else raw,
+            prior_context=prior_context,
+        )
+
+    @classmethod
+    def from_request_or_dict(
+        cls,
+        request_text: str = "",
+        raw: dict[str, Any] | RefinementSpec | None = None,
+        prior_context: dict[str, Any] | None = None,
+    ) -> RefinementSpec:
+        if isinstance(raw, RefinementSpec):
+            base_excl_cols = list(raw.exclude_columns)
+            base_excl_flts = list(raw.exclude_filters)
+            base_over_flts = {k: list(v) for k, v in raw.override_filters.items()}
+            prior_elems = list(raw.prior_selected_elements)
+            prior_flts = {k: list(v) for k, v in raw.prior_filters.items()}
+            prior_tpl = raw.prior_template_id
+        else:
+            raw_d = raw or {}
+            base_excl_cols = list(raw_d.get("exclude_columns") or raw_d.get("remove_columns") or [])
+            base_excl_flts = list(raw_d.get("exclude_filters") or raw_d.get("remove_filters") or [])
+            ov_raw = raw_d.get("override_filters") or raw_d.get("replace_filter_value") or {}
+            base_over_flts = {
+                str(k): ([str(x) for x in v] if isinstance(v, list) else [str(v)])
+                for k, v in dict(ov_raw).items()
+            }
+            prior_elems = list(raw_d.get("prior_selected_elements") or [])
+            pf_raw = raw_d.get("prior_filters") or {}
+            prior_flts = {
+                str(k): ([str(x) for x in v] if isinstance(v, list) else [str(v)])
+                for k, v in dict(pf_raw).items()
+            }
+            prior_tpl = raw_d.get("prior_template_id")
+
+        if prior_context:
+            if not prior_elems and prior_context.get("prior_selected_elements"):
+                prior_elems = list(prior_context["prior_selected_elements"])
+            if not prior_flts and prior_context.get("prior_filters"):
+                prior_flts = {
+                    str(k): ([str(x) for x in v] if isinstance(v, list) else [str(v)])
+                    for k, v in dict(prior_context["prior_filters"]).items()
+                }
+            if not prior_tpl and prior_context.get("base_template_id"):
+                prior_tpl = str(prior_context["base_template_id"])
+
+        if request_text:
+            from .lexical_guards import (
+                expand_excluded_column_names,
+                parse_natural_language_refinements,
+                split_multiturn_sections,
+            )
+
+            _, _, mt_elems, mt_flts = split_multiturn_sections(request_text)
+            if not prior_elems and mt_elems:
+                prior_elems = mt_elems
+            if not prior_flts and mt_flts:
+                prior_flts = mt_flts
+            nl_ec, nl_ef, nl_of = parse_natural_language_refinements(request_text)
+            for c in nl_ec:
+                if c not in base_excl_cols:
+                    base_excl_cols.append(c)
+            for f in nl_ef:
+                if f not in base_excl_flts:
+                    base_excl_flts.append(f)
+            for k, vals in nl_of.items():
+                if k not in base_over_flts:
+                    base_over_flts[k] = vals
+
+        from .lexical_guards import expand_excluded_column_names as _expand_ec
+        base_excl_cols = _expand_ec(base_excl_cols)
+        return cls(
+            exclude_columns=base_excl_cols,
+            exclude_filters=base_excl_flts,
+            override_filters=base_over_flts,
+            prior_selected_elements=prior_elems,
+            prior_filters=prior_flts,
+            prior_template_id=prior_tpl,
+        )
+
+
+@dataclass(frozen=True)
+class NeuralCompilationIR:
+    """
+    Compact, deterministic Intermediate Representation emitted inside `<output>{...}</output>`
+    by `endexis-qwen3-0.6b-dpo-v2_3` for Track-A raw neural evaluation and Track-B
+    neuro-symbolic verified compilation.
+    """
+
+    template_id: str | None = None
+    da2_domain: str = "CWC Encounter"
+    tenancy: str = "communityworks"
+    execution_strategy: str = "single_domain_oda"
+    selected_elements: list[str] = field(default_factory=list)
+    exclude_columns: list[str] = field(default_factory=list)
+    exclude_filters: list[str] = field(default_factory=list)
+    override_filters: dict[str, list[str]] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> NeuralCompilationIR:
+        if not isinstance(raw, dict):
+            raise TypeError(f"NeuralCompilationIR expected dict, got {type(raw).__name__}")
+
+        def _require_str_list(val: Any, field_name: str) -> list[str]:
+            if val is None:
+                return []
+            if not isinstance(val, list):
+                raise ValueError(f"{field_name} must be a list of strings, got {type(val).__name__}")
+            out: list[str] = []
+            for item in val:
+                if not isinstance(item, str):
+                    raise ValueError(f"{field_name} items must be strings, got {type(item).__name__}")
+                s = item.split("(")[0].strip() if (" (" in item and item.endswith(")")) else item.strip()
+                if s:
+                    out.append(s)
+            return out
+
+        ov_raw = raw.get("override_filters") if "override_filters" in raw else raw.get("replace_filter_value")
+        ov_clean: dict[str, list[str]] = {}
+        if ov_raw is not None:
+            if not isinstance(ov_raw, dict):
+                raise ValueError(f"override_filters must be a dict, got {type(ov_raw).__name__}")
+            for k, v in ov_raw.items():
+                if isinstance(v, str):
+                    ov_clean[str(k)] = [v.strip()] if v.strip() else []
+                elif isinstance(v, list) and all(isinstance(x, str) for x in v):
+                    ov_clean[str(k)] = [x.strip() for x in v if x.strip()]
+                else:
+                    raise ValueError(f"override_filters[{k!r}] must be a string or list of strings")
+
+        sel_raw = raw.get("selected_elements") if "selected_elements" in raw else raw.get("ground_truth_selected_elements")
+        if sel_raw is None and isinstance(raw.get("queries"), list) and raw["queries"]:
+            q0 = raw["queries"][0]
+            if isinstance(q0, dict):
+                sel_raw = q0.get("elements") if "elements" in q0 else q0.get("selected_elements")
+        sel_clean = _require_str_list(sel_raw, "selected_elements")
+
+        excl_cols_raw = raw.get("exclude_columns") if "exclude_columns" in raw else raw.get("remove_columns")
+        excl_flts_raw = raw.get("exclude_filters") if "exclude_filters" in raw else raw.get("remove_filters")
+        excl_cols = _require_str_list(excl_cols_raw, "exclude_columns")
+        excl_flts = _require_str_list(excl_flts_raw, "exclude_filters")
+
+        dom = str(raw.get("da2_domain") or "CWC Encounter")
+        if isinstance(raw.get("queries"), list) and raw["queries"] and isinstance(raw["queries"][0], dict):
+            dom = str(raw["queries"][0].get("domain") or dom)
+
+        tpl_val = raw.get("template_id") or raw.get("id") or raw.get("query_id")
+        return cls(
+            template_id=str(tpl_val).strip() if tpl_val else None,
+            da2_domain=dom,
+            tenancy=str(raw.get("tenancy") or raw.get("target_tenancy") or "communityworks"),
+            execution_strategy=str(raw.get("execution_strategy") or "single_domain_oda"),
+            selected_elements=sel_clean,
+            exclude_columns=excl_cols,
+            exclude_filters=excl_flts,
+            override_filters=ov_clean,
+        )
+
+    @classmethod
+    def parse_from_completion(cls, completion_text: str) -> NeuralCompilationIR | None:
+        if not completion_text:
+            return None
+        candidate = completion_text.strip()
+        m_out = re.search(r"<output>\s*(\{[\s\S]*?\})\s*</output>", candidate)
+        if m_out:
+            json_str = m_out.group(1)
+        else:
+            # Strip <reasoning>...</reasoning> or <think>...</think> and find outermost JSON object
+            stripped = re.sub(r"<(?:reasoning|think)>[\s\S]*?</(?:reasoning|think)>", "", candidate).strip()
+            start = stripped.find("{")
+            end = stripped.rfind("}")
+            if start == -1 or end == -1 or end <= start:
+                return None
+            json_str = stripped[start : end + 1]
+        try:
+            parsed = json.loads(json_str)
+            if not isinstance(parsed, dict):
+                return None
+            if not parsed.get("template_id") and (parsed.get("id") or parsed.get("query_id")):
+                parsed["template_id"] = parsed.get("id") or parsed.get("query_id")
+            return cls.from_dict(parsed)
+        except Exception:
+            return None
+
+
 @dataclass(frozen=True)
 class ColumnMatch:
     table: str
@@ -338,6 +583,8 @@ class InterpretationResult:
     join_graph: list[str]
     guardrails_triggered: list[str]
     matched_da2_views: list[dict[str, Any]] = field(default_factory=list)
+    refinement: RefinementSpec = field(default_factory=RefinementSpec)
+    matched_template_id: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

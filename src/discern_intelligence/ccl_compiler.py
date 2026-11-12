@@ -11,7 +11,9 @@ import re
 from typing import Any
 
 from .interpreter import MillenniumInterpreter
-from .schemas import CompiledCCLProgram, InterpretationResult, VerificationReport
+from .knowledge import load_da2_canonical_reports_catalog, load_da2_elements, load_da2_filter_value_catalog, load_v500_tables
+from .lexical_guards import expand_excluded_column_names, extract_affirmative_text, sanitize_text_for_report_naming
+from .schemas import ColumnMatch, CompiledCCLProgram, InterpretationResult, NeuralCompilationIR, RefinementSpec, VerificationReport
 
 TABLE_ALIASES: dict[str, str] = {
     "ENCOUNTER": "e",
@@ -67,14 +69,30 @@ class CCLCompiler:
         program_name: str | None = None,
         tenancy: str | None = None,
         interpretation: InterpretationResult | None = None,
+        refinement: RefinementSpec | dict[str, Any] | None = None,
         value_filters: list[tuple[str, list[str]]] | None = None,
     ) -> CompiledCCLProgram:
         """value_filters: ("TABLE.COLUMN_CD", [code values]) IN lists, added to that table's PLAN/JOIN when it has one."""
-        interp = interpretation or self._interpreter.interpret(request_text, tenancy=tenancy)
+        eff_ref = RefinementSpec.from_request_or_dict(request_text=request_text, raw=refinement)
+        interp = interpretation or self._interpreter.interpret(request_text, tenancy=tenancy, refinement=eff_ref)
+        if eff_ref.is_empty and not interp.refinement.is_empty:
+            eff_ref = interp.refinement
         prog_name = self._sanitize_program_name(program_name or self._derive_program_name(request_text))
-        low = request_text.lower()
-        is_active_census = ("active" in low and "census" in low) or any(
-            w in low for w in ("active inpatient", "current inpatient", "midnight census", "currently admitted", "inhouse")
+        low = extract_affirmative_text(request_text).lower()
+        has_disch_override = (
+            "Enc Status" in eff_ref.override_filters
+            and any("discharg" in v.lower() for v in eff_ref.override_filters["Enc Status"])
+        )
+        eff_excl_flts = {
+            f.lower() for f in eff_ref.exclude_filters
+            if not any(f.lower() == ok.lower() for ok in eff_ref.override_filters)
+        }
+        is_active_census = (
+            (("active" in low and "census" in low) or any(
+                w in low for w in ("active inpatient", "current inpatient", "midnight census", "currently admitted", "inhouse")
+            ))
+            and "enc status" not in eff_excl_flts
+            and not has_disch_override
         )
 
         is_cssrs = any(w in low for w in ("cssrs", "c-ssrs", "columbia", "suicide"))
@@ -154,11 +172,45 @@ class CCLCompiler:
             else:
                 select_exprs.append(f"{out_label} = trim({alias}.{col_low}, 3)")
 
+        from .da2_generator import _resolve_override_filter_values
+        target_to_field = {
+            "ENCOUNTER.ENCNTR_TYPE_CD": "Enc Type",
+            "ENCOUNTER.ENCNTR_STATUS_CD": "Enc Status",
+            "ENCOUNTER.LOC_FACILITY_CD": "Enc Loc Facility",
+            "ENCOUNTER.LOC_NURSE_UNIT_CD": "Enc Loc Nurse Unit",
+            "ORDERS.ORDER_STATUS_CD": "Order Status",
+            "CLINICAL_EVENT.RESULT_STATUS_CD": "CE Result Status",
+        }
+        explicit_vf_fields_low = {
+            target_to_field[t].lower()
+            for t, _ in (value_filters or [])
+            if t in target_to_field and target_to_field[t].lower() not in eff_excl_flts
+        }
+        norm_ov_map: dict[str, list[str]] = {}
+        for ov_k, ov_v in eff_ref.override_filters.items():
+            _, ov_pairs = _resolve_override_filter_values(ov_k, ov_v)
+            norm_ov_map[ov_k] = [d for d, _ in ov_pairs]
+        norm_prior_map: dict[str, list[str]] = {}
+        for pr_k, pr_v in eff_ref.prior_filters.items():
+            if pr_k.lower() in eff_excl_flts or pr_k.lower() in explicit_vf_fields_low:
+                continue
+            _, pr_pairs = _resolve_override_filter_values(pr_k, pr_v)
+            norm_prior_map[pr_k] = [d for d, _ in pr_pairs]
+        import dataclasses
+        plan_ref = dataclasses.replace(
+            eff_ref,
+            prior_filters=norm_prior_map,
+            override_filters=norm_ov_map,
+        )
         # Build FROM clause and PLAN/JOIN clauses
-        from_lines = [f"    {TABLE_ALIASES[t]} = {t}" if False else f"    {t} {TABLE_ALIASES[t]}" for t in ordered_tables]
-        plan_lines = self._build_plan_join_lines(ordered_tables, is_active_census, is_cssrs=is_cssrs)
+        from_lines = [f"    {t} {TABLE_ALIASES[t]}" for t in ordered_tables]
+        plan_lines = self._build_plan_join_lines(ordered_tables, is_active_census, is_cssrs=is_cssrs, refinement=plan_ref)
+        ov_low_keys = {k.lower() for k in eff_ref.override_filters}
         applied: list[str] = []
         for target, codes in value_filters or []:
+            mapped_f = target_to_field.get(target, "")
+            if mapped_f and (mapped_f.lower() in eff_excl_flts or mapped_f.lower() in ov_low_keys):
+                continue
             table, column = target.split(".")
             alias = TABLE_ALIASES.get(table)
             head = next((i for i, ln in enumerate(plan_lines) if ln in (f"PLAN {alias}", f"JOIN {alias}")), None)
@@ -208,7 +260,10 @@ class CCLCompiler:
             "GO",
         ]
         source_code = "\n".join(lines) + "\n"
-        verification = self.verify_ccl_source(source_code, ordered_tables, is_active_census)
+        ce_stat_excluded = "ce result status" in eff_excl_flts
+        verification = self.verify_ccl_source(
+            source_code, ordered_tables, is_active_census, ce_status_excluded=ce_stat_excluded
+        )
 
         return CompiledCCLProgram(
             program_name=prog_name,
@@ -222,7 +277,168 @@ class CCLCompiler:
             value_filters_applied=applied,
         )
 
-    def _build_plan_join_lines(self, ordered_tables: list[str], is_active_census: bool, is_cssrs: bool = False) -> list[str]:
+    def compile_from_neural_ir(
+        self,
+        ir: NeuralCompilationIR,
+        request_text: str = "",
+        program_name: str | None = None,
+    ) -> CompiledCCLProgram:
+        """
+        Compiles a CCL (.prg) program strictly from a `NeuralCompilationIR` without invoking
+        the symbolic `MillenniumInterpreter` on `request_text`. Rejects empty or unknown DA2 elements.
+        """
+        excl_cols = expand_excluded_column_names(ir.exclude_columns)
+        excl_lows = {c.lower() for c in excl_cols}
+        kept_elems = [e for e in ir.selected_elements if e and e.lower() not in excl_lows]
+        prog_name = self._sanitize_program_name(program_name or self._derive_program_name(request_text or (ir.template_id or "neural_ir")))
+        if not kept_elems:
+            return CompiledCCLProgram(
+                program_name=prog_name,
+                request_text=request_text,
+                target_tenancy=ir.tenancy or "communityworks",
+                tenancy_deployment_note="Invalid strict neural IR: empty selected_elements.",
+                source_code="",
+                tables_used=[],
+                code_sets_used=[],
+                verification=VerificationReport(False, [], ["Empty selected_elements in strict neural IR."], []),
+            )
+
+        da2_by_name = {e["da2_field_name"]: e for e in load_da2_elements() if e.get("da2_field_name")}
+        canon_cat = load_da2_canonical_reports_catalog()
+        known_names: set[str] = set(da2_by_name.keys())
+        for bv in canon_cat.get("business_views_xml_catalog", []):
+            for col in bv.get("columns", []):
+                if col.get("name"):
+                    known_names.add(col["name"])
+        for qr in canon_cat.get("canonical_queries_and_reports", []):
+            for sel_e in qr.get("selected_elements", []):
+                known_names.add(sel_e)
+                if ":" in sel_e:
+                    known_names.add(sel_e.split(":", 1)[1].strip())
+        known_names.update(load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"].keys())
+        from .da2_generator import LIVE_CWC_ELEMENT_MAP
+        known_names.update(LIVE_CWC_ELEMENT_MAP.keys())
+        known_names.update(v[0] for v in LIVE_CWC_ELEMENT_MAP.values())
+
+        unknown_elems = [
+            e for e in kept_elems
+            if e not in known_names and (":" not in e or e.split(":", 1)[1].strip() not in known_names)
+        ]
+        if unknown_elems:
+            return CompiledCCLProgram(
+                program_name=prog_name,
+                request_text=request_text,
+                target_tenancy=ir.tenancy or "communityworks",
+                tenancy_deployment_note="Invalid strict neural IR: unknown DA2 element(s).",
+                source_code="",
+                tables_used=[],
+                code_sets_used=[],
+                verification=VerificationReport(
+                    False,
+                    [],
+                    [f"Unknown DA2 element(s) in strict neural IR: {', '.join(unknown_elems[:5])}"],
+                    [],
+                ),
+            )
+
+        v500_tables = load_v500_tables()
+        matched_cols: list[ColumnMatch] = []
+        seen_tc: set[tuple[str, str]] = set()
+
+        def _add_tc(tbl: str, col_name: str, fname: str) -> None:
+            if tbl not in TABLE_ALIASES or col_name == "*" or (tbl, col_name) in seen_tc:
+                return
+            seen_tc.add((tbl, col_name))
+            t_meta = v500_tables.get(tbl) or {}
+            c_meta = next((c for c in t_meta.get("columns", []) if c.get("name") == col_name), {})
+            matched_cols.append(
+                ColumnMatch(
+                    table=tbl,
+                    column=col_name,
+                    v500_type=str(c_meta.get("v500_type") or "VARCHAR2"),
+                    ccl_type=str(c_meta.get("ccl_type") or ("dq8 (DATETIME)" if col_name.endswith("_DT_TM") else "vc (STRING)")),
+                    nullable=bool(c_meta.get("nullable", True)),
+                    code_set=c_meta.get("code_set"),
+                    code_set_name=None,
+                    cdf_meanings=[],
+                    in_healtheintent_ods=True,
+                    definition=fname,
+                    da2_field_name=fname,
+                    da2_domain=ir.da2_domain,
+                    da2_subentity="Encounter",
+                    element_uuid=None,
+                    value_semantics="",
+                    score=1.0,
+                )
+            )
+
+        for fname in kept_elems:
+            base_f = fname.split(":", 1)[1].strip() if ":" in fname else fname
+            cat = da2_by_name.get(fname) or da2_by_name.get(base_f)
+            target = (cat or {}).get("v500_target") or ""
+            if "." in target:
+                t_part, _, c_part = target.partition(".")
+                if t_part in TABLE_ALIASES and c_part and c_part != "*":
+                    _add_tc(t_part, c_part, base_f)
+                    continue
+            if base_f.startswith("CE "):
+                _add_tc("CLINICAL_EVENT", "RESULT_VAL", base_f)
+            elif base_f.startswith(("Med Adm", "Med Admin")):
+                _add_tc("ORDERS", "ORDER_MNEMONIC", base_f)
+                _add_tc("MED_ADMIN_EVENT", "ADMIN_DOSAGE", base_f)
+            elif base_f.startswith("Task Atv"):
+                _add_tc("TASK_ACTIVITY", "TASK_STATUS_CD", base_f)
+            elif base_f.startswith(("Order ", "Ord ")):
+                _add_tc("ORDERS", "ORDER_MNEMONIC", base_f)
+            elif base_f.startswith("Sch "):
+                _add_tc("SCH_APPT", "SCH_STATE_CD", base_f)
+                _add_tc("SCH_EVENT", "APPT_TYPE_CD", base_f)
+            elif base_f.startswith(("Chg ", "Rev ")) or fname.startswith(("ChgRecon:", "Revenue:")):
+                _add_tc("CHARGE", "CHARGE_DESCRIPTION", base_f)
+            elif base_f.startswith("HP "):
+                _add_tc("BO_HP_RELTN", "FIN_CLASS_CD", base_f)
+                _add_tc("HEALTH_PLAN", "PLAN_NAME", base_f)
+            elif base_f.startswith(("BO ", "Denial ", "F Enc")):
+                _add_tc("PFT_ENCNTR", "ACCT_NBR", base_f)
+                _add_tc("BENEFIT_ORDER", "FIN_CLASS_CD", base_f)
+            elif base_f.startswith(("Diag ", "Dx ")):
+                _add_tc("DIAGNOSIS", "DIAG_DISPLAY", base_f)
+                _add_tc("NOMENCLATURE", "SOURCE_STRING", base_f)
+            elif base_f in ("Enc Attending Phys", "Enc Attending Physician", "Enc Pl Relationship Type"):
+                _add_tc("ENCNTR_PRSNL_RELTN", "ENCNTR_PRSNL_R_CD", base_f)
+            elif base_f.startswith("Person MRN"):
+                _add_tc("PERSON_ALIAS", "ALIAS", base_f)
+
+        ir_ref = RefinementSpec(
+            exclude_columns=excl_cols,
+            exclude_filters=list(ir.exclude_filters),
+            override_filters={k: list(v) for k, v in ir.override_filters.items()},
+            prior_template_id=ir.template_id,
+        )
+        ir_interp = InterpretationResult(
+            request_text=request_text,
+            inferred_tenancy=ir.tenancy or "communityworks",
+            tenancy_rationale="NeuralCompilationIR tenancy",
+            legal_execution_surfaces=["da2", "ccl"],
+            recommended_strategy=ir.execution_strategy or "single_domain_oda",
+            matched_columns=matched_cols,
+            matched_forms_and_outputs=[],
+            matched_code_sets=[],
+            join_graph=[],
+            guardrails_triggered=[],
+            matched_da2_views=[],
+            refinement=ir_ref,
+            matched_template_id=ir.template_id,
+        )
+        return self.compile(
+            request_text=request_text,
+            program_name=prog_name,
+            tenancy=ir.tenancy or "communityworks",
+            interpretation=ir_interp,
+            refinement=ir_ref,
+        )
+
+    def _build_plan_join_lines(self, ordered_tables: list[str], is_active_census: bool, is_cssrs: bool = False, refinement: RefinementSpec | None = None) -> list[str]:
         lines: list[str] = []
         if is_active_census:
             lines.extend([
@@ -287,7 +503,36 @@ class CCLCompiler:
                 "JOIN ce",
                 "    WHERE ce.encntr_id = e.encntr_id",
                 '      AND ce.valid_until_dt_tm >= cnvtdatetime("31-DEC-2100 00:00:00")',
-                "      AND ce.result_status_cd IN (c_auth_cd, c_modified_cd, c_altered_cd)",
+                *(
+                    [
+                        "      AND trim(uar_get_code_display(ce.result_status_cd), 3) IN ("
+                        + ", ".join(
+                            f'"{v.replace(chr(34), "")}"'
+                            for k, vals in (
+                                list((refinement.prior_filters if refinement else {}).items())
+                                + list((refinement.override_filters if refinement else {}).items())
+                            )
+                            if k.lower() == "ce result status"
+                            for v in vals
+                        )
+                        + ")"
+                    ]
+                    if (
+                        refinement
+                        and (
+                            any(ok.lower() == "ce result status" for ok in refinement.override_filters)
+                            or (
+                                any(pk.lower() == "ce result status" for pk in refinement.prior_filters)
+                                and not any(ef.lower() == "ce result status" for ef in refinement.exclude_filters)
+                            )
+                        )
+                    )
+                    else (
+                        []
+                        if (refinement and any(ef.lower() == "ce result status" for ef in refinement.exclude_filters))
+                        else ["      AND ce.result_status_cd IN (c_auth_cd, c_modified_cd, c_altered_cd)"]
+                    )
+                ),
                 "      AND ce.view_level = 1",
                 *(
                     [
@@ -457,14 +702,45 @@ class CCLCompiler:
             ],
         }
 
+        eff_field_filters: dict[str, list[str]] = {}
+        if refinement:
+            excl_set = {f.lower() for f in refinement.exclude_filters}
+            for pk, pvals in refinement.prior_filters.items():
+                if pk.lower() not in excl_set and pvals:
+                    eff_field_filters[pk] = list(pvals)
+            for ok, ovals in refinement.override_filters.items():
+                if ovals:
+                    eff_field_filters[ok] = list(ovals)
+
+        if eff_field_filters:
+            enc_col_map = {
+                "Enc Type": "e.encntr_type_cd",
+                "Enc Status": "e.encntr_status_cd",
+                "Enc Loc Facility": "e.loc_facility_cd",
+                "Enc Loc Nurse Unit": "e.loc_nurse_unit_cd",
+            }
+            for f_key, f_vals in eff_field_filters.items():
+                if f_key in enc_col_map and f_vals:
+                    q_vals = ", ".join(f'"{v.replace(chr(34), "")}"' for v in f_vals)
+                    lines.append(f"      AND trim(uar_get_code_display({enc_col_map[f_key]}), 3) IN ({q_vals})")
+
         for tbl in ordered_tables[1:]:
             if tbl in join_map:
                 lines.extend(join_map[tbl])
+                if tbl == "ORDERS" and "Order Status" in eff_field_filters:
+                    ov_os = [v for v in eff_field_filters["Order Status"] if v]
+                    if ov_os:
+                        q_os = ", ".join(f'"{v.replace(chr(34), "")}"' for v in ov_os)
+                        lines.append(f"      AND trim(uar_get_code_display(o.order_status_cd), 3) IN ({q_os})")
 
         return lines
 
     def verify_ccl_source(
-        self, source: str, ordered_tables: list[str], is_active_census: bool
+        self,
+        source: str,
+        ordered_tables: list[str],
+        is_active_census: bool,
+        ce_status_excluded: bool = False,
     ) -> VerificationReport:
         checked = []
         errors = []
@@ -494,8 +770,8 @@ class CCLCompiler:
             checked.append(f"CCL_PLAN_JOIN_COMPLETE: All {len(ordered_tables)} FROM tables have explicit PLAN/JOIN blocks")
 
         if "CLINICAL_EVENT" in ordered_tables:
-            if '31-DEC-2100' in source and "c_auth_cd" in source:
-                checked.append("CCL_CE_VERSION_GUARD: Enforces valid_until_dt_tm >= 31-DEC-2100 and AUTH/MODIFIED/ALTERED status")
+            if '31-DEC-2100' in source and (ce_status_excluded or "ce.result_status_cd IN" in source or "uar_get_code_display(ce.result_status_cd)" in source):
+                checked.append("CCL_CE_VERSION_GUARD: Enforces valid_until_dt_tm >= 31-DEC-2100 and configured result_status_cd guard")
             else:
                 errors.append("CLINICAL_EVENT queried without valid_until_dt_tm >= 31-DEC-2100 and result_status_cd filter.")
 
@@ -525,7 +801,8 @@ class CCLCompiler:
 
     @staticmethod
     def _derive_program_name(request_text: str) -> str:
-        stop = {"show", "get", "find", "list", "the", "for", "with", "and", "from", "all", "report", "query", "in", "on", "to"}
-        words = [w for w in re.findall(r"[a-z0-9]+", request_text.lower()) if w not in stop and len(w) > 2]
+        clean_req = sanitize_text_for_report_naming(request_text)
+        stop = {"show", "get", "find", "list", "the", "for", "with", "and", "from", "all", "report", "query", "in", "on", "to", "build", "generate", "create", "also", "include"}
+        words = [w for w in re.findall(r"[a-z0-9]+", clean_req.lower()) if w not in stop and len(w) > 2]
         stem = "_".join(words[:4]) if words else "extract"
         return f"cust_da2_{stem}"[:28]

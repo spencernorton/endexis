@@ -19,7 +19,16 @@ from .knowledge import (
     load_tenancy_taxonomy,
     load_v500_tables,
 )
-from .schemas import ColumnMatch, InterpretationResult
+from .lexical_guards import (
+    extract_affirmative_text,
+    has_word_phrase,
+    is_financial_adjustment_request,
+    is_financial_charge_or_revenue_request,
+    is_financial_payment_request,
+    is_personnel_position_request,
+    resolve_canonical_template_id,
+)
+from .schemas import ColumnMatch, InterpretationResult, RefinementSpec
 
 # High-signal semantic concept rules mapping clinical/financial concepts to exact V500 + DA2 targets
 CONCEPT_SIGNALS: list[dict[str, Any]] = [
@@ -74,10 +83,16 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
             ("ENCNTR_PRSNL_RELTN", "PRSNL_PERSON_ID"),
             ("ENCNTR_PRSNL_RELTN", "ENCNTR_PRSNL_R_CD"),
             ("PRSNL", "NAME_FULL_FORMATTED"),
-            ("PRSNL", "POSITION_CD"),
         ],
-        "da2": ["Enc Attending Phys", "Enc Pl Relationship Type", "Prsnl Name Full Format", "Prsnl Position"],
-        "code_sets": [333, 88],
+        "da2": ["Enc Attending Phys", "Enc Pl Relationship Type", "Prsnl Name Full Format"],
+        "code_sets": [333],
+    },
+    {
+        "gate": "personnel_position",
+        "phrases": ["prsnl position", "personnel position", "staff position", "provider position", "position_cd", "code set 88", "cwc personnel", "credentialing role"],
+        "v500": [("PRSNL", "POSITION_CD")],
+        "da2": ["Prsnl Position"],
+        "code_sets": [88],
     },
     {
         "phrases": [
@@ -238,7 +253,8 @@ CONCEPT_SIGNALS: list[dict[str, Any]] = [
         "code_sets": [14232, 14233],
     },
     {
-        "phrases": ["charge", "charges", "cpt", "cdm", "revenue", "billed", "gross price", "quantity", "quantities", "payment", "payments", "adjustment", "adjustments", "gl", "benefit order", "bo_hp_reltn"],
+        "gate": "financial",
+        "phrases": ["charge", "charges", "cpt", "cdm", "revenue", "billed", "gross price", "extended price", "gl", "general ledger", "benefit order", "bo_hp_reltn", "denial", "denials"],
         "v500": [
             ("CHARGE", "CHARGE_ITEM_ID"),
             ("CHARGE", "CHARGE_DESCRIPTION"),
@@ -459,10 +475,19 @@ class MillenniumInterpreter:
         tenancy: str | None = None,
         top_k_columns: int = 28,
         strict_precision: bool = False,
+        refinement: RefinementSpec | dict[str, Any] | None = None,
     ) -> InterpretationResult:
-        low = request_text.lower()
+        aff_text = extract_affirmative_text(request_text)
+        low = aff_text.lower()
         tokens = set(re.findall(r"[a-z0-9_]+", low))
-        tenancy_id, tenancy_reason, legal_surfaces = self.infer_tenancy(request_text, tenancy)
+        tenancy_id, tenancy_reason, legal_surfaces = self.infer_tenancy(aff_text, tenancy)
+        eff_ref = RefinementSpec.from_request_or_dict(request_text=request_text, raw=refinement)
+        matched_tpl_id = resolve_canonical_template_id(request_text)
+        has_fin_adj = is_financial_adjustment_request(request_text)
+        has_fin_pay = is_financial_payment_request(request_text)
+        has_fin_chg = is_financial_charge_or_revenue_request(request_text)
+        has_any_fin = has_fin_adj or has_fin_pay or has_fin_chg
+        has_prsnl_pos = is_personnel_position_request(request_text)
 
         # Always include core encounter/person anchors when interpreting clinical/financial requests
         candidate_pairs: dict[tuple[str, str], tuple[float, str | None]] = {
@@ -474,9 +499,14 @@ class MillenniumInterpreter:
         triggered_cs: set[int] = {319, 4}
 
         for sig in CONCEPT_SIGNALS:
+            gate = sig.get("gate")
+            if gate == "personnel_position" and not has_prsnl_pos:
+                continue
+            if gate == "financial" and not has_any_fin:
+                continue
             matched_phrase = False
             for phr in sig["phrases"]:
-                if re.search(rf"(?<![a-z0-9]){re.escape(phr)}(?![a-z0-9])", low):
+                if has_word_phrase(low, phr):
                     matched_phrase = True
                     break
             if matched_phrase:
@@ -508,8 +538,11 @@ class MillenniumInterpreter:
 
         # Also scan V500 table & column names / definitions directly for exact technical token hits
         for tname, tinfo in self._tables.items():
+            if not has_any_fin and tname in ("CHARGE", "CHARGE_MOD", "PFT_ENCNTR", "BENEFIT_ORDER", "BO_HP_RELTN", "TRANS_LOG", "GL_TRANS_LOG"):
+                if f"{tname.lower()}." not in low:
+                    continue
             t_low = tname.lower()
-            t_hit = bool(re.search(rf"(?<![a-z0-9]){re.escape(t_low)}(?![a-z0-9])", low)) or t_low in tokens
+            t_hit = has_word_phrase(low, t_low) or t_low in tokens
             for cinfo in tinfo.get("columns", []):
                 cname = cinfo["name"]
                 c_low = cname.lower()
@@ -527,7 +560,7 @@ class MillenniumInterpreter:
                     if cinfo.get("code_set"):
                         triggered_cs.add(int(cinfo["code_set"]))
 
-        self._apply_temporal_and_identifier_disambiguation(low, candidate_pairs, triggered_cs, strict_precision=strict_precision)
+        self._apply_temporal_and_identifier_disambiguation(low, candidate_pairs, triggered_cs, strict_precision=strict_precision, request_text=request_text)
 
         # Build ColumnMatch objects
         matched_cols: list[ColumnMatch] = []
@@ -544,7 +577,7 @@ class MillenniumInterpreter:
                 da2_rec = self._da2_by_name.get("Person Name Full Format")
             if not da2_rec:
                 # Look up by exact v500_target table.column prefix first, falling back to table prefix only if no da2_hint
-                allow_cwf_adj_pay = any(w in low for w in ("adjustment", "adjustments", "payment", "payments", "cwf"))
+                allow_cwf_adj_pay = has_any_fin
                 da2_rec = next(
                     (
                         e for e in self._da2_elements
@@ -584,6 +617,49 @@ class MillenniumInterpreter:
                 )
             )
 
+        # Enforce clinical-vs-billing domain isolation and RefinementSpec column exclusions
+        excl_low = {x.lower() for x in eff_ref.exclude_columns}
+        excl_v500: set[tuple[str, str]] = set()
+        if "hp financial class" in excl_low or "bo fin class" in excl_low:
+            excl_v500.add(("ENCOUNTER", "FINANCIAL_CLASS_CD"))
+        if "hp plan name" in excl_low:
+            excl_v500.update({("HEALTH_PLAN", "PLAN_NAME"), ("HEALTH_PLAN", "PLAN_TYPE_CD")})
+        if "enc loc room" in excl_low:
+            excl_v500.add(("ENCOUNTER", "LOC_ROOM_CD"))
+        if "enc loc bed" in excl_low or "bed loc" in excl_low:
+            excl_v500.add(("ENCOUNTER", "LOC_BED_CD"))
+        if "person mrn" in excl_low:
+            excl_v500.add(("PERSON_ALIAS", "ALIAS"))
+        if "enc attending phys" in excl_low:
+            excl_v500.update({
+                ("ENCNTR_PRSNL_RELTN", "PRSNL_PERSON_ID"),
+                ("ENCNTR_PRSNL_RELTN", "ENCNTR_PRSNL_R_CD"),
+                ("PRSNL", "NAME_FULL_FORMATTED"),
+            })
+        if "enc discharge disp" in excl_low:
+            excl_v500.add(("ENCOUNTER", "DISCH_DISPOSITION_CD"))
+        if "prsnl position" in excl_low or not has_prsnl_pos:
+            excl_v500.add(("PRSNL", "POSITION_CD"))
+            if not has_prsnl_pos:
+                triggered_cs.discard(88)
+
+        filtered_cols: list[ColumnMatch] = []
+        for cm in matched_cols:
+            if (cm.table, cm.column) in excl_v500:
+                continue
+            fn = (cm.da2_field_name or "").strip()
+            if fn.lower() in excl_low:
+                continue
+            if not has_prsnl_pos and fn == "Prsnl Position":
+                continue
+            if not has_any_fin and (
+                fn.startswith(("Adj ", "AdjTrans", "Pay ", "PayTrans", "Chg ", "BO "))
+                or ((cm.da2_domain or "").startswith("CWF ") and not fn.startswith("HP "))
+            ):
+                continue
+            filtered_cols.append(cm)
+
+        matched_cols = filtered_cols
         matched_cols.sort(key=lambda c: c.score, reverse=True)
         matched_cols = matched_cols[:top_k_columns]
 
@@ -618,6 +694,8 @@ class MillenniumInterpreter:
             join_graph=join_graph,
             guardrails_triggered=guardrails,
             matched_da2_views=matched_da2_views,
+            refinement=eff_ref,
+            matched_template_id=matched_tpl_id,
         )
 
     def _build_join_graph(self, tables_present: set[str]) -> list[str]:
@@ -748,6 +826,7 @@ class MillenniumInterpreter:
         candidate_pairs: dict[tuple[str, str], tuple[float, str | None]],
         triggered_cs: set[int],
         strict_precision: bool = False,
+        request_text: str = "",
     ) -> None:
         is_mar = (bool(re.search(r"\bmar\b", low)) or any(w in low for w in ("bcma", "med_admin", "medication administration", "administered", "prn dose", "doses given", "mme")))
         if is_mar:
@@ -790,12 +869,12 @@ class MillenniumInterpreter:
         if any(t == "DIAGNOSIS" for t, _ in list(candidate_pairs.keys())):
             candidate_pairs[("DIAGNOSIS", "DIAGNOSIS_DISPLAY")] = (9.6, "Diagnosis Display")
 
-        if any(w in low for w in ("adjustment", "write-off", "cwf gs adjustments")):
+        if is_financial_adjustment_request(request_text or low):
             candidate_pairs[("PFT_ENCNTR", "ADJUSTMENT_BALANCE")] = (9.8, "Adj Amount")
             candidate_pairs[("TRANS_LOG", "TOTAL_TRANS_AMOUNT")] = (9.7, "Adj Amount")
             candidate_pairs[("TRANS_LOG", "POST_DT_TM")] = (9.7, "Adj Post Dt")
             candidate_pairs[("TRANS_LOG", "TRANS_REASON_CD")] = (9.5, "Adj Trans Reason")
-        if any(w in low for w in ("payment", "cash payment", "cwf gs payments")):
+        if is_financial_payment_request(request_text or low):
             candidate_pairs[("PFT_ENCNTR", "APPLIED_PAYMENT_BALANCE")] = (9.8, "Pay Amount")
             candidate_pairs[("TRANS_LOG", "TOTAL_TRANS_AMOUNT")] = (9.7, "Pay Amount")
             candidate_pairs[("TRANS_LOG", "POST_DT_TM")] = (9.7, "Pay Post Dt")

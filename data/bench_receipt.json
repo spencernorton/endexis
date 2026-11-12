@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "title": "Endexis v2.3.0 vs. GPT & Claude \u2014 Zero-Leakage Compilation",
+  "subtitle": "Shared Holdout Filter (N=144) & Verifier Regression Suites (N=18) \u2014 Apples-to-Apples (bench-receipt/v1)",
+  "metrics": [
+    {
+      "key": "fv_acc1",
+      "label": "Filter Acc@1"
+    },
+    {
+      "key": "cv_exact",
+      "label": "CODE_VALUE Exact"
+    },
+    {
+      "key": "elem_f1",
+      "label": "Element F1"
+    },
+    {
+      "key": "xml_pass1",
+      "label": "XML Pass@1"
+    },
+    {
+      "key": "sql_pass1",
+      "label": "SQL Pass@1"
+    },
+    {
+      "key": "e2e_pass1",
+      "label": "End-to-End Pass@1"
+    }
+  ],
+  "models": [
+    {
+      "name": "Endexis v2.3 (GGUF + Verifier)",
+      "metrics": {
+        "fv_acc1": 1.0,
+        "cv_exact": 1.0,
+        "elem_f1": 1.0,
+        "xml_pass1": 1.0,
+        "sql_pass1": 1.0,
+        "e2e_pass1": 1.0
+      }
+    },
+    {
+      "name": "Endexis V1 Baseline",
+      "metrics": {
+        "fv_acc1": 0.8929,
+        "cv_exact": 1.0,
+        "elem_f1": 0.6573,
+        "xml_pass1": 1.0,
+        "sql_pass1": 1.0,
+        "e2e_pass1": 1.0
+      }
+    },
+    {
+      "name": "Claude Sonnet 4.6 (RAG)",
+      "metrics": {
+        "fv_acc1": 0.8214,
+        "cv_exact": 0.9286,
+        "elem_f1": 0.0467,
+        "xml_pass1": 0.0,
+        "sql_pass1": 1.0,
+        "e2e_pass1": 0.0
+      }
+    },
+    {
+      "name": "GPT Heavy (RAG)",
+      "metrics": {
+        "fv_acc1": 0.4643,
+        "cv_exact": 0.6429,
+        "elem_f1": 0.0,
+        "xml_pass1": 0.0,
+        "sql_pass1": 0.5,
+        "e2e_pass1": 0.0
+      }
+    },
+    {
+      "name": "GPT Fast (RAG)",
+      "metrics": {
+        "fv_acc1": 0.3929,
+        "cv_exact": 0.6429,
+        "elem_f1": 0.0122,
+        "xml_pass1": 0.0,
+        "sql_pass1": 0.5,
+        "e2e_pass1": 0.125
+      }
+    },
+    {
+      "name": "Claude Sonnet 4.6 (Zero-Shot)",
+      "metrics": {
+        "fv_acc1": 0.0,
+        "cv_exact": 0.0,
+        "elem_f1": 0.0566,
+        "xml_pass1": 0.0,
+        "sql_pass1": 1.0,
+        "e2e_pass1": 0.0
+      }
+    },
+    {
+      "name": "GPT Fast (Zero-Shot)",
+      "metrics": {
+        "fv_acc1": 0.0,
+        "cv_exact": 0.0,
+        "elem_f1": 0.0,
+        "xml_pass1": 0.0,
+        "sql_pass1": 0.0,
+        "e2e_pass1": 0.0
+      }
+    }
+  ]
+}
