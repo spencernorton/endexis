@@ -1,0 +1,113 @@
+{
+  "schema": "endexis-phase3b-gguf-latency-parity-receipt/v2.3",
+  "pipeline_version": "endexis-v2.3-clean-r1",
+  "gguf_artifacts": {
+    "q8_0": {
+      "filename": "endexis-qwen3-0.6b-dpo-v2_3-q8_0.gguf",
+      "size_mb": 741.07,
+      "sha256": "e4abd9d292e7fc64f1a7734e29ec57233ee4b2f3a7a8cf6d04b896f9412f076f"
+    },
+    "q4_k_m": {
+      "filename": "endexis-qwen3-0.6b-dpo-v2_3-q4_k_m.gguf",
+      "size_mb": 378.32,
+      "sha256": "54b300609f689ab2de1e6b23999288cf37108dfb57106669cba33c6cf67958fc"
+    }
+  },
+  "q8_0_vs_bf16_parity": {
+    "disjoint_eval_count": 132,
+    "structural_agreement_rate": 0.9924,
+    "mean_element_set_jaccard": 0.9996,
+    "gate_threshold": 0.98,
+    "passed": true
+  },
+  "latency_and_accuracy_benchmarks": {
+    "legacy_v2_0_0_pytorch_http_reference_mean_ms": 2352.61,
+    "v2_0_0_q4_k_m_cuda": {
+      "gguf_file": "endexis-qwen3-0.6b-dpo-q4_k_m.gguf",
+      "ngl": 99,
+      "count": 132,
+      "track_a_strict_pass_at_1": 0.0,
+      "verifier_compile_rate": 0.0,
+      "domain_accuracy": 0.0,
+      "mean_element_f1": 0.0,
+      "contamination_free_rate": 0.0,
+      "latency_n1_greedy_ms": {
+        "p50": 0.0,
+        "p95": 208.99,
+        "mean": 80.18,
+        "min": 0.0,
+        "max": 346.66
+      },
+      "latency_n4_verifier_ranked_ms": {}
+    },
+    "v2_3_0_q8_0_cuda": {
+      "gguf_file": "endexis-qwen3-0.6b-dpo-v2_3-q8_0.gguf",
+      "ngl": 99,
+      "count": 132,
+      "track_a_strict_pass_at_1": 0.9773,
+      "verifier_compile_rate": 0.9773,
+      "domain_accuracy": 1.0,
+      "mean_element_f1": 0.9684,
+      "contamination_free_rate": 0.9773,
+      "latency_n1_greedy_ms": {
+        "p50": 650.1,
+        "p95": 2599.83,
+        "mean": 963.54,
+        "min": 99.33,
+        "max": 4625.79
+      },
+      "latency_n4_verifier_ranked_ms": {
+        "subset_count": 16,
+        "track_b_verified_pass_at_4": 1.0,
+        "p50": 560.92,
+        "p95": 772.15,
+        "mean": 578.24
+      }
+    },
+    "v2_3_0_q4_k_m_cuda": {
+      "gguf_file": "endexis-qwen3-0.6b-dpo-v2_3-q4_k_m.gguf",
+      "ngl": 99,
+      "count": 132,
+      "track_a_strict_pass_at_1": 0.8939,
+      "verifier_compile_rate": 0.8939,
+      "domain_accuracy": 0.9924,
+      "mean_element_f1": 0.9581,
+      "contamination_free_rate": 0.8939,
+      "latency_n1_greedy_ms": {
+        "p50": 257.44,
+        "p95": 795.69,
+        "mean": 361.2,
+        "min": 130.62,
+        "max": 1291.95
+      },
+      "latency_n4_verifier_ranked_ms": {
+        "subset_count": 16,
+        "track_b_verified_pass_at_4": 1.0,
+        "p50": 196.63,
+        "p95": 273.05,
+        "mean": 201.16
+      }
+    },
+    "v2_3_0_q4_k_m_cpu": {
+      "gguf_file": "endexis-qwen3-0.6b-dpo-v2_3-q4_k_m.gguf",
+      "ngl": 0,
+      "count": 32,
+      "track_a_strict_pass_at_1": 1.0,
+      "verifier_compile_rate": 1.0,
+      "domain_accuracy": 1.0,
+      "mean_element_f1": 0.9568,
+      "contamination_free_rate": 1.0,
+      "latency_n1_greedy_ms": {
+        "p50": 2357.32,
+        "p95": 2852.16,
+        "mean": 2307.42,
+        "min": 1573.74,
+        "max": 2972.52
+      },
+      "latency_n4_verifier_ranked_ms": {}
+    },
+    "cuda_q4_p50_speedup_vs_legacy_pytorch_http": 9.14,
+    "latency_gate_p50_le_350ms_passed": true
+  },
+  "wall_time_seconds": 640.13
+}

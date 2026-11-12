@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "title": "Endexis v2.3.0 \u2014 5-Fold GroupKFold OOF & GGUF Parity (N=132)",
+  "subtitle": "Unverified Track-A Neural Compilation Across BF16, Q8_0, Q4_K_M & Template-Disjoint OOF",
+  "metrics": [
+    {
+      "key": "strict_pass1",
+      "label": "Strict Pass@1"
+    },
+    {
+      "key": "elem_f1",
+      "label": "Element F1"
+    },
+    {
+      "key": "domain_acc",
+      "label": "Domain Acc"
+    },
+    {
+      "key": "contam_free",
+      "label": "Contam-Free"
+    },
+    {
+      "key": "verifier_all",
+      "label": "XML/SQL/CCL/BIRT"
+    }
+  ],
+  "models": [
+    {
+      "name": "v2.3 Merged BF16 (Full Corpus)",
+      "metrics": {
+        "strict_pass1": 0.9697,
+        "elem_f1": 0.9682,
+        "domain_acc": 1.0,
+        "contam_free": 0.9697,
+        "verifier_all": 0.9697
+      }
+    },
+    {
+      "name": "v2.3 Q8_0 GGUF (99.2% Parity)",
+      "metrics": {
+        "strict_pass1": 0.9773,
+        "elem_f1": 0.9684,
+        "domain_acc": 1.0,
+        "contam_free": 0.9773,
+        "verifier_all": 0.9773
+      }
+    },
+    {
+      "name": "v2.3 Q4_K_M GGUF (257ms p50)",
+      "metrics": {
+        "strict_pass1": 0.8939,
+        "elem_f1": 0.9581,
+        "domain_acc": 0.9924,
+        "contam_free": 0.8939,
+        "verifier_all": 0.8939
+      }
+    },
+    {
+      "name": "v2.3 5-Fold GroupKFold OOF",
+      "metrics": {
+        "strict_pass1": 0.5076,
+        "elem_f1": 0.6206,
+        "domain_acc": 0.9318,
+        "contam_free": 0.947,
+        "verifier_all": 0.947
+      }
+    },
+    {
+      "name": "v2.0 Legacy (322-Row Baseline)",
+      "metrics": {
+        "strict_pass1": 0.0,
+        "elem_f1": 0.0,
+        "domain_acc": 0.0,
+        "contam_free": 0.0,
+        "verifier_all": 0.0
+      }
+    }
+  ]
+}

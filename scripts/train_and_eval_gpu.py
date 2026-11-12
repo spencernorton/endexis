@@ -34,6 +34,10 @@ from safetensors.torch import load_file, save_file
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 WORK_DIR = Path(os.environ.get("ENDEXIS_WORK_DIR", str(Path(__file__).resolve().parent.parent)))
+# Device: CUDA trainer host preferred; Apple MPS / CPU keep the pipeline runnable elsewhere.
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+DTYPE = torch.bfloat16 if DEVICE.type in ("cuda", "mps") else torch.float32
+MAX_TRAIN_SAMPLES = int(os.environ.get("ENDEXIS_MAX_TRAIN_SAMPLES", "0"))  # >0 truncates SFT/DPO for smoke runs
 BASE_MODEL_DIR = WORK_DIR / "base-qwen3-0.6b-bf16"
 DATA_DIR = WORK_DIR / "data"
 REPO_SRC = WORK_DIR / "src"
@@ -135,8 +139,8 @@ def save_adapter_checkpoint(model: nn.Module, out_dir: Path, rank: int = 16, alp
     }
 
 
-def encode_prompt_and_response(tokenizer: Any, prompt: str, completion: str, max_len: int = 512) -> tuple[torch.Tensor, torch.Tensor]:
-    p_text = f"<|im_start|>system\nYou are Endexis (endexis), the Cerner Millennium V500, Discern Analytics 2.0 (DA2), CCL, and BIRT 4.4.2 neural compiler.<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
+def encode_prompt_and_response(tokenizer: Any, prompt: str, completion: str, max_len: int = 1024) -> tuple[torch.Tensor, torch.Tensor]:
+    p_text = f"<|im_start|>system\nYou are Endexis (endexis), the Cerner Millennium V500, Discern Analytics 2.0 (DA2), CCL, and BIRT 4.4.2 neural compiler. Emit a concise <reasoning>...</reasoning> trace followed by valid JSON compilation output inside <output>...</output>.<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
     c_text = f"{completion}<|im_end|>"
     p_ids = tokenizer.encode(p_text, add_special_tokens=False)
     c_ids = tokenizer.encode(c_text, add_special_tokens=False)
@@ -152,8 +156,8 @@ def encode_prompt_and_response(tokenizer: Any, prompt: str, completion: str, max
 
 def compute_sequence_logprob(model: nn.Module, input_ids: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
     """Computes average log-probability of completion tokens (where labels != -100)."""
-    inp = input_ids.unsqueeze(0).cuda()
-    lbl = labels.unsqueeze(0).cuda()
+    inp = input_ids.unsqueeze(0).to(DEVICE)
+    lbl = labels.unsqueeze(0).to(DEVICE)
     logits = model(inp).logits[:, :-1, :].float()
     targets = lbl[:, 1:]
     mask = (targets != -100).float()
@@ -172,7 +176,7 @@ def evaluate_validation_loss_and_dpo_margin(
     val_losses = []
     with torch.no_grad():
         for inp, lbl in val_sft_encoded:
-            out = model(inp.unsqueeze(0).cuda(), labels=lbl.unsqueeze(0).cuda())
+            out = model(inp.unsqueeze(0).to(DEVICE), labels=lbl.unsqueeze(0).to(DEVICE))
             val_losses.append(float(out.loss.item()))
 
         pref_hits = 0
@@ -198,6 +202,8 @@ def main() -> int:
     t0 = time.time()
     random.seed(42)
     torch.manual_seed(42)
+    if DEVICE.type == "cuda":
+        torch.cuda.set_per_process_memory_fraction(0.45, 0)
 
     pre_gpu = get_gpu_watcher_status()
     print("Pre-training GPU watcher status:", json.dumps(pre_gpu.get("gpu", {})), flush=True)
@@ -206,7 +212,7 @@ def main() -> int:
     dpo_rows = [json.loads(line) for line in (DATA_DIR / "dpo_contrastive_v1.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
 
     tokenizer = AutoTokenizer.from_pretrained(str(BASE_MODEL_DIR))
-    model = AutoModelForCausalLM.from_pretrained(str(BASE_MODEL_DIR), dtype=torch.bfloat16).cuda()
+    model = AutoModelForCausalLM.from_pretrained(str(BASE_MODEL_DIR), dtype=DTYPE).to(DEVICE)
     trainable_params = inject_lora(model, rank=16, alpha=32.0)
     total_params = sum(p.numel() for p in model.parameters())
     lora_param_cnt = sum(p.numel() for p in trainable_params)
@@ -223,17 +229,20 @@ def main() -> int:
         random.shuffle(items)
         val_take = max(1, min(4, len(items) // 10))
         val_sft_samples.extend(items[:val_take])
-        train_sft_samples.extend(items[val_take : val_take + 55])
+        train_sft_samples.extend(items[val_take:])
 
     random.shuffle(train_sft_samples)
     val_sft_samples = val_sft_samples[:40]
+    if MAX_TRAIN_SAMPLES > 0:  # smoke run: tiny end-to-end pass, not a qualification run
+        train_sft_samples = train_sft_samples[:MAX_TRAIN_SAMPLES]
+        val_sft_samples = val_sft_samples[:4]
 
     train_sft_encoded = [
         encode_prompt_and_response(
             tokenizer,
             r["instruction"],
             r.get("formatted_completion") or json.dumps(r["response"], ensure_ascii=False),
-            max_len=512,
+            max_len=1024,
         )
         for r in train_sft_samples
     ]
@@ -242,7 +251,7 @@ def main() -> int:
             tokenizer,
             r["instruction"],
             r.get("formatted_completion") or json.dumps(r["response"], ensure_ascii=False),
-            max_len=512,
+            max_len=1024,
         )
         for r in val_sft_samples
     ]
@@ -251,9 +260,11 @@ def main() -> int:
     for d in dpo_rows:
         c_txt = d.get("chosen_formatted") or json.dumps(d["chosen"], ensure_ascii=False)
         r_txt = d.get("rejected_formatted") or json.dumps(d["rejected"], ensure_ascii=False)
-        c_inp, c_lbl = encode_prompt_and_response(tokenizer, d["prompt"], c_txt, max_len=512)
-        r_inp, r_lbl = encode_prompt_and_response(tokenizer, d["prompt"], r_txt, max_len=512)
+        c_inp, c_lbl = encode_prompt_and_response(tokenizer, d["prompt"], c_txt, max_len=1024)
+        r_inp, r_lbl = encode_prompt_and_response(tokenizer, d["prompt"], r_txt, max_len=1024)
         dpo_encoded.append((c_inp, c_lbl, r_inp, r_lbl))
+    if MAX_TRAIN_SAMPLES > 0:
+        dpo_encoded = dpo_encoded[:MAX_TRAIN_SAMPLES]
 
     # 0. Pre-training Baseline Evaluation on GPU
     print("Evaluating Pre-Training Base Model (Qwen3-0.6B) on GPU...", flush=True)
@@ -285,7 +296,7 @@ def main() -> int:
         grad_accum = 4
         optimizer_sft.zero_grad()
         for step, (inp, lbl) in enumerate(train_sft_encoded, 1):
-            out = model(inp.unsqueeze(0).cuda(), labels=lbl.unsqueeze(0).cuda())
+            out = model(inp.unsqueeze(0).to(DEVICE), labels=lbl.unsqueeze(0).to(DEVICE))
             loss = out.loss / grad_accum
             loss.backward()
             if step % grad_accum == 0 or step == len(train_sft_encoded):
@@ -313,7 +324,7 @@ def main() -> int:
     print(f"Running Stage-2 RPO-Anchored Contrastive DPO on {len(dpo_encoded)} preference pairs (beta=0.25, lr=8e-6, rpo_alpha=0.5)...", flush=True)
     model.train()
     optimizer_dpo = torch.optim.AdamW(trainable_params, lr=8e-6, weight_decay=0.01)
-    beta = 0.25
+    beta = 0.10
     dpo_loss_curve: list[dict[str, float]] = []
     optimizer_dpo.zero_grad()
 
@@ -325,7 +336,7 @@ def main() -> int:
             logits_diff = (pi_c - ref_c) - (pi_r - ref_r)
             dpo_loss = -F.logsigmoid(beta * logits_diff)
             nll_anchor = -pi_c
-            total_dpo_loss = dpo_loss + 0.5 * nll_anchor
+            total_dpo_loss = dpo_loss + 0.15 * nll_anchor
             (total_dpo_loss / 4).backward()
             epoch_losses.append(float(dpo_loss.item()))
             if idx % 4 == 0 or idx == len(dpo_encoded):
@@ -351,7 +362,7 @@ def main() -> int:
                 "Discern Analytics 2.0 (DA2), CCL, and BIRT 4.4.2 neural compiler.<|im_end|>\n"
                 f"<|im_start|>user\n{hq['prompt']}<|im_end|>\n<|im_start|>assistant\n<reasoning>\n"
             )
-            inp_ids = tokenizer(p_text, return_tensors="pt").input_ids.cuda()
+            inp_ids = tokenizer(p_text, return_tensors="pt").input_ids.to(DEVICE)
             gen_ids = model.generate(
                 inp_ids,
                 max_new_tokens=160,
@@ -373,11 +384,11 @@ def main() -> int:
                 "best_of_4_reasoning_trace": "<reasoning>\n" + ranked[0].split("</reasoning>")[0].strip() + "\n</reasoning>",
             })
 
-    peak_vram_mb = round(torch.cuda.max_memory_allocated() / (1024 * 1024), 2)
+    peak_vram_mb = round(torch.cuda.max_memory_allocated() / (1024 * 1024), 2) if DEVICE.type == "cuda" else 0.0
     post_gpu = get_gpu_watcher_status()
 
     receipt = {
-        "host": "cuda-bf16-trainer",
+        "host": f"{DEVICE.type}-bf16-trainer",
         "base_model": "Qwen/Qwen3-0.6B (BF16 dequantized, 596,049,920 parameters)",
         "lora_architecture": {
             "rank": 16,

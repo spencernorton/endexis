@@ -8,6 +8,13 @@ import re
 from typing import Any
 
 from .knowledge import load_forms_catalog, load_som_summary
+from .lexical_guards import (
+    extract_affirmative_text,
+    has_word_phrase,
+    is_financial_adjustment_request,
+    is_financial_charge_or_revenue_request,
+    is_financial_payment_request,
+)
 from .schemas import FormOutputResolution
 
 
@@ -24,38 +31,56 @@ class FormsAndOutputResolver:
         self._som = load_som_summary()
 
     def resolve(self, request_text: str, top_k: int = 3) -> list[FormOutputResolution]:
-        text_low = request_text.lower()
+        aff_text = extract_affirmative_text(request_text)
+        text_low = aff_text.lower()
         tokens = set(re.findall(r"[a-z0-9_&-]+", text_low))
+        has_fin_intent = (
+            is_financial_charge_or_revenue_request(request_text)
+            or is_financial_adjustment_request(request_text)
+            or is_financial_payment_request(request_text)
+        )
+        has_chg_intent = is_financial_charge_or_revenue_request(request_text)
 
         scored: list[FormOutputResolution] = []
         for entry in self._forms:
+            fid = entry["id"]
+            if fid == "revcycle_patient_accounting_outputs" and not has_fin_intent:
+                continue
+
             score = 0.0
             for kw in entry.get("keywords", []):
                 kw_low = kw.lower()
-                if _mentions(text_low, kw_low):
-                    # Multi-word exact phrase gets a strong boost
+                if has_word_phrase(text_low, kw_low):
                     score += 4.5 if " " in kw_low else 2.5
                 else:
-                    kw_parts = set(kw_low.split())
+                    kw_parts = {p for p in kw_low.split() if len(p) > 2}
+                    # Never allow 'charge' token to match unless explicit financial/charge intent
+                    if not has_chg_intent:
+                        kw_parts -= {"charge", "charges", "billed", "cpt"}
                     overlap = len(tokens & kw_parts)
                     if overlap:
                         score += overlap * 0.9
 
-            # Boost if table or payload column names are explicitly mentioned
+            # Boost only on explicit SQL table/column tokens (never substring 'charge' in 'discharged')
             for dt in entry.get("definition_tables", []) + entry.get("activity_tables", []):
-                if _mentions(text_low, dt["table"].lower()):
+                t_low = dt["table"].lower()
+                if ("_" in t_low and has_word_phrase(text_low, t_low)) or f"v500.{t_low}" in text_low:
                     score += 5.0
             for pc in entry.get("payload_columns", []):
                 tc = pc["table_column"].lower()
-                if any(_mentions(text_low, part) for part in tc.split(".")):
-                    score += 1.5
+                col_only = tc.split(".", 1)[1] if "." in tc else tc
+                if tc in text_low or ("_" in col_only and len(col_only) > 5 and has_word_phrase(text_low, col_only)):
+                    score += 2.0
 
             if score > 0:
-                som_matches = self._match_som_objects(text_low, tokens, entry["id"])
+                som_matches = self._match_som_objects(text_low, tokens, fid)
                 da2_map = entry.get("da2_mapping", {})
+                da2_fields = list(da2_map.get("fields", []))
+                if not has_chg_intent:
+                    da2_fields = [f for f in da2_fields if not f.startswith(("Chg ", "BO ", "Adj ", "Pay "))]
                 scored.append(
                     FormOutputResolution(
-                        form_id=entry["id"],
+                        form_id=fid,
                         form_family_name=entry["name"],
                         definition_tables=entry.get("definition_tables", []),
                         activity_tables=entry.get("activity_tables", []),
@@ -63,7 +88,7 @@ class FormsAndOutputResolver:
                         join_pattern_sql=entry.get("join_pattern_sql", ""),
                         da2_domain=da2_map.get("domain", "CWC Encounter"),
                         da2_sub_entity=da2_map.get("sub_entity", "Clinical Events"),
-                        da2_fields=da2_map.get("fields", []),
+                        da2_fields=da2_fields,
                         mandatory_filters=da2_map.get("mandatory_filters", []),
                         matched_som_objects=som_matches,
                         score=round(score, 2),
@@ -72,7 +97,6 @@ class FormsAndOutputResolver:
 
         scored.sort(key=lambda x: x.score, reverse=True)
         if not scored:
-            # Default fallback to PowerForms + Clinical Events if generic form/output query
             default_entry = self._forms[0]
             da2_map = default_entry.get("da2_mapping", {})
             scored.append(
@@ -115,7 +139,7 @@ class FormsAndOutputResolver:
         results = []
         for obj in self._som:
             oname = obj["object_name"]
-            if oname in preferred or oname.lower() in text_low:
+            if oname in preferred or has_word_phrase(text_low, oname.lower()):
                 results.append({
                     "som_object": oname,
                     "description": obj["description"],

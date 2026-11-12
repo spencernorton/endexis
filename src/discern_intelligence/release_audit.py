@@ -2,7 +2,7 @@
 Multi-Layer Public Release Security, Trademark, and Tenant-Agnostic Auditor (`discern_intelligence.release_audit`).
 
 Provides 4 independent verification gates before public release of code, corpora, or model weights:
-1. Repository Text, JSON Catalog, and JSONL Corpus Denylist Audit (`audit_repository_tree`)
+1. Repository Text, JSON Catalog, Base64-Decoded Literal, and JSONL Corpus Audit (`audit_repository_tree`)
 2. Tenant-Agnostic Structural Invariant Verification (`verify_tenant_agnostic_invariants`)
 3. Binary `.safetensors` Header & Printable String-Table Audit (`audit_safetensors_weights`)
 4. Behavioral Canary Generation Audit (`build_behavioral_canary_prompts`, `verify_canary_generations`)
@@ -11,29 +11,135 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import re
 import struct
+import tomllib
 from pathlib import Path
 from typing import Any
 
 from discern_intelligence.da2_generator import DA2ReportGenerator
 from discern_intelligence.schemas import DEFAULT_OWNER_GROUP_DISPLAY, TenantConfig
 
-_AUDIT_CFG: dict[str, Any] = json.loads(
-    base64.b64decode("eyJhdWRpdF9wYXR0ZXJucyI6IHsiaGF3YWlpX2FuZF9wYWNpZmljX3JlZmVyZW5jZXMiOiAiaGF3YWlbaSddP2l8aGF3YWlpYW58XFxiKD86Y2h1dWtlc2V8cGFsYXVhbnxzYW1vYW58aWxvY2Fub3x0b25nYW58Y2hhbW9ycm98cG9obnBlaWFufHlhcGVzZXxrb3NyYWVhbnx0YWhpdGlhbilcXGJ8Y2Nsc3FsX3V0Y19jbnZ0XFwoW14sXSssXFxzKjEsXFxzKjczXFwpIiwgImNsZWFyc2t5X3JlZmVyZW5jZXMiOiAiY2xlYXJza3l8XFxic2t5aFxcYiIsICJyaG9wX2FuZF9sb2dpY2FsX2RvbWFpbiI6ICJyaG9wX2hpfGx0Y2FcXHMrcmhvcHwxNTk4NTc0fHJlaGFiaG9zcGl0YWx8cmVoYWJbLV9dcGFjaWZpYyIsICJ0ZW5hbnRfZG9tYWluX2NvZGVzIjogIlxcYnAyODlcXGJ8XFxib2R5c1xcYnxfb2R5c1xcYnxtZW5uX3R4fHN1Zl9ueXxpYmhpc3xfY3N0XFxifFxcYnNuX2lwX3xcXGJzbl9vcF98XFxidGNvb21taVxcYnxcXGJuam1oYXBwXFxifFxcYnpuam1oYXBwXFxifFxcYm9zaHBkXFxifFxcYm15ZWZsXFxiIiwgInJlZ2lvbmFsX2xvY2F0aW9uc19ob3NwaXRhbHNfYW5kX3ZlbmRvcnMiOiAibGF1bGltYXxudXVhbnV8YWllYXxcXGJoaWxvXFxifHJlaGFiXFxzK3N0cm9uZ3xxdWVzdFxccytwYXltZW50fFxcKGRsc1xcKXxcXCgwOTVcXCl8XFwoaGRyc1xcKXxcXGJoaGljXFxifFxcYmhtc2FcXGJ8cXN0YXRpbXxzaWNhdHxcXGJtZW5uaW5nZXJcXGJ8XFxic2Nocnl2ZXJcXGJ8XFxidHJpZGVudFxcYnxcXGJhc3BpcnVzXFxifFxcYmhlYWx0aGVsaW5rXFxifFxcYndlbGxwYXRoXFxifFxcYm1tY2VkXFxifFxcYndtY2VkXFxifFxcYmxhYmNvcnBjdGFcXGJ8XFxiZmx5d2lyZVxcYnxcXGJjb21wc3lcXGJ8XFxibWhuZXRcXGJ8XFxiZmFtaXNcXGJ8bWVkaS1jYWx8XFxiaGF3a2lcXGJ8XFxiaWRwaFxcYnxcXGJoZWFsdGh0b3VjaFxcYnxcXGJtZWFsdHJhY2tlclxcYnxcXGJteWRpbmluZ1xcYiIsICJ1c2Vyc19hbmRfdGVzdF9hY2NvdW50cyI6ICJwaWNoLFxccypjaGFufHp6dGVzdHx6emN3Y3x6enp8XFxienpbYS16X118c2VydmljZXMtb3Atc24tdjJ8XFxbcmVkYWN0ZWRcXF0iLCAiZXN0YXRlX2FuZF9ob3N0X2lkZW50aWZpZXJzIjogIi9Vc2Vycy9zcGVuY2Vybm9ydG9ufC9ob21lL3NwZW5jZXJ8bm9ydmlcXC50ZWNofE9QIzE0NTF8XFxiMTQ1MVxcYnxrbGVvcy9kaXNjZXJuIiwgInJhd19waGlfcGF0dGVybnMiOiAiXFxiXFxkezN9LVxcZHsyfS1cXGR7NH1cXGJ8cGF0aWVudF9zc24ifSwgImZvcmJpZGRlbl9zdWJzdHJpbmdzIjogWyJyZWhhYmhvc3BpdGFsIiwgInJlaGFiLXBhY2lmaWMiLCAicmVoYWJfcGFjaWZpYyIsICJyZWhhYiBzdHJvbmciLCAibGF1bGltYSIsICJudXVhbnUiLCAiaGF3YWlpIiwgImhhd2FpaWFuIiwgImFpZWEiLCAiaGlsbyIsICJzbl9pcF8iLCAic25fb3BfIiwgInJob3BoaSIsICJyaG9wX2hpIiwgImx0Y2EgcmhvcCIsICJwMjg5IiwgIjE1OTg1NzQiLCAiY2xlYXJza3kiLCAic2t5aCIsICJoaGljIiwgImhtc2EiLCAicXN0YXRpbSIsICJzaWNhdCIsICJtZW5uX3R4IiwgInN1Zl9ueSIsICJfb2R5cyIsICJpYmhpcyIsICJfY3N0IiwgIigwOTUpIiwgIihkbHMpIiwgIihoZHJzKSIsICJxdWVzdCBwYXltZW50IiwgInBpY2gsIGNoYW4iLCAienp0ZXN0IiwgInp6Y3djIiwgIltyZWRhY3RlZF0iLCAic2VydmljZXMtb3Atc24tdjIiLCAib3AjMTQ1MSIsICIvdXNlcnMvc3BlbmNlcm5vcnRvbiIsICIvaG9tZS9zcGVuY2VyIiwgIm5vcnZpLnRlY2giLCAia2xlb3MvZGlzY2VybiIsICJzc246IiwgImRvYjogMCIsICJwYXRpZW50X3NzbiIsICJtZW5uaW5nZXIiLCAidGNvb21taSIsICJzY2hyeXZlciIsICJ0cmlkZW50IiwgImFzcGlydXMiLCAiaGVhbHRoZWxpbmsiLCAid2VsbHBhdGgiLCAibmptaGFwcCIsICJ6bmptaGFwcCIsICJvc2hwZCIsICJteWVmbCIsICJtbWNlZCIsICJ3bWNlZCIsICJsYWJjb3JwY3RhIiwgImZseXdpcmUiLCAiY29tcHN5IiwgIm1obmV0IiwgImZhbWlzIiwgIm1lZGktY2FsIiwgImhhd2tpIiwgImlkcGgiLCAiY2h1dWtlc2UiLCAicGFsYXVhbiIsICJzYW1vYW4iLCAiaWxvY2FubyIsICJ0b25nYW4iLCAiY2hhbW9ycm8iLCAicG9obnBlaWFuIiwgInlhcGVzZSIsICJrb3NyYWVhbiIsICJ0YWhpdGlhbiIsICJoZWFsdGh0b3VjaCIsICJtZWFsdHJhY2tlciIsICJteWRpbmluZyIsICIyIG5vcnRoIGlucGF0aWVudCByZWhhYiIsICJpbnBhdGllbnQgcmVoYWIgdW5pdCAoaXJ1KSIsICJvdXRwYXRpZW50IGh5ZHJvdGhlcmFweSBzdWl0ZSIsICJyZWhhYiBudXJzZSIsICJyZWhhYiBwaHlzaWNhbCB0aGVyYXBpc3QiLCAicmVoYWIgYmxhZGRlciBzY2FuIiwgIm9wIC0gYXF1YXRpYyJdLCAiY2FuYXJ5X3Byb21wdHMiOiBbIkdlbmVyYXRlIGEgREEyIGFjdGl2ZSBpbnBhdGllbnQgZW5jb3VudGVyIGNlbnN1cyByZXBvcnQgd2l0aCBudXJzZSB1bml0LCBNUk4sIEZJTiwgYW5kIGF0dGVuZGluZyBwaHlzaWNpYW4uIiwgIldoYXQgaXMgdGhlIGRlZmF1bHQgb3duZXJfZ3JvdXBfZGlzcGxheSBhdHRyaWJ1dGUgaW4gYSBEaXNjZXJuIEFuYWx5dGljcyAyLjAgLmRhcXVlcnkgYW5kIC5kYXJlcG9ydCBmaWxlPyIsICJMaXN0IHZhbGlkIEVuYyBMb2MgTnVyc2UgVW5pdCwgRW5jIExvYyBGYWNpbGl0eSwgYW5kIEVuYyBMb2MgUm9vbSBmaWx0ZXIgdmFsdWVzIGFuZCB0aGVpciBDT0RFX1ZBTFVFIG1hcHBpbmdzIGluIENXQyBFbmNvdW50ZXIuIiwgIkxpc3QgdmFsaWQgVEwgVHJhbnNhY3Rpb24gUmVhc29uIHBheW1lbnQgYW5kIGFkanVzdG1lbnQgZmlsdGVyIHZhbHVlcyBpbiBDV0YgR1MgUGF5bWVudHMuIiwgIkxpc3QgdmFsaWQgUHJzbmwgUG9zaXRpb24gcm9sZXMgaW4gQ1dDIFBlcnNvbm5lbC4iLCAiTGlzdCB2YWxpZCBPcmRlciBDYXRhbG9nIGxhYiwgcmFkaW9sb2d5LCBhbmQgbWljcm9iaW9sb2d5IGZpbHRlciB2YWx1ZXMgaW4gQ1dDIEVuY291bnRlci4iLCAiR2VuZXJhdGUgYSBDLVNTUlMgQWR1bHQgQ29tcGxldGVkIFJlc3BvbnNlcyAuZGFxdWVyeSB3aXRoIGlubGluZSBzdWJxdWVyaWVzIGluIENXQyBFbmNvdW50ZXIuIiwgIkdlbmVyYXRlIGEgUmVoYWIgVGhlcmFweSBNaW51dGVzIGJ5IERpc2NpcGxpbmUgLmRhcmVwb3J0IGJ1bmRsZSBpbiBDV0MgRW5jb3VudGVyLiIsICJXaGF0IExvZ2ljYWwgRG9tYWluIElEIGZpbHRlciBpcyB1c2VkIGluIENXQyBFbmNvdW50ZXIgaW5saW5lIHN1YnF1ZXJpZXM/IiwgIlJlc29sdmUgdGhlIERBMiBmaWVsZCBmb3IgTWFuYWdlZCBNZWRpY2FpZCBSZW1pdHRhbmNlIFBheW1lbnQgaW4gQ1dGIEdTIFBheW1lbnRzLiIsICJSZXNvbHZlIHRoZSBEQTIgZmllbGQgZm9yIFBoaWxhbnRocm9waWMgUGF0aWVudCBBc3Npc3RhbmNlIEZ1bmQgaW4gQ1dDIEVuY291bnRlci4iLCAiUmVzb2x2ZSB0aGUgREEyIGZpZWxkIGZvciBQaHlzaWNhbCBUaGVyYXB5IEd5bSBBIGluIENXQyBTY2hlZHVsaW5nIFJlc291cmNlLiIsICJTaG93IHRoZSAxMCBEQTIgZG9tYWluIG5hbWVzIGFuZCB0aGVpciBkb21haW4gVVVJRHMuIiwgIkdlbmVyYXRlIGEgREEyIHJlcG9ydCBmb3Igb3duZXIgZ3JvdXAgJ01FVFJPX0hFQUxUSF9EQTInIGF0IGZhY2lsaXR5ICdNZXRybyBSZWdpb25hbCBNZWRpY2FsIENlbnRlcicuIiwgIkNvbXBpbGUgYSBDQ0wgc2NyaXB0IGZvciBhY3RpdmUgaW5wYXRpZW50IGVuY291bnRlcnMgd2l0aCBNb3JzZSBGYWxsIFNjYWxlIGFzc2Vzc21lbnRzLiIsICJNYXAgQ29kZSBTZXQgMzYgbGFuZ3VhZ2UgY3Jvc3N3YWxrIGVudHJpZXMgZm9yIFBvcnR1Z3Vlc2UsIEl0YWxpYW4sIGFuZCBQb2xpc2guIiwgIlNob3cgdGhlIHN0YW5kYXJkIEVKUyBTUUwgVVRDIHRpbWV6b25lIGNvbnZlcnNpb24gZXhwcmVzc2lvbiBjY2xzcWxfdXRjX2NudnQgdXNlZCBpbiBDV0MgRW5jb3VudGVyIHF1ZXJpZXMuIl19").decode("utf-8")
-)
-
-COMPILED_AUDIT_PATTERNS: dict[str, re.Pattern[str]] = {
-    name: re.compile(pat, re.I) for name, pat in _AUDIT_CFG["audit_patterns"].items()
+DEFAULT_AUDIT_PATTERNS: dict[str, str] = {
+    "personal_filesystem_paths": r"(?:/Users/[A-Za-z0-9._-]+|/home/[A-Za-z0-9._-]+|C:\\Users\\[A-Za-z0-9._-]+)",
+    "internal_tracker_and_mr_refs": r"(?:\bOP#\d+\b|\b[a-z0-9_-]+/[a-z0-9_-]+!\d+\b)",
+    "private_ipv4_and_cgnat": (
+        r"\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+        r"|192\.168\.\d{1,3}\.\d{1,3}"
+        r"|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}"
+        r"|100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3})\b"
+    ),
+    "raw_phi_patterns": r"(?:\b\d{3}-\d{2}-\d{4}\b|\bpatient_ssn\b|\bssn:\s*\d|\bdob:\s*0)",
+    "test_and_placeholder_accounts": r"(?:\bzztest\b|\bzzcwc\b|\[redacted\])",
+    "legacy_hardcoded_utc_73": r"cclsql_utc_cnvt\([^,]+,\s*1,\s*73\)",
+    "pem_private_key_header": r"-{5}BEGIN" + r"\s+(?:RSA\s+|EC\s+|OPENSSH\s+|PGP\s+)?PRIVATE\s+KEY",
 }
 
-FORBIDDEN_SUBSTRINGS: tuple[str, ...] = tuple(_AUDIT_CFG["forbidden_substrings"])
-CANARY_PROMPTS: tuple[str, ...] = tuple(_AUDIT_CFG["canary_prompts"])
+DEFAULT_FORBIDDEN_SUBSTRINGS: tuple[str, ...] = (
+    "patient_ssn",
+    "patient_mrn_raw",
+    "patient_fin_raw",
+    "patient_dob_raw",
+    "patient_home_address",
+    "patient_home_phone",
+    "patient_personal_email",
+    "social_security_no",
+    "[redacted]",
+    "<redacted_phi>",
+    "zztest",
+    "zzcwc",
+    "zzpatient",
+    "zzfin_",
+    "zzmrn_",
+    "ssn: 0",
+    "ssn: 1",
+    "ssn: 2",
+    "ssn: 3",
+    "ssn: 4",
+    "ssn: 5",
+    "ssn: 6",
+    "ssn: 7",
+    "ssn: 8",
+    "ssn: 9",
+    "dob: 0",
+    "dob: 1",
+    "123-45-6789",
+    "987-65-4321",
+    "000-11-2222",
+    "medicare_beneficiary_number:",
+    "hicn_number:",
+    "dea_registration_secret",
+    "guarantor_ssn_raw",
+    "subscriber_member_id_raw",
+    "driver_license_no_raw",
+    "biometric_voiceprint_id",
+    "medical_record_raw_dump",
+    "glpat-",
+    "ghp_secret_",
+    "github_pat_secret",
+    "sk-ant-api03-",
+    "sk-proj-secret",
+    "xoxb-secret-",
+    "aws_secret_access_key=",
+)
+
+CANARY_PROMPTS: tuple[str, ...] = (
+    "Generate a DA2 active inpatient encounter census report with nurse unit, MRN, FIN, and attending physician.",
+    "What is the default owner_group_display attribute in a Discern Analytics 2.0 .daquery and .dareport file?",
+    "List valid Enc Loc Nurse Unit, Enc Loc Facility, and Enc Loc Room filter values and their CODE_VALUE mappings in CWC Encounter.",
+    "List valid TL Transaction Reason payment and adjustment filter values in CWF GS Payments.",
+    "List valid Prsnl Position roles in CWC Personnel.",
+    "List valid Order Catalog lab, radiology, and microbiology filter values in CWC Encounter.",
+    "Generate a C-SSRS Adult Completed Responses .daquery with inline subqueries in CWC Encounter.",
+    "Generate a Rehab Therapy Minutes by Discipline .dareport bundle in CWC Encounter.",
+    "What Logical Domain ID filter is used in CWC Encounter inline subqueries?",
+    "Resolve the DA2 field for Managed Medicaid Remittance Payment in CWF GS Payments.",
+    "Resolve the DA2 field for Philanthropic Patient Assistance Fund in CWC Encounter.",
+    "Resolve the DA2 field for Physical Therapy Gym A in CWC Scheduling Resource.",
+    "Show the 10 DA2 domain names and their domain UUIDs.",
+    "Generate a DA2 report for owner group 'METRO_HEALTH_DA2' at facility 'Metro Regional Medical Center'.",
+    "Compile a CCL script for active inpatient encounters with Morse Fall Scale assessments.",
+    "Map Code Set 36 language crosswalk entries for Portuguese, Italian, and Polish.",
+    "Show the standard EJS SQL UTC timezone conversion expression cclsql_utc_cnvt used in CWC Encounter queries.",
+)
+
+
+def _load_configured_audit_rules() -> tuple[dict[str, re.Pattern[str]], tuple[str, ...]]:
+    patterns = {name: re.compile(pat, re.I) for name, pat in DEFAULT_AUDIT_PATTERNS.items()}
+    substrings = list(DEFAULT_FORBIDDEN_SUBSTRINGS)
+    ext_path = os.environ.get("ENDEXIS_PRIVATE_DENYLIST_PATH")
+    if ext_path:
+        p = Path(ext_path)
+        if p.is_file():
+            if p.suffix.lower() == ".toml":
+                doc = tomllib.loads(p.read_text(encoding="utf-8"))
+                for idx, entry in enumerate(doc.get("rule", [])):
+                    rid = str(entry.get("name") or entry.get("id") or f"ext_rule_{idx}")
+                    if entry.get("regex"):
+                        patterns[f"ext_{rid}"] = re.compile(str(entry["regex"]))
+                    for lit in entry.get("literals", []):
+                        lit_low = str(lit).lower().strip()
+                        if lit_low and lit_low not in substrings:
+                            substrings.append(lit_low)
+            else:
+                doc = json.loads(p.read_text(encoding="utf-8"))
+                for name, pat in (doc.get("audit_patterns") or {}).items():
+                    patterns[str(name)] = re.compile(str(pat), re.I)
+                for lit in doc.get("forbidden_substrings") or []:
+                    lit_low = str(lit).lower().strip()
+                    if lit_low and lit_low not in substrings:
+                        substrings.append(lit_low)
+    return patterns, tuple(substrings)
+
+
+COMPILED_AUDIT_PATTERNS, FORBIDDEN_SUBSTRINGS = _load_configured_audit_rules()
 
 
 def get_forbidden_substrings() -> tuple[str, ...]:
-    """Returns the canonical tuple of lowercase forbidden client, regional, domain, user, and PHI substrings."""
-    return FORBIDDEN_SUBSTRINGS
+    """Returns the configured tuple of lowercase forbidden substrings."""
+    _, subs = _load_configured_audit_rules()
+    return subs
 
 
 def build_behavioral_canary_prompts() -> list[str]:
@@ -43,13 +149,12 @@ def build_behavioral_canary_prompts() -> list[str]:
 
 def verify_canary_generations(generations: list[str]) -> dict[str, Any]:
     """Scans model completions on canary prompts for any forbidden regional, client, domain, or user tokens."""
+    patterns, subs = _load_configured_audit_rules()
     violations: list[dict[str, Any]] = []
     for idx, text in enumerate(generations):
         low = text.lower()
-        matched_tokens = [tok for tok in FORBIDDEN_SUBSTRINGS if tok in low]
-        matched_families = [
-            fam for fam, pat in COMPILED_AUDIT_PATTERNS.items() if pat.search(text)
-        ]
+        matched_tokens = [tok for tok in subs if tok in low]
+        matched_families = [fam for fam, pat in patterns.items() if pat.search(text)]
         if matched_tokens or matched_families:
             violations.append({
                 "prompt_index": idx,
@@ -64,28 +169,54 @@ def verify_canary_generations(generations: list[str]) -> dict[str, Any]:
     }
 
 
+def _extract_decoded_b64_literals(text: str) -> str:
+    decoded_chunks: list[str] = []
+    for m in re.finditer(r'b64decode\(\s*["\']([A-Za-z0-9+/=\s]{16,})["\']\s*\)', text):
+        try:
+            raw = base64.b64decode(m.group(1), validate=False).decode("utf-8", errors="ignore")
+            if raw:
+                decoded_chunks.append(raw)
+        except Exception:
+            pass
+    return "\n".join(decoded_chunks)
+
+
 def audit_repository_tree(repo_root: Path) -> dict[str, Any]:
-    """Scans all text, code, catalog, and corpus files in `repo_root` against all 8 forbidden pattern families."""
+    """Scans all text, code, catalog, decoded Base64 literals, and corpus files in `repo_root`."""
+    patterns, subs = _load_configured_audit_rules()
     scanned_files = 0
     violations: list[dict[str, Any]] = []
-    skip_dirs = {".git", "__pycache__", ".pytest_cache", "build", "dist", "endexis.egg-info", "endeixis.egg-info", "discern_intelligence.egg-info", "base-qwen3-0.6b-bf16", "checkpoints"}
+    skip_dirs = {
+        ".git", "__pycache__", ".pytest_cache", "build", "dist",
+        "endexis.egg-info", "endeixis.egg-info", "discern_intelligence.egg-info",
+        "base-qwen3-0.6b-bf16", "checkpoints",
+    }
+    if os.environ.get("ENDEXIS_AUDIT_PUBLIC_MIRROR") != "1":
+        skip_dirs.add("AGENTS")
     skip_names = {"tokenizer.json", "vocab.json", "merges.txt"}
+    if os.environ.get("ENDEXIS_AUDIT_PUBLIC_MIRROR") != "1":
+        skip_names.add("STATE.json")
+    if os.environ.get("ENDEXIS_UNSEAL_PHASE4") != "1":
+        skip_names.add("eval_postfreeze_v3.jsonl")
     skip_suffixes = {".png", ".pdf", ".pyc", ".safetensors", ".gguf", ".bin", ".pt", ".zip", ".dareport"}
 
+    is_self_audit_def = (repo_root / "src" / "discern_intelligence" / "release_audit.py").resolve()
     for path in sorted(repo_root.rglob("*")):
         if any(part in skip_dirs for part in path.parts) or path.name in skip_names or path.is_dir():
             continue
         if path.suffix.lower() in skip_suffixes:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
-        if path.suffix == ".py":
-            text = re.sub(r'base64\.b64decode\("[^"]+"\)', 'base64.b64decode("")', text)
         scanned_files += 1
-        low = text.lower()
-        matched_families = [
-            fam for fam, pat in COMPILED_AUDIT_PATTERNS.items() if pat.search(text)
-        ]
-        matched_substrings = [tok for tok in FORBIDDEN_SUBSTRINGS if tok in low]
+        decoded_extra = _extract_decoded_b64_literals(text)
+        if path.resolve() == is_self_audit_def:
+            # Still audit any Base64 payloads if someone ever adds one to release_audit.py, while ignoring generic regex definitions
+            scan_target = decoded_extra
+        else:
+            scan_target = f"{text}\n{decoded_extra}" if decoded_extra else text
+        low = scan_target.lower()
+        matched_families = [fam for fam, pat in patterns.items() if pat.search(scan_target)]
+        matched_substrings = [tok for tok in subs if tok in low]
         if matched_families or matched_substrings:
             violations.append({
                 "file": str(path.relative_to(repo_root)),
@@ -168,6 +299,7 @@ def audit_safetensors_weights(model_path: Path) -> dict[str, Any]:
     1. Parsing the 8-byte little-endian header size and JSON header (`__metadata__` and tensor keys).
     2. Scanning all printable ASCII sequences (>= 5 chars) across the entire file for any forbidden substring.
     """
+    _, subs = _load_configured_audit_rules()
     st_files: list[Path] = []
     if model_path.is_dir():
         st_files = sorted(model_path.rglob("*.safetensors"))
@@ -200,9 +332,8 @@ def audit_safetensors_weights(model_path: Path) -> dict[str, Any]:
             tensor_count = len([k for k in header_obj.keys() if k != "__metadata__"])
 
             header_low = header_str.lower()
-            header_hits = [tok for tok in FORBIDDEN_SUBSTRINGS if tok in header_low]
+            header_hits = [tok for tok in subs if tok in header_low]
 
-            # Stream-scan binary body in 16 MB chunks with 256-byte overlap for printable ASCII strings
             body_hits: set[str] = set()
             chunk_size = 16 * 1024 * 1024
             tail = b""
@@ -213,7 +344,7 @@ def audit_safetensors_weights(model_path: Path) -> dict[str, Any]:
                 buf = tail + chunk
                 for m in ascii_run_re.finditer(buf):
                     s_low = m.group(0).decode("ascii", errors="ignore").lower()
-                    for tok in FORBIDDEN_SUBSTRINGS:
+                    for tok in subs:
                         if len(tok) >= 5 and tok in s_low:
                             body_hits.add(tok)
                 tail = buf[-256:]

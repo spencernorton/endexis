@@ -15,14 +15,179 @@ from typing import Any
 from .ccl_compiler import CCLCompiler
 from .interpreter import MillenniumInterpreter
 from .knowledge import load_da2_canonical_reports_catalog, load_da2_elements, load_da2_filter_value_catalog, load_v500_tables
+from .lexical_guards import (
+    any_word_phrase,
+    expand_excluded_column_names,
+    extract_affirmative_text,
+    has_word_phrase,
+    is_financial_adjustment_request,
+    is_financial_charge_or_revenue_request,
+    is_financial_payment_request,
+    is_him_coding_request,
+    is_personnel_position_request,
+    sanitize_text_for_report_naming,
+)
 from .schemas import (
     DEFAULT_OWNER_GROUP_DISPLAY,
     DA2QuerySpec,
     DA2UploadableBundle,
     InterpretationResult,
+    NeuralCompilationIR,
+    RefinementSpec,
     TenantConfig,
     VerificationReport,
 )
+
+
+def _is_valid_uuid_str(val: Any) -> bool:
+    if not val or not isinstance(val, str):
+        return False
+    try:
+        uuid.UUID(val.strip())
+        return True
+    except Exception:
+        return False
+
+
+_OVERRIDE_FILTER_SPECS: dict[str, tuple[str, list[tuple[tuple[str, ...], str, str]]]] = {
+    "Enc Type": (
+        "10b02c36-ff84-47d6-a825-ea142281a547",
+        [
+            (("inpatient rehabilitation", "inpatient rehab"), "Inpatient Rehabilitation", "72191245"),
+            (("inpatient",), "Inpatient", "309308"),
+            (("outpatient",), "Outpatient", "309309"),
+            (("emergency", "ed"), "Emergency", "309310"),
+            (("observation",), "Observation", "309312"),
+            (("recurring",), "Recurring", "309314"),
+        ],
+    ),
+    "Enc Loc Nurse Unit": (
+        "75267dc7-d5c6-437b-aa34-98e46bbc5db1",
+        [
+            (("3 north medical-surgical unit", "3 north", "3 north unit"), "3 North Medical-Surgical Unit", "220003"),
+            (("icu", "icu unit", "intensive care", "intensive care unit"), "ICU", "220003"),
+            (("stepdown", "stepdown unit", "step-down", "step-down unit", "pcu", "pcu unit"), "Stepdown", "220004"),
+            (("med/surg", "med-surg", "med/surg unit", "med-surg unit", "medical", "medical unit"), "Med/Surg", "220002"),
+            (("rehab", "rehab unit", "rehabilitation", "rehabilitation unit"), "Rehab Unit", "220005"),
+            (("emergency", "emergency department", "ed", "ed unit"), "ED", "220006"),
+        ],
+    ),
+    "CE Result Status": (
+        "7ccf3fe5-568a-4015-82e0-fd370a98426e",
+        [
+            (("auth (verified)", "auth", "verified", "authenticated"), "Auth (Verified)", "25"),
+            (("modified",), "Modified", "35"),
+            (("altered",), "Altered", "34"),
+            (("in progress", "unauth"), "In Progress", "29"),
+        ],
+    ),
+    "Enc Loc Facility": (
+        "b09f6eab-aa80-4110-a4af-3dcbbd00384b",
+        [
+            (("regional medical center",), "Regional Medical Center", "220001"),
+            (("main hospital",), "Main Hospital", "220001"),
+            (("main", "hospital", "medical center", "campus", "facility"), "Facility Campus", "220001"),
+        ],
+    ),
+    "Enc Status": (
+        "7161959f-72cd-46bb-b6f6-2b177edd0469",
+        [
+            (("discharged", "discharge"), "Discharged", "856"),
+            (("active", "inhouse", "admitted"), "Active", "854"),
+        ],
+    ),
+    "Order Status": (
+        "1d1ee0d5-6e14-462f-bb27-2939048ea0bd",
+        [
+            (("completed", "complete"), "Completed", "2543"),
+            (("discontinued", "dc"), "Discontinued", "2545"),
+            (("ordered", "active"), "Ordered", "2550"),
+        ],
+    ),
+    "Adj Trans Reason": (
+        "f3d85d50-44ef-4c68-866a-660e9911d588",
+        [
+            (("contractual",), "Contractual", "1893501"),
+        ],
+    ),
+    "Bill Type": (
+        "991c7d3b-3ef0-4b28-bd18-634873123101",
+        [
+            (("hcfa 1450", "ub-04", "ub04"), "HCFA 1450", "851"),
+        ],
+    ),
+    "Sch App Role": (
+        "0914250a-2f89-4240-9881-51065a044150",
+        [
+            (("patient",), "Patient", "4572"),
+        ],
+    ),
+}
+
+
+def _resolve_override_filter_values(
+    flt_key: str,
+    raw_vals: list[str],
+    tenant_config: TenantConfig | None = None,
+) -> tuple[str | None, list[tuple[str, str]]]:
+    cleaned = [str(rv).strip() for rv in (raw_vals or []) if str(rv).strip()]
+    if not cleaned:
+        raise ValueError(f"Empty override filter values for {flt_key!r}")
+
+    tenant_map: dict[str, tuple[str, str]] = {}
+    if tenant_config is not None:
+        for k, v in tenant_config.get_location_overrides(flt_key).items():
+            if str(k).strip() and str(v).strip():
+                tenant_map[str(k).strip().lower()] = (str(k).strip(), str(int(float(str(v).strip()))))
+
+    cat_fields = load_da2_filter_value_catalog()["live_harvested_code_value_mappings"]["fields"]
+    cat_map: dict[str, tuple[str, str]] = {}
+    if flt_key in cat_fields:
+        for d, cv in cat_fields[flt_key]["display_to_code_value"].items():
+            clean_d = html.unescape(str(d)).strip()
+            if clean_d:
+                cat_map[clean_d.lower()] = (clean_d, str(int(float(cv))))
+
+    spec = _OVERRIDE_FILTER_SPECS.get(flt_key)
+    f_uuid: str | None = None
+    if flt_key in LIVE_CWC_ELEMENT_MAP:
+        f_uuid = LIVE_CWC_ELEMENT_MAP[flt_key][1]
+    elif spec is not None:
+        f_uuid = spec[0]
+    elif flt_key in cat_fields:
+        for el_entry in load_da2_elements():
+            if el_entry.get("da2_field_name") == flt_key and _is_valid_uuid_str(el_entry.get("element_uuid")):
+                f_uuid = el_entry["element_uuid"]
+                break
+
+    if f_uuid is None and not tenant_map and not cat_map:
+        raise ValueError(f"Unsupported override filter field: {flt_key!r}")
+
+    resolved: list[tuple[str, str]] = []
+    seen_codes: set[str] = set()
+    for rv in cleaned:
+        rv_low = re.sub(r"\s+", " ", rv.lower()).strip()
+        if re.match(r"^(?:not|no|non|except|without|exclude|excluding|other\s+than)\b", rv_low):
+            raise ValueError(f"Negated override filter value is unsupported for IN-list override {flt_key!r}: {rv!r}")
+        rv_stripped = re.sub(r"\s+(?:encounters?|patients?|visits?|orders?|status)$", "", rv_low).strip()
+        pair: tuple[str, str] | None = None
+        if rv_low in tenant_map:
+            pair = tenant_map[rv_low]
+        elif rv_low in cat_map:
+            pair = cat_map[rv_low]
+        elif rv_stripped in cat_map:
+            pair = cat_map[rv_stripped]
+        elif spec is not None:
+            for triggers, disp, code in spec[1]:
+                if rv_low in triggers or rv_stripped in triggers:
+                    pair = (disp, code)
+                    break
+        if pair is None:
+            raise ValueError(f"Unknown {flt_key!r} override value: {rv!r}")
+        if pair[1] not in seen_codes:
+            seen_codes.add(pair[1])
+            resolved.append(pair)
+    return f_uuid, resolved
 
 
 
@@ -745,15 +910,25 @@ class DA2ReportGenerator:
         self._interpreter = interpreter or MillenniumInterpreter()
         self._ccl_compiler = ccl_compiler or CCLCompiler(self._interpreter)
         self._tenant_config = tenant_config or TenantConfig()
-        self._da2_catalog = {e["da2_field_name"]: dict(e) for e in load_da2_elements()}
-        for bv in load_da2_canonical_reports_catalog().get("business_views_xml_catalog", []):
+        self._da2_catalog = {}
+        for e in load_da2_elements():
+            ed = dict(e)
+            fname = ed["da2_field_name"]
+            if not _is_valid_uuid_str(ed.get("element_uuid")):
+                ed["element_uuid"] = str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.element:{fname}"))
+            self._da2_catalog[fname] = ed
+        canon_cat = load_da2_canonical_reports_catalog()
+        self._canonical_templates = {
+            r["id"]: r for r in canon_cat.get("reports", []) if isinstance(r, dict) and r.get("id")
+        }
+        for bv in canon_cat.get("business_views_xml_catalog", []):
             lv_name = bv.get("logical_view_name", "")
             is_deprecated_view = "OLD" in lv_name or lv_name == "CWF Encounter"
             for col in bv.get("columns", []):
                 cname = col.get("name")
                 cuuid = col.get("uuid")
                 cat_name = col.get("category_name", "Encounter")
-                if cname and cuuid:
+                if cname and _is_valid_uuid_str(cuuid):
                     if cname in self._da2_catalog:
                         if not is_deprecated_view and cat_name not in ("Deprecate", "Deprecated Elements"):
                             self._da2_catalog[cname]["element_uuid"] = cuuid
@@ -768,8 +943,59 @@ class DA2ReportGenerator:
                             "element_uuid": cuuid,
                             "value_semantics_and_guardrails": "Harvested Business View element",
                         }
+        for qr in canon_cat.get("canonical_queries_and_reports", []):
+            xml_uuids: dict[str, str] = {}
+            if qr.get("cclquery_xml"):
+                try:
+                    croot = ET.fromstring(qr["cclquery_xml"])
+                    for el_n in croot.findall(".//element"):
+                        nm = el_n.attrib.get("name", "").strip()
+                        uu = el_n.attrib.get("uuid", "").strip()
+                        if nm and _is_valid_uuid_str(uu) and uu not in DEPRECATED_CWC_UUIDS:
+                            xml_uuids[nm] = uu
+                except ET.ParseError:
+                    pass
+            q_dom = str(qr.get("da2_domain") or "CWC Encounter").split("+")[0].strip()
+            for sel_e in qr.get("selected_elements", []):
+                base_e = sel_e.split(":", 1)[1].strip() if ":" in sel_e else sel_e
+                for cand_e in (sel_e, base_e):
+                    if cand_e and cand_e not in self._da2_catalog:
+                        live_m = LIVE_CWC_ELEMENT_MAP.get(cand_e)
+                        if live_m:
+                            u_val = live_m[1]
+                        elif cand_e in xml_uuids:
+                            u_val = xml_uuids[cand_e]
+                        elif base_e in self._da2_catalog and _is_valid_uuid_str(self._da2_catalog[base_e].get("element_uuid")):
+                            u_val = self._da2_catalog[base_e]["element_uuid"]
+                        else:
+                            # Mint RFC4122 UUIDv4 for non-CWC-Encounter canonical elements
+                            raw16 = bytearray(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.v4:{cand_e}").bytes)
+                            raw16[6] = (raw16[6] & 0x0F) | 0x40
+                            raw16[8] = (raw16[8] & 0x3F) | 0x80
+                            u_val = str(uuid.UUID(bytes=bytes(raw16)))
+                        self._da2_catalog[cand_e] = {
+                            "da2_field_name": cand_e,
+                            "da2_domain": q_dom if q_dom in DOMAIN_UUID_MAP else "CWC Encounter",
+                            "da2_bus_view_subentity": "Encounter",
+                            "v500_target": "ENCOUNTER.*",
+                            "ccl_data_type": "dq8 (DATETIME)" if "Dt" in cand_e else "vc (STRING)",
+                            "code_set": None,
+                            "element_uuid": u_val,
+                            "value_semantics_and_guardrails": "Canonical report catalog element",
+                        }
         for alias_name, (canon_name, canon_uuid, canon_type) in LIVE_CWC_ELEMENT_MAP.items():
-            if alias_name in self._da2_catalog:
+            if alias_name not in self._da2_catalog:
+                self._da2_catalog[alias_name] = {
+                    "da2_field_name": alias_name,
+                    "da2_domain": "CWC Encounter",
+                    "da2_bus_view_subentity": "Encounter",
+                    "v500_target": "ENCOUNTER.*",
+                    "ccl_data_type": "dq8 (DATETIME)" if canon_type in ("2", "4") or "Dt" in alias_name else "vc (STRING)",
+                    "code_set": None,
+                    "element_uuid": canon_uuid,
+                    "value_semantics_and_guardrails": "Live CWC Encounter element alias",
+                }
+            else:
                 self._da2_catalog[alias_name]["element_uuid"] = canon_uuid
             if canon_name in self._da2_catalog:
                 self._da2_catalog[canon_name]["element_uuid"] = canon_uuid
@@ -782,40 +1008,91 @@ class DA2ReportGenerator:
         owner_group_display: str | None = None,
         facility_display: str | None = None,
         tenant_config: TenantConfig | None = None,
+        refinement: RefinementSpec | dict[str, Any] | None = None,
+        prior_context: dict[str, Any] | None = None,
+        neural_ir: NeuralCompilationIR | dict[str, Any] | None = None,
+        strict_neural_ir: bool = False,
         value_filters: dict[str, list[str]] | None = None,
         like_filters: dict[str, str] | None = None,
     ) -> DA2UploadableBundle:
-        """value_filters: DA2 field name -> display values to keep, e.g. {"Enc Type": ["Inpatient"]}. Each becomes an
-        IN-list filter. Only fields with a harvested display -> code value map work; anything else raises ValueError.
-
-        like_filters: DA2 text field name -> DA2 "Is Like" pattern with % wildcards, e.g. {"Person Name Last": "%SM%"}.
-        Each becomes an Is Like filter in the .daquery only (DA2 matches the pattern as written, case included); the
-        reference SQL, the CCL and the standalone .rptdesign don't carry it, so it is listed in
-        value_filters_not_in_reference. Only LIKE_TEXT_FIELDS work, and like_pattern() says how each pattern is written;
-        anything else raises ValueError."""
         vfilters = self._resolve_value_filters(value_filters) + self._resolve_like_filters(like_filters)
+        ir_obj = NeuralCompilationIR.from_dict(neural_ir) if isinstance(neural_ir, dict) else neural_ir
+        eff_ref = RefinementSpec.from_request(request_text, explicit=refinement, prior_context=prior_context)
+        if ir_obj is not None:
+            merged_excl_cols = list(eff_ref.exclude_columns) if not strict_neural_ir else []
+            for c in expand_excluded_column_names(ir_obj.exclude_columns):
+                if c not in merged_excl_cols:
+                    merged_excl_cols.append(c)
+            merged_excl_flts = list(eff_ref.exclude_filters) if not strict_neural_ir else []
+            for f in ir_obj.exclude_filters:
+                if f not in merged_excl_flts:
+                    merged_excl_flts.append(f)
+            merged_over_flts = dict(eff_ref.override_filters) if not strict_neural_ir else {}
+            for k, v in ir_obj.override_filters.items():
+                merged_over_flts[k] = list(v)
+            eff_ref = RefinementSpec(
+                exclude_columns=merged_excl_cols,
+                exclude_filters=merged_excl_flts,
+                override_filters=merged_over_flts,
+                prior_selected_elements=eff_ref.prior_selected_elements,
+                prior_filters=eff_ref.prior_filters,
+                prior_template_id=eff_ref.prior_template_id or ir_obj.template_id,
+            )
+
+        req_tenancy = tenancy or (ir_obj.tenancy if (strict_neural_ir and ir_obj and ir_obj.tenancy) else None)
         eff_tenant = TenantConfig.resolve_for_request(
             request_text=request_text,
             base_config=tenant_config or self._tenant_config,
             owner_group_display=owner_group_display,
-            tenancy=tenancy,
+            tenancy=req_tenancy,
             facility_display=facility_display,
         )
-        interp = self._interpreter.interpret(request_text, tenancy=eff_tenant.tenancy)
+        # Normalize filter precedence: prior_filters + value_filters -> remove exclude_filters -> apply override_filters
+        ov_low_keys = {k.lower() for k in eff_ref.override_filters}
+        eff_excl_lows = {f.lower() for f in eff_ref.exclude_filters if f.lower() not in ov_low_keys}
+        vfilters = [
+            vf for vf in vfilters
+            if vf["name"].lower() not in eff_excl_lows and vf["name"].lower() not in ov_low_keys
+        ]
+        vf_low_names = {vf["name"].lower() for vf in vfilters}
+        effective_overrides: dict[str, list[str]] = {}
+        for pk, pvals in eff_ref.prior_filters.items():
+            if pk.lower() not in eff_excl_lows and pk.lower() not in ov_low_keys and pk.lower() not in vf_low_names and pvals:
+                effective_overrides[pk] = list(pvals)
+        for ok, ovals in eff_ref.override_filters.items():
+            effective_overrides[ok] = list(ovals)
+        # Eagerly validate override filter values (raises ValueError on empty/unknown labels)
+        for ok, ovals in effective_overrides.items():
+            _resolve_override_filter_values(ok, ovals, tenant_config=eff_tenant)
+        eff_ref = RefinementSpec(
+            exclude_columns=list(eff_ref.exclude_columns),
+            exclude_filters=[f for f in eff_ref.exclude_filters if f.lower() not in ov_low_keys],
+            override_filters=effective_overrides,
+            prior_selected_elements=list(eff_ref.prior_selected_elements),
+            prior_filters=dict(eff_ref.prior_filters),
+            prior_template_id=eff_ref.prior_template_id,
+        )
+        interp = self._interpreter.interpret(request_text, tenancy=eff_tenant.tenancy, refinement=eff_ref)
+        target_tenancy = ir_obj.tenancy if (strict_neural_ir and ir_obj and ir_obj.tenancy) else interp.inferred_tenancy
         r_name = report_name or self._derive_report_name(request_text)
         report_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.report:{r_name}"))
-        low = request_text.lower()
-        is_active_census = ("active" in low and "census" in low) or any(
-            w in low for w in ("active inpatient", "current inpatient", "midnight census", "currently admitted", "inhouse")
+        aff_low = extract_affirmative_text(request_text).lower()
+        is_active_census = ("active" in aff_low and "census" in aff_low) or any(
+            w in aff_low for w in ("active inpatient", "current inpatient", "midnight census", "currently admitted", "inhouse")
         )
+        if "Enc Status" in eff_ref.exclude_filters or (
+            "Enc Status" in eff_ref.override_filters
+            and any("discharg" in v.lower() for v in eff_ref.override_filters["Enc Status"])
+        ):
+            is_active_census = False
 
         is_cssrs = (
-            any(w in low for w in ("cssrs", "c-ssrs", "columbia", "suicide"))
-            and not ("suicide precaution" in low and not any(w in low for w in ("cssrs", "c-ssrs", "columbia", "screening")))
+            any(w in aff_low for w in ("cssrs", "c-ssrs", "columbia", "suicide"))
+            and not ("suicide precaution" in aff_low and not any(w in aff_low for w in ("cssrs", "c-ssrs", "columbia", "screening")))
         )
         is_provider_clinical_notes = (
             any(
-                w in low
+                w in aff_low
                 for w in (
                     "consult note",
                     "initial consult",
@@ -826,19 +1103,33 @@ class DA2ReportGenerator:
                     "fppe",
                 )
             )
-            and not any(w in low for w in ("where is", "which table", "which column"))
+            and not any(w in aff_low for w in ("where is", "where are", "which table", "which column"))
         )
+        strict_ir_errors: list[str] = []
         queries, birt_join_key = self._build_da2_query_specs(
-            r_name, interp, is_active_census, owner_group_display=eff_tenant.owner_group_display, value_filters=vfilters
+            r_name,
+            interp,
+            is_active_census,
+            owner_group_display=eff_tenant.owner_group_display,
+            refinement=eff_ref,
+            neural_ir=ir_obj,
+            strict_neural_ir=strict_neural_ir,
+            value_filters=vfilters,
+            tenant_config=eff_tenant,
+            strict_ir_errors=strict_ir_errors,
         )
-        # The value maps are CWC Encounter elements: a design with no CWC Encounter query carries none of them, and the
-        # reference CCL follows the DA2 files.
         if not any(q.da2_domain == "CWC Encounter" for q in queries):
             vfilters = []
-        ccl_prog = self._ccl_compiler.compile(
-            request_text, tenancy=interp.inferred_tenancy, interpretation=interp,
-            value_filters=[(vf["target"], [c for _, c in vf["values"]]) for vf in vfilters if vf["target"]],
-        )
+        if strict_neural_ir and ir_obj is not None:
+            ccl_prog = self._ccl_compiler.compile_from_neural_ir(ir_obj, request_text=request_text)
+        else:
+            ccl_prog = self._ccl_compiler.compile(
+                request_text,
+                tenancy=target_tenancy,
+                interpretation=interp,
+                refinement=eff_ref,
+                value_filters=[(vf["target"], [c for _, c in vf["values"]]) for vf in vfilters if vf["target"]],
+            )
         eff_strategy = "two_dataset_birt_join" if (len(queries) == 2 and birt_join_key) else "single_domain_oda"
         rptdesign_xml = self._render_rptdesign_xml(
             report_name=r_name,
@@ -855,18 +1146,21 @@ class DA2ReportGenerator:
             queries=queries,
             birt_join_key=birt_join_key,
         )
+        ce_stat_excluded = any(ef.lower() == "ce result status" for ef in eff_ref.exclude_filters)
         verification = self.verify_da2_bundle(
             rptdesign_xml=rptdesign_xml,
             queries=queries,
             interp=interp,
             is_active_census=is_active_census,
+            ce_status_excluded=ce_stat_excluded,
+            strict_ir_errors=strict_ir_errors,
         )
 
         return DA2UploadableBundle(
             report_name=r_name,
             report_uuid=report_uuid,
             request_text=request_text,
-            target_tenancy=interp.inferred_tenancy,
+            target_tenancy=target_tenancy,
             execution_strategy=eff_strategy,
             birt_join_key=birt_join_key,
             queries=queries,
@@ -889,11 +1183,12 @@ class DA2ReportGenerator:
         out = []
         for name, displays in value_filters.items():
             live = LIVE_CWC_ELEMENT_MAP.get(name)
-            # A live element under another name (Prsnl Position -> Enc Pl Relationship Type) would filter the wrong field.
             if name not in fields or not live or live[0] != name or live[1] not in VERIFIED_CWC_ENCOUNTER_UUIDS:
                 raise ValueError(f"No verified DA2 value map for {name!r}")
-            vmap = {html.unescape(str(d)).strip().lower(): (html.unescape(str(d)).strip(), str(cv))
-                    for d, cv in fields[name]["display_to_code_value"].items()}
+            vmap = {
+                html.unescape(str(d)).strip().lower(): (html.unescape(str(d)).strip(), str(cv))
+                for d, cv in fields[name]["display_to_code_value"].items()
+            }
             unknown = [d for d in displays if str(d).strip().lower() not in vmap]
             if unknown or not displays:
                 raise ValueError(f"Unknown {name!r} values: {unknown or 'none given'}")
@@ -902,12 +1197,11 @@ class DA2ReportGenerator:
             target = (self._da2_catalog.get(name) or {}).get("v500_target") or ""
             table, _, column = target.partition(".")
             if column not in {c["name"] for c in (load_v500_tables().get(table) or {}).get("columns", [])}:
-                target = ""  # e.g. ENCOUNTER.ENC_ADMIT_TYPE_CD: not a V500 column, so no SQL or CCL for it
+                target = ""
             out.append({
                 "name": name,
                 "uuid": LIVE_CWC_ELEMENT_MAP[name][1],
                 "values": values,
-                # Some catalog targets point at a date or a wildcard; only a *_CD column can take code values.
                 "target": target if re.fullmatch(r"[A-Z0-9_]+\.[A-Z0-9_]+_CD", target) else None,
                 "text": f"{name} in ({', '.join(d for d, _ in values)})",
             })
@@ -918,8 +1212,14 @@ class DA2ReportGenerator:
         out = []
         for name, pattern in (like_filters or {}).items():
             pattern = like_pattern(name, pattern)
-            out.append({"name": name, "uuid": LIVE_CWC_ELEMENT_MAP[name][1], "values": [], "target": None,
-                        "like": pattern, "text": f"{name} is like '{pattern}'"})
+            out.append({
+                "name": name,
+                "uuid": LIVE_CWC_ELEMENT_MAP[name][1],
+                "values": [],
+                "target": None,
+                "like": pattern,
+                "text": f"{name} is like '{pattern}'",
+            })
         return out
 
     @staticmethod
@@ -933,8 +1233,16 @@ class DA2ReportGenerator:
         interp: InterpretationResult,
         is_active_census: bool,
         owner_group_display: str = DEFAULT_OWNER_GROUP_DISPLAY,
+        refinement: RefinementSpec | None = None,
+        neural_ir: NeuralCompilationIR | None = None,
+        strict_neural_ir: bool = False,
         value_filters: list[dict[str, Any]] | None = None,
+        tenant_config: TenantConfig | None = None,
+        strict_ir_errors: list[str] | None = None,
     ) -> tuple[list[DA2QuerySpec], str | None]:
+        eff_ref = refinement or interp.refinement or RefinementSpec()
+        excl_col_lows = {c.lower() for c in eff_ref.exclude_columns}
+
         # Collect unique DA2 elements from matched columns + forms
         all_elements: list[dict[str, Any]] = []
         seen_names: set[str] = set()
@@ -945,26 +1253,110 @@ class DA2ReportGenerator:
             seen_names.add(fname)
             cat = self._da2_catalog.get(fname)
             if cat:
-                all_elements.append(dict(cat))
+                el_copy = dict(cat)
+                if not _is_valid_uuid_str(el_copy.get("element_uuid")):
+                    el_copy["element_uuid"] = str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.element:{fname}"))
+                all_elements.append(el_copy)
             else:
+                live_hit = LIVE_CWC_ELEMENT_MAP.get(fname)
+                el_uuid = live_hit[1] if live_hit else str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.element:{fname}"))
                 all_elements.append({
                     "da2_field_name": fname,
                     "da2_domain": "CWC Encounter",
                     "da2_bus_view_subentity": "Encounter",
                     "v500_target": "ENCOUNTER.*",
-                    "ccl_data_type": "vc (STRING)",
+                    "ccl_data_type": "dq8 (DATETIME)" if "Dt" in fname else "vc (STRING)",
                     "code_set": None,
-                    "element_uuid": str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.element:{fname}")),
+                    "element_uuid": el_uuid,
                     "value_semantics_and_guardrails": "DA2 business-view field",
                 })
+
+        if strict_neural_ir and neural_ir is not None:
+            for fname in neural_ir.selected_elements:
+                if fname.lower() in excl_col_lows:
+                    continue
+                base_f = fname.split(":", 1)[1].strip() if ":" in fname else fname
+                if fname not in self._da2_catalog and base_f not in self._da2_catalog and fname not in LIVE_CWC_ELEMENT_MAP:
+                    if strict_ir_errors is not None:
+                        strict_ir_errors.append(f"Unknown DA2 element in strict neural IR: {fname!r}")
+                    continue
+                add_elem(fname)
+            if not all_elements and strict_ir_errors is not None:
+                strict_ir_errors.append("Empty selected_elements in strict neural IR after exclusions.")
+            if any(e["da2_field_name"].startswith("CE ") for e in all_elements):
+                if "ce result status" not in excl_col_lows:
+                    add_elem("CE Result Status")
+                if "ce valid until dt tm" not in excl_col_lows and "ce valid until dt/tm" not in excl_col_lows:
+                    add_elem("CE Valid Until Dt/Tm")
+            if neural_ir.da2_domain not in DOMAIN_UUID_MAP:
+                if strict_ir_errors is not None:
+                    strict_ir_errors.append(f"Unknown DA2 domain in strict neural IR: {neural_ir.da2_domain!r}")
+                ir_dom = "CWC Encounter"
+            else:
+                ir_dom = neural_ir.da2_domain
+            if neural_ir.execution_strategy == "two_dataset_birt_join":
+                if not any(e["da2_field_name"] == "Enc Id" for e in all_elements):
+                    all_elements.insert(0, dict(self._da2_catalog["Enc Id"]))
+                secondary = [
+                    e for e in all_elements
+                    if e["da2_field_name"] == "Enc Id"
+                    or e["da2_field_name"].startswith(("Chg ", "BO ", "HP ", "Adj ", "Pay ", "CE ", "Med Adm", "Task Atv"))
+                ]
+                primary = [
+                    e for e in all_elements
+                    if e["da2_field_name"] == "Enc Id"
+                    or e not in secondary
+                ]
+                if len(secondary) > 1 and len(primary) > 1:
+                    q1 = self._make_single_query_spec(
+                        f"{report_name}_Primary_CWC",
+                        "CWC Encounter",
+                        primary,
+                        is_active_census=is_active_census,
+                        owner_group_display=owner_group_display,
+                        refinement=eff_ref,
+                        value_filters=value_filters,
+                        tenant_config=tenant_config,
+                    )
+                    q2 = self._make_single_query_spec(
+                        f"{report_name}_Secondary_Detail",
+                        ir_dom,
+                        secondary,
+                        is_active_census=is_active_census,
+                        owner_group_display=owner_group_display,
+                        refinement=eff_ref,
+                        value_filters=value_filters,
+                        tenant_config=tenant_config,
+                    )
+                    return [q1, q2], "Enc Id"
+            q_ir = self._make_single_query_spec(
+                f"{report_name}_Query",
+                ir_dom,
+                all_elements,
+                is_active_census=is_active_census,
+                owner_group_display=owner_group_display,
+                refinement=eff_ref,
+                value_filters=value_filters,
+                tenant_config=tenant_config,
+            )
+            return [q_ir], None
 
         # Ensure primary join/anchor keys are always first
         add_elem("Enc Id")
         add_elem("Enc Encounter Number")
         add_elem("Person Full Name")
 
-        # Domain and sub-entity element expansion from general clinical/financial semantics
-        low_req = interp.request_text.lower()
+        # Seed prior turn's selected elements in multi-turn follow-ups or verified neural_ir proposals
+        if eff_ref.prior_selected_elements:
+            for p_el in eff_ref.prior_selected_elements:
+                add_elem(p_el)
+        if neural_ir is not None and neural_ir.selected_elements:
+            for n_el in neural_ir.selected_elements:
+                add_elem(n_el)
+
+        # Domain and sub-entity element expansion from affirmative clinical/financial semantics
+        aff_text = extract_affirmative_text(interp.request_text)
+        low_req = aff_text.lower()
         is_meta_question = any(k in low_req for k in ("where is", "where are", "which table", "which column"))
         is_cssrs = (
             any(k in low_req for k in ("cssrs", "c-ssrs", "columbia", "suicide"))
@@ -1175,33 +1567,35 @@ class DA2ReportGenerator:
             for cm in interp.matched_columns:
                 if cm.da2_field_name:
                     add_elem(cm.da2_field_name)
+            if (has_word_phrase(low_req, "los") or has_word_phrase(low_req, "length of stay")) and "enc los" not in excl_col_lows:
+                add_elem("Enc LOS")
 
             for fm in interp.matched_forms_and_outputs[:1]:
                 if fm.score >= 3.5:
                     for df in fm.da2_fields:
                         add_elem(df)
 
-        if "adjustment" in low_req or "cwf gs adjustments" in low_req:
+        if is_financial_adjustment_request(interp.request_text):
             for f in (
                 "Enc FIN", "Person Name Full", "Enc Loc Facility", "Enc Admit Dt/Tm", "Enc Discharge Dt/Tm",
                 "Adj Post Dt", "Adj Amount", "Adj Trans Sub Type", "Adj Trans Reason", "AdjTrans Alias",
                 "Adj Debit GL Number", "Adj Credit GL Number", "HP Financial Class",
             ):
                 add_elem(f)
-        if "payment" in low_req or "cwf gs payments" in low_req:
+        if is_financial_payment_request(interp.request_text):
             for f in (
                 "Enc FIN", "Person Name Full", "Enc Loc Facility", "Enc Admit Dt/Tm", "Enc Discharge Dt/Tm",
                 "Pay Post Dt", "Pay Effective Dt", "Pay Amount", "Pay Trans Type", "Pay Trans Sub Type",
                 "Pay Trans Reason", "PayTrans Alias", "HP Financial Class", "HP Plan Name",
             ):
                 add_elem(f)
-        if "resuscitation" in low_req or "code status" in low_req:
+        if has_word_phrase(low_req, "resuscitation") or has_word_phrase(low_req, "code status"):
             for f in (
                 "Enc Loc Nurse Unit", "Enc Loc Room", "Person Name Full", "Enc FIN",
                 "Order Catalog", "Order Catalog Type", "Order Clinical Display Line", "Order Status",
             ):
                 add_elem(f)
-        if ("appointment" in low_req or "appt" in low_req) and "slot utilization" not in low_req and "no-show" not in low_req and "no show" not in low_req:
+        if (has_word_phrase(low_req, "appointment") or has_word_phrase(low_req, "appointments") or has_word_phrase(low_req, "appt")) and not any_word_phrase(low_req, ("slot utilization", "no-show", "no show", "outside appointment", "outside appointments")):
             all_elements.clear()
             seen_names.clear()
             for f in (
@@ -1211,19 +1605,19 @@ class DA2ReportGenerator:
                 "Sch App Duration", "Sch App State", "Sch Ev App Type",
             ):
                 add_elem(f)
-            if "room" in low_req:
+            if has_word_phrase(low_req, "room"):
                 add_elem("Enc Loc Room")
-            if "bed" in low_req:
+            if has_word_phrase(low_req, "bed"):
                 add_elem("Enc Loc Bed")
-            if "reason" in low_req or "cancel" in low_req:
+            if has_word_phrase(low_req, "reason") or has_word_phrase(low_req, "cancel") or has_word_phrase(low_req, "cancellation"):
                 add_elem("Sch Evt Act Reason")
-        elif "scheduling" in low_req or "slot utilization" in low_req or "appointment" in low_req:
+        elif any_word_phrase(low_req, ("scheduling", "slot utilization", "appointment", "appointments")):
             for f in (
                 "Enc FIN", "Person Name Full", "Sch App Beg Dt/Tm", "Sch App End Dt/Tm", "Sch App Duration",
                 "Sch App State", "Sch App Slot State", "Sch App Role", "Sch Evt Appt Type", "Sch Evt Act Reason",
             ):
                 add_elem(f)
-        if "ndc" in low_req or "duplicate charge" in low_req:
+        if has_word_phrase(low_req, "duplicate charge") or (has_word_phrase(low_req, "ndc") and is_financial_charge_or_revenue_request(interp.request_text)):
             for f in (
                 "Enc FIN", "Chg Service Dt/Tm", "Chg Bill Item Desc", "Chg Item Quantity",
                 "Chg Item Extended Price", "Chg M Field 1 Id", "Chg M Field 6", "Chg Manual Ind",
@@ -1520,11 +1914,38 @@ class DA2ReportGenerator:
                     "value_semantics_and_guardrails": "Inline outer-joined CWC Charge financial status (verified CWC Charge financial status)",
                 })
 
+        # Enforce domain isolation & clinical-vs-billing non-contamination
+        allow_adj = is_financial_adjustment_request(interp.request_text)
+        allow_pay = is_financial_payment_request(interp.request_text)
+        allow_chg = is_financial_charge_or_revenue_request(interp.request_text) or is_revenue_charge_reconciliation or has_word_phrase(low_req, "duplicate charge")
+        allow_pos = is_personnel_position_request(interp.request_text)
+
+        sanitized_elements: list[dict[str, Any]] = []
+        for el in all_elements:
+            fn = el["da2_field_name"]
+            if fn == "Prsnl Position" and not allow_pos:
+                continue
+            if (fn.startswith("Adj ") or fn == "AdjTrans Alias") and not allow_adj:
+                continue
+            if (fn.startswith("Pay ") or fn == "PayTrans Alias") and not allow_pay:
+                continue
+            if (fn.startswith("Chg ") or fn.startswith("ChgRecon:") or fn.startswith("BO ")) and not (allow_chg or allow_adj or allow_pay):
+                continue
+            if fn.lower() in excl_col_lows:
+                continue
+            sanitized_elements.append(el)
+        all_elements = sanitized_elements
+        if not all_elements:
+            add_elem("Enc Id")
+            add_elem("Person Name Full Format")
+
         # Ensure CE version/status fields are present whenever any CE field is selected
         has_ce = any(e["da2_field_name"].startswith("CE ") for e in all_elements)
         if has_ce and not (is_cssrs or is_custom_ce_template or is_targeted_order_report):
-            add_elem("CE Result Status")
-            add_elem("CE Valid Until Dt Tm")
+            if "ce result status" not in excl_col_lows:
+                add_elem("CE Result Status")
+            if "ce valid until dt tm" not in excl_col_lows and "ce valid until dt/tm" not in excl_col_lows:
+                add_elem("CE Valid Until Dt Tm")
 
         has_combined_order_and_mar = is_targeted_order_report and any(
             e["da2_field_name"].startswith(("Med Adm", "Task Atv", "CE Med")) for e in all_elements
@@ -1532,18 +1953,28 @@ class DA2ReportGenerator:
         if (interp.recommended_strategy == "two_dataset_birt_join" and not (
             is_cssrs or is_custom_ce_template or is_targeted_order_report
         )) or (is_targeted_order_report and is_custom_ce_template) or has_combined_order_and_mar:
-            # Split into Primary (Encounter / Clinical) and Secondary (Financial / Charges or second child list)
+            # Ensure Enc Id join key is present when splitting across two datasets
+            if not any(e["da2_field_name"] == "Enc Id" for e in all_elements):
+                all_elements.insert(0, dict(self._da2_catalog.get("Enc Id") or {
+                    "da2_field_name": "Enc Id",
+                    "da2_domain": "CWC Encounter",
+                    "da2_bus_view_subentity": "Encounter",
+                    "v500_target": "ENCOUNTER.ENCNTR_ID",
+                    "ccl_data_type": "f8 (FLOAT)",
+                    "code_set": None,
+                    "element_uuid": "5ef4381c-6344-43c4-81b5-2c18cd6bcb70",
+                }))
             fin_elements = [
                 e for e in all_elements
                 if e["da2_field_name"] in {"Enc Id", "Enc Encounter Number"}
-                or e["da2_field_name"].startswith(("Chg ", "BO ", "HP ", "Account "))
+                or e["da2_field_name"].startswith(("Chg ", "BO ", "HP ", "Account ", "Adj ", "Pay "))
                 or "CWF" in e.get("da2_domain", "")
             ]
             clin_elements = [
                 e for e in all_elements
                 if e["da2_field_name"] in {"Enc Id", "Enc Encounter Number"}
                 or not (
-                    e["da2_field_name"].startswith(("Chg ", "BO ", "HP "))
+                    e["da2_field_name"].startswith(("Chg ", "BO ", "HP ", "Adj ", "Pay "))
                     or "CWF" in e.get("da2_domain", "")
                 )
             ]
@@ -1562,11 +1993,11 @@ class DA2ReportGenerator:
                 ]
                 sec_domain = "CWC Encounter"
             else:
-                if "adjustment" in low_req or any(e["da2_field_name"].startswith("Adj") for e in fin_elements):
+                if allow_adj and any(e["da2_field_name"].startswith("Adj") for e in fin_elements):
                     sec_domain = "CWF GS Adjustments"
-                elif "payment" in low_req or any(e["da2_field_name"].startswith("Pay") for e in fin_elements):
+                elif allow_pay and any(e["da2_field_name"].startswith("Pay") for e in fin_elements):
                     sec_domain = "CWF GS Payments"
-                elif "general ledger" in low_req or "cwf gl" in low_req:
+                elif has_word_phrase(low_req, "general ledger") or has_word_phrase(low_req, "cwf gl"):
                     sec_domain = "CWF GL"
                 elif any(e["da2_field_name"].startswith("BO ") for e in fin_elements):
                     sec_domain = "CWF GS Revenue"
@@ -1577,6 +2008,8 @@ class DA2ReportGenerator:
                 ("Enc Registration Dt/Tm", "42ee9a32-031f-495d-962a-5f04376e071a"),
                 ("Enc Discharge Dt/Tm", "1d44a53e-cba7-4ddf-80c4-d86205e30e0d"),
             ):
+                if req_dt_col.lower() in excl_col_lows:
+                    continue
                 for target_list in (clin_elements, fin_elements):
                     if not any(el["da2_field_name"] in (req_dt_col, "Enc Admit Dt Tm", "Enc Admit Dt/Tm", "Enc Disch Dt Tm") and (req_dt_col.split()[1] in el["da2_field_name"]) for el in target_list):
                         target_list.append({
@@ -1590,49 +2023,68 @@ class DA2ReportGenerator:
                             "value_semantics_and_guardrails": "Live-verified CWC Encounter date-time anchor",
                         })
 
-            q1 = self._make_single_query_spec(
-                f"{report_name}_Primary_CWC",
-                "CWC Encounter",
-                clin_elements,
-                is_active_census=is_active_census,
-                owner_group_display=owner_group_display,
-                value_filters=value_filters,
-            )
-            q2 = self._make_single_query_spec(
-                f"{report_name}_Secondary_Detail",
-                sec_domain,
-                fin_elements,
-                is_active_census=is_active_census,
-                owner_group_display=owner_group_display,
-                value_filters=value_filters,
-            )
-            return [q1, q2], "Enc Id"
+            if len(fin_elements) > 1 and len(clin_elements) > 1:
+                q1 = self._make_single_query_spec(
+                    f"{report_name}_Primary_CWC",
+                    "CWC Encounter",
+                    clin_elements,
+                    is_active_census=is_active_census,
+                    owner_group_display=owner_group_display,
+                    refinement=eff_ref,
+                    value_filters=value_filters,
+                    tenant_config=tenant_config,
+                )
+                q2 = self._make_single_query_spec(
+                    f"{report_name}_Secondary_Detail",
+                    sec_domain,
+                    fin_elements,
+                    is_active_census=is_active_census,
+                    owner_group_display=owner_group_display,
+                    refinement=eff_ref,
+                    value_filters=value_filters,
+                    tenant_config=tenant_config,
+                )
+                return [q1, q2], "Enc Id"
 
-        single_domain = "CWC Encounter"
-        if "cwf gs adjustments" in low_req or ("adjustment" in low_req and ("cwf" in low_req or "write-off" in low_req or "transaction extract" in low_req)):
-            single_domain = "CWF GS Adjustments"
-        elif "cwf gs payments" in low_req or ("payment" in low_req and ("cwf" in low_req or "ledger" in low_req or "transaction extract" in low_req)):
-            single_domain = "CWF GS Payments"
-        elif "cwf gs revenue" in low_req:
-            single_domain = "CWF GS Revenue"
-        elif "cwf gl" in low_req or "general ledger" in low_req:
-            single_domain = "CWF GL"
-        elif "cwc scheduling" in low_req or "scheduling resource" in low_req or "slot utilization" in low_req:
-            single_domain = "CWC Scheduling Resource"
-        elif "cwc formulary" in low_req:
-            single_domain = "CWC Formulary"
-        elif "cwc personnel" in low_req:
-            single_domain = "CWC Personnel"
-        elif "cwc person" in low_req and "encounter" not in low_req:
-            single_domain = "CWC Person"
-        elif "cwc organization" in low_req:
-            single_domain = "CWC Organization"
+        # Check explicit "in domain <Domain Name>" override first (e.g. "in domain CWC Encounter")
+        explicit_domain = None
+        for cand_dom in sorted(DOMAIN_UUID_MAP.keys(), key=len, reverse=True):
+            if re.search(rf"\bin\s+domain\s+{re.escape(cand_dom)}\b", aff_text, re.I):
+                explicit_domain = cand_dom
+                break
 
-        if any(k in low_req for k in ("cwf gs adjustments", "cwf gs payments", "resuscitation", "code status", "slot utilization", "duplicate charge")):
-            all_elements = [
+        single_domain = explicit_domain or "CWC Encounter"
+        if explicit_domain is None:
+            if has_word_phrase(low_req, "cwf gs adjustments") or (
+                allow_adj and any_word_phrase(low_req, ("cwf", "write-off", "write off", "transaction extract", "transaction detail"))
+            ):
+                single_domain = "CWF GS Adjustments"
+            elif has_word_phrase(low_req, "cwf gs payments") or (
+                allow_pay and any_word_phrase(low_req, ("cwf", "ledger", "transaction extract", "transaction detail"))
+            ):
+                single_domain = "CWF GS Payments"
+            elif has_word_phrase(low_req, "cwf gs revenue"):
+                single_domain = "CWF GS Revenue"
+            elif has_word_phrase(low_req, "cwf gl") or has_word_phrase(low_req, "general ledger"):
+                single_domain = "CWF GL"
+            elif any_word_phrase(low_req, ("cwc scheduling", "scheduling resource", "slot utilization")):
+                single_domain = "CWC Scheduling Resource"
+            elif has_word_phrase(low_req, "cwc formulary"):
+                single_domain = "CWC Formulary"
+            elif has_word_phrase(low_req, "cwc personnel"):
+                single_domain = "CWC Personnel"
+            elif has_word_phrase(low_req, "cwc person") and not has_word_phrase(low_req, "encounter"):
+                single_domain = "CWC Person"
+            elif has_word_phrase(low_req, "cwc organization"):
+                single_domain = "CWC Organization"
+
+        if any_word_phrase(low_req, ("cwf gs adjustments", "cwf gs payments", "resuscitation", "code status", "slot utilization", "duplicate charge")):
+            trimmed = [
                 e for e in all_elements
                 if e["da2_field_name"] not in ("Enc Id", "Enc Encounter Number", "Person Full Name", "CE Result Status", "CE Valid Until Dt Tm")
             ]
+            if trimmed:
+                all_elements = trimmed
 
         q_single = self._make_single_query_spec(
             f"{report_name}_Query",
@@ -1640,7 +2092,9 @@ class DA2ReportGenerator:
             all_elements,
             is_active_census=is_active_census,
             owner_group_display=owner_group_display,
+            refinement=eff_ref,
             value_filters=value_filters,
+            tenant_config=tenant_config,
         )
         return [q_single], None
 
@@ -1651,10 +2105,12 @@ class DA2ReportGenerator:
         elements: list[dict[str, Any]],
         is_active_census: bool,
         owner_group_display: str = DEFAULT_OWNER_GROUP_DISPLAY,
+        refinement: RefinementSpec | None = None,
         value_filters: list[dict[str, Any]] | None = None,
+        tenant_config: TenantConfig | None = None,
     ) -> DA2QuerySpec:
-        # The value maps are CWC Encounter elements; other domains don't carry them.
         value_filters = value_filters if domain == "CWC Encounter" else []
+        eff_ref = refinement or RefinementSpec()
         q_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, f"com.cerner.discern.da2.query:{q_name}"))
         sub_entities = sorted({e.get("da2_bus_view_subentity", "Encounter") for e in elements})
         filters = [
@@ -1695,7 +2151,6 @@ class DA2ReportGenerator:
                 "Chg Process Flag",
                 "Chg Service Dt/Tm Between <Relative Date Range>",
             ])
-        # "MAR" as its own word of the query name, not inside SUMMARY or PRIMARY
         if any("Med Admin" in n for n in el_names_set) or {"MAR", "MARS"} & set(re.split(r"[^A-Z0-9]+", q_name.upper())):
             filters.append(
                 "Order Status Not In (Canceled, Voided) [Code Set 6004: 2542, 2553] — NEVER exclude Discontinued (2545) on historical MAR/PRN audits"
@@ -1711,10 +2166,9 @@ class DA2ReportGenerator:
                 "Enc Disch Dt Tm IS NULL (uncheck 'is not null' on optional date prompt)",
             ])
         if any(e["da2_field_name"].startswith("CE ") for e in elements):
-            filters.extend([
-                "CE Valid Until Dt Tm >= 12/31/2100 00:00:00",
-                "CE Result Status in (Auth (Verified), Modified, Altered) [Code Set 8]",
-            ])
+            filters.append("CE Valid Until Dt Tm >= 12/31/2100 00:00:00")
+            if not any(ef.lower() == "ce result status" for ef in eff_ref.exclude_filters) and not any(ok.lower() == "ce result status" for ok in eff_ref.override_filters):
+                filters.append("CE Result Status in (Auth (Verified), Modified, Altered) [Code Set 8]")
         inline_subq_names = []
         for e in elements:
             sqn = e.get("inline_query_name")
@@ -1783,6 +2237,17 @@ class DA2ReportGenerator:
             }
         ]
 
+        if eff_ref.exclude_filters:
+            excl_flt_lows = [ef.lower() for ef in eff_ref.exclude_filters]
+            filters = [
+                flt for flt in filters
+                if not any(ef in flt.lower() for ef in excl_flt_lows)
+            ]
+        if eff_ref.override_filters:
+            for ov_k, ov_vals in eff_ref.override_filters.items():
+                filters = [flt for flt in filters if not flt.lower().startswith(ov_k.lower())]
+                filters.append(f"{ov_k} IN ({', '.join(ov_vals)}) [Refinement Override]")
+
         cclquery_xml = self._render_cclquery_xml(
             q_name=q_name,
             q_uuid=q_uuid,
@@ -1791,7 +2256,9 @@ class DA2ReportGenerator:
             prompt_name=prompt_name,
             prompt_uuid=prompt_uuid,
             is_active_census=is_active_census,
+            refinement=eff_ref,
             value_filters=value_filters,
+            tenant_config=tenant_config,
         )
         ejs_v500_sql = self._render_ejs_v500_sql(
             q_name=q_name,
@@ -1799,7 +2266,9 @@ class DA2ReportGenerator:
             domain=domain,
             elements=elements,
             is_active_census=is_active_census,
+            refinement=eff_ref,
             value_filters=value_filters,
+            tenant_config=tenant_config,
         )
 
         daquery_xml = self._render_daquery_xml(
@@ -1811,7 +2280,9 @@ class DA2ReportGenerator:
             prompt_uuid=prompt_uuid,
             is_active_census=is_active_census,
             owner_group_display=owner_group_display,
+            refinement=eff_ref,
             value_filters=value_filters,
+            tenant_config=tenant_config,
         )
         filters.extend(vf["text"] for vf in value_filters or [])
 
@@ -1840,7 +2311,9 @@ class DA2ReportGenerator:
         prompt_uuid: str,
         is_active_census: bool,
         owner_group_display: str = DEFAULT_OWNER_GROUP_DISPLAY,
+        refinement: RefinementSpec | None = None,
         value_filters: list[dict[str, Any]] | None = None,
+        tenant_config: TenantConfig | None = None,
     ) -> str:
         """Renders a native Cerner DA2 .daquery file for File -> Import -> Other -> Query."""
         dom_uuid = "690ff3c7-f0b2-4019-8176-4e26eeff14f0" if domain == "CWC Encounter" else DOMAIN_UUID_MAP.get(domain, "690ff3c7-f0b2-4019-8176-4e26eeff14f0")
@@ -1907,7 +2380,9 @@ class DA2ReportGenerator:
         qual_body = f'<operator type="AND">{f1}{f2}</operator>'
         has_ce_da = any(e["da2_field_name"].startswith("CE ") for e in elements)
         has_event_title = any(e["da2_field_name"] == "CE Event Title" for e in elements)
-        if has_ce_da and not has_event_title:
+        eff_excl_daq = {f.lower() for f in (refinement.exclude_filters if refinement else [])}
+        eff_ov_daq = {k.lower() for k in (refinement.override_filters if refinement else {})}
+        if has_ce_da and not has_event_title and "ce result status" not in eff_excl_daq and "ce result status" not in eff_ov_daq:
             f_ce_stat = (
                 '<filter joinType="0" mode="0" prompt_element_uuid="7ccf3fe5-568a-4015-82e0-fd370a98426e" prompt_type="0" useIndex="1">'
                 '<element name="CE Result Status" type="1" uuid="7ccf3fe5-568a-4015-82e0-fd370a98426e"/>'
@@ -1922,6 +2397,14 @@ class DA2ReportGenerator:
                 '</filter>'
             )
             qual_body = f'<operator type="AND"><operator type="AND">{qual_body}{f_ce_stat}</operator>{f_ce_valid}</operator>'
+        elif has_ce_da and not has_event_title:
+            f_ce_valid = (
+                '<filter joinType="0" mode="2" prompt_element_uuid="871b99b7-e872-4db0-8762-d663c933ad76" prompt_type="1" useIndex="1">'
+                '<element name="CE Valid Until Dt/Tm" type="2" uuid="871b99b7-e872-4db0-8762-d663c933ad76"/>'
+                '<values type="LIST" xCount="1"><value cdfmeaning="&gt;= TODAY" display="&gt;= Today                           &#127;"/></values>'
+                '</filter>'
+            )
+            qual_body = f'<operator type="AND">{qual_body}{f_ce_valid}</operator>'
 
         primary_ord_cat = next((el.get("primary_order_catalog") for el in elements if el.get("primary_order_catalog")), None)
         primary_ord_cat_types = next((el.get("primary_order_catalog_types") for el in elements if el.get("primary_order_catalog_types")), None)
@@ -2037,7 +2520,8 @@ class DA2ReportGenerator:
                 )
                 qual_body = f'<operator type="AND">{qual_body}{f_join_enc}</operator>'
 
-        if is_active_census:
+        eff_ref = refinement or RefinementSpec()
+        if is_active_census and "Enc Status" not in eff_ref.exclude_filters and "Enc Status" not in eff_ref.override_filters:
             f_act = (
                 '<filter joinType="0" mode="0" prompt_element_uuid="7161959f-72cd-46bb-b6f6-2b177edd0469" prompt_type="0" useIndex="1">'
                 '<element name="Enc Status" type="1" uuid="7161959f-72cd-46bb-b6f6-2b177edd0469"/>'
@@ -2047,25 +2531,41 @@ class DA2ReportGenerator:
             )
             qual_body = f'<operator type="AND">{qual_body}{f_act}</operator>'
 
+        for ov_k, ov_vals in eff_ref.override_filters.items():
+            ov_uuid, ov_pairs = _resolve_override_filter_values(ov_k, ov_vals, tenant_config=tenant_config)
+            if ov_uuid and ov_pairs and (domain != "CWC Encounter" or ov_uuid in VERIFIED_CWC_ENCOUNTER_UUIDS):
+                v_nodes = "".join(
+                    f'<value display="{html.escape(d, quote=True)}" text="{c}.00"/>'
+                    for d, c in ov_pairs
+                )
+                f_ov = (
+                    f'<filter joinType="0" mode="0" prompt_element_uuid="{ov_uuid}" prompt_type="0" useIndex="1">'
+                    f'<element name="{html.escape(ov_k, quote=True)}" type="1" uuid="{ov_uuid}"/>'
+                    f'<operator type="IN"/>'
+                    f'<values type="LIST" xCount="{len(ov_pairs)}">{v_nodes}</values>'
+                    f'</filter>'
+                )
+                qual_body = f'<operator type="AND">{qual_body}{f_ov}</operator>'
+
         for vf in value_filters or []:
             v_vals = "".join(
                 f'<value display="{html.escape(d, quote=True)}" text="{c}.00"/>' for d, c in vf["values"]
             )
             v_name = html.escape(LIVE_CWC_ELEMENT_MAP[vf["name"]][0], quote=True)
-            if vf.get("like"):  # the shape DA2 itself writes for an Is Like qualification
+            if vf.get("like"):
                 f_val = (
-                    f'<filter joinType="0" mode="0" useIndex="1"><element name="{v_name}" type="3" uuid="{vf["uuid"]}"/>'
+                    f'<filter joinType="0" mode="0" useIndex="1"><element name="{v_name}" type="3" uuid="{vf['uuid']}"/>'
                     '<operator type="LIKE"/>'
-                    f'<values type="LIST" xCount="1"><value text="{html.escape(vf["like"], quote=True)}"/></values>'
+                    f'<values type="LIST" xCount="1"><value text="{html.escape(vf['like'], quote=True)}"/></values>'
                     '</filter>'
                 )
                 qual_body = f'<operator type="AND">{qual_body}{f_val}</operator>'
                 continue
             f_val = (
-                f'<filter joinType="0" mode="0" prompt_element_uuid="{vf["uuid"]}" prompt_type="0" useIndex="1">'
-                f'<element name="{v_name}" type="1" uuid="{vf["uuid"]}"/>'
+                f'<filter joinType="0" mode="0" prompt_element_uuid="{vf['uuid']}" prompt_type="0" useIndex="1">'
+                f'<element name="{v_name}" type="1" uuid="{vf['uuid']}"/>'
                 '<operator type="IN"/>'
-                f'<values type="LIST" xCount="{len(vf["values"])}">{v_vals}</values>'
+                f'<values type="LIST" xCount="{len(vf['values'])}">{v_vals}</values>'
                 '</filter>'
             )
             qual_body = f'<operator type="AND">{qual_body}{f_val}</operator>'
@@ -2198,8 +2698,11 @@ class DA2ReportGenerator:
         prompt_name: str,
         prompt_uuid: str,
         is_active_census: bool,
+        refinement: RefinementSpec | None = None,
         value_filters: list[dict[str, Any]] | None = None,
+        tenant_config: TenantConfig | None = None,
     ) -> str:
+        eff_ref = refinement or RefinementSpec()
         dom_uuid = DOMAIN_UUID_MAP.get(domain, DOMAIN_UUID_MAP["CWC Encounter"])
         esc_qname = html.escape(q_name, quote=True)
         elem_lines = []
@@ -2211,7 +2714,7 @@ class DA2ReportGenerator:
             )
 
         filter_blocks = []
-        if is_active_census:
+        if is_active_census and "Enc Status" not in eff_ref.exclude_filters and "Enc Status" not in eff_ref.override_filters:
             enc_stat_uuid = self._da2_catalog.get("Enc Status", {}).get(
                 "element_uuid", "31ca416e-4fb2-4847-8d6c-6470b1d9b77c"
             )
@@ -2223,7 +2726,22 @@ class DA2ReportGenerator:
                 '          </values>',
                 '        </filter>',
             ])
-        if any(e["da2_field_name"].startswith("CE ") for e in elements):
+        for ov_k, ov_vals in eff_ref.override_filters.items():
+            ov_uuid, ov_pairs = _resolve_override_filter_values(ov_k, ov_vals, tenant_config=tenant_config)
+            if ov_uuid and ov_pairs:
+                esc_ovk = html.escape(ov_k, quote=True)
+                filter_blocks.extend([
+                    '        <filter group="0" joinType="0" mode="0" op="8" type="LIST" useIndex="0">',
+                    f'          <element display="{esc_ovk}" name="{esc_ovk}" uuid="{ov_uuid}"/>',
+                    f'          <values type="LIST" xCount="{len(ov_pairs)}">',
+                    *[
+                        f'            <value display="{html.escape(d, quote=True)}" text="{c}"/>'
+                        for d, c in ov_pairs
+                    ],
+                    '          </values>',
+                    '        </filter>',
+                ])
+        if any(e["da2_field_name"].startswith("CE ") for e in elements) and not any(ef.lower() == "ce result status" for ef in eff_ref.exclude_filters) and not any(ok.lower() == "ce result status" for ok in eff_ref.override_filters):
             ce_stat_uuid = self._da2_catalog.get("CE Result Status", {}).get(
                 "element_uuid", "87c461cf-9507-41e8-95b1-851df9ca0d33"
             )
@@ -2238,14 +2756,13 @@ class DA2ReportGenerator:
                 '        </filter>',
             ])
 
-        # Is Like filters stay out: this format's operator code for LIKE isn't known (only op 8 = LIST, 10 = DATE).
         for vf in (vf for vf in value_filters or [] if not vf.get("like")):
             v_name = html.escape(vf["name"], quote=True)
             v_uuid = self._da2_catalog.get(vf["name"], {}).get("element_uuid", vf["uuid"])
             filter_blocks.extend([
                 '        <filter group="0" joinType="0" mode="0" op="8" type="LIST" useIndex="0">',
                 f'          <element display="{v_name}" name="{v_name}" uuid="{v_uuid}"/>',
-                f'          <values type="LIST" xCount="{len(vf["values"])}">',
+                f'          <values type="LIST" xCount="{len(vf['values'])}">',
                 *(f'            <value display="{html.escape(d, quote=True)}" text="{c}"/>' for d, c in vf["values"]),
                 '          </values>',
                 '        </filter>',
@@ -2291,18 +2808,26 @@ class DA2ReportGenerator:
         domain: str,
         elements: list[dict[str, Any]],
         is_active_census: bool,
+        refinement: RefinementSpec | None = None,
         value_filters: list[dict[str, Any]] | None = None,
+        tenant_config: TenantConfig | None = None,
     ) -> str:
+        eff_ref = refinement or RefinementSpec()
+        excl_lows = {c.lower() for c in eff_ref.exclude_columns}
         tz_idx = int(getattr(self._tenant_config, "utc_timezone_index", 54) or 54)
+        base_select_candidates = [
+            ("Enc Id", "  CWC_ENCOUNTER.ENCNTR_ID AS Enc_Id"),
+            ("Enc FIN", "  CWC_ENC_FUNC.GET_FIN_NBR(CWC_ENCOUNTER.ENCNTR_ID) AS Enc_FIN"),
+            ("Person MRN", "  CWC_PER_FUNC.GET_MRN(CWC_ENCOUNTER.ENCNTR_ID, CWC_ENCOUNTER.PERSON_ID, CWC_ENCOUNTER.LOC_FACILITY_CD) AS Person_MRN_Facility"),
+            ("Person Name Full", "  CWC_PERSON.NAME_FULL_FORMATTED AS Person_Name_Full"),
+            ("Enc Loc Facility", "  omf_get_cv_display(CWC_ENCOUNTER.LOC_FACILITY_CD) AS Enc_Loc_Facility"),
+            ("Enc Loc Nurse Unit", "  omf_get_cv_display(CWC_ENCOUNTER.LOC_NURSE_UNIT_CD) AS Enc_Loc_Nurse_Unit"),
+            ("Enc Admit Dt/Tm", f"  cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, {tz_idx}) AS Enc_Admit_Dt_Tm"),
+            ("Enc Discharge Dt/Tm", f"  cclsql_utc_cnvt(CWC_ENCOUNTER.DISCH_DT_TM, 1, {tz_idx}) AS Enc_Discharge_Dt_Tm"),
+        ]
         select_exprs = [
-            "  CWC_ENCOUNTER.ENCNTR_ID AS Enc_Id",
-            "  CWC_ENC_FUNC.GET_FIN_NBR(CWC_ENCOUNTER.ENCNTR_ID) AS Enc_FIN",
-            "  CWC_PER_FUNC.GET_MRN(CWC_ENCOUNTER.ENCNTR_ID, CWC_ENCOUNTER.PERSON_ID, CWC_ENCOUNTER.LOC_FACILITY_CD) AS Person_MRN_Facility",
-            "  CWC_PERSON.NAME_FULL_FORMATTED AS Person_Name_Full",
-            "  omf_get_cv_display(CWC_ENCOUNTER.LOC_FACILITY_CD) AS Enc_Loc_Facility",
-            "  omf_get_cv_display(CWC_ENCOUNTER.LOC_NURSE_UNIT_CD) AS Enc_Loc_Nurse_Unit",
-            f"  cclsql_utc_cnvt(CWC_ENCOUNTER.REG_DT_TM, 1, {tz_idx}) AS Enc_Admit_Dt_Tm",
-            f"  cclsql_utc_cnvt(CWC_ENCOUNTER.DISCH_DT_TM, 1, {tz_idx}) AS Enc_Discharge_Dt_Tm",
+            expr for label, expr in base_select_candidates
+            if label == "Enc Id" or label.lower() not in excl_lows
         ]
         from_clauses = [
             "V500.ENCOUNTER CWC_ENCOUNTER",
@@ -2335,7 +2860,14 @@ class DA2ReportGenerator:
             where_clauses.extend([
                 "CWC_ENCOUNTER.ENCNTR_ID = CWC_CLINICAL_EVENT.ENCNTR_ID",
                 "CWC_CLINICAL_EVENT.VALID_UNTIL_DT_TM >= TO_DATE('2100-12-31 00:00:00', 'YYYY-MM-DD HH24:MI:SS')",
-                "CWC_CLINICAL_EVENT.RESULT_STATUS_CD IN (25, 34, 35)",
+                *(
+                    []
+                    if (
+                        any(ef.lower() == "ce result status" for ef in eff_ref.exclude_filters)
+                        or any(ok.lower() == "ce result status" for ok in eff_ref.override_filters)
+                    )
+                    else ["CWC_CLINICAL_EVENT.RESULT_STATUS_CD IN (25, 34, 35)"]
+                ),
             ])
 
         if has_orders:
@@ -2396,7 +2928,11 @@ class DA2ReportGenerator:
             where_clauses.extend([
                 "CWC_ENCOUNTER.ENCNTR_ID = CWC_MED_ADMIN_EVENT.ENCNTR_ID",
                 "CWC_MED_ADMIN_EVENT.ACTIVE_IND = 1",
-                "CWC_ORDERS.ORDER_STATUS_CD NOT IN (2542, 2553)",
+                *(
+                    []
+                    if any(ef.lower() == "order status" for ef in eff_ref.exclude_filters)
+                    else ["CWC_ORDERS.ORDER_STATUS_CD NOT IN (2542, 2553)"]
+                ),
             ])
 
         if has_surg:
@@ -2427,11 +2963,28 @@ class DA2ReportGenerator:
                     "CWC_DIAGNOSIS.ACTIVE_IND = 1",
                 ])
 
-        if is_active_census:
+        if is_active_census and "Enc Status" not in eff_ref.exclude_filters and "Enc Status" not in eff_ref.override_filters:
             where_clauses.extend([
                 "CWC_ENCOUNTER.ENCNTR_STATUS_CD IN (854)",
                 "CWC_ENCOUNTER.DISCH_DT_TM IS NULL",
             ])
+        for ov_k, ov_vals in eff_ref.override_filters.items():
+            _, ov_pairs = _resolve_override_filter_values(ov_k, ov_vals, tenant_config=tenant_config)
+            if not ov_pairs:
+                continue
+            codes_sql = ", ".join(c for _, c in ov_pairs)
+            if ov_k == "Enc Type":
+                where_clauses.append(f"CWC_ENCOUNTER.ENCNTR_TYPE_CD IN ({codes_sql})")
+            elif ov_k == "Enc Loc Nurse Unit":
+                where_clauses.append(f"CWC_ENCOUNTER.LOC_NURSE_UNIT_CD IN ({codes_sql})")
+            elif ov_k == "Enc Loc Facility":
+                where_clauses.append(f"CWC_ENCOUNTER.LOC_FACILITY_CD IN ({codes_sql})")
+            elif ov_k == "Enc Status":
+                where_clauses.append(f"CWC_ENCOUNTER.ENCNTR_STATUS_CD IN ({codes_sql})")
+            elif ov_k == "Order Status" and "V500.ORDERS CWC_ORDERS" in from_clauses:
+                where_clauses.append(f"CWC_ORDERS.ORDER_STATUS_CD IN ({codes_sql})")
+            elif ov_k.lower() == "ce result status" and "V500.CLINICAL_EVENT CWC_CLINICAL_EVENT" in from_clauses:
+                where_clauses.append(f"CWC_CLINICAL_EVENT.RESULT_STATUS_CD IN ({codes_sql})")
         if "CSSRS" in q_name.upper() or "C_SSRS" in q_name.upper() or "C-SSRS" in q_name.upper():
             where_clauses.append(
                 "(UPPER(omf_get_cv_display(CWC_CLINICAL_EVENT.EVENT_CD)) LIKE '%CSSRS%' "
@@ -2441,9 +2994,7 @@ class DA2ReportGenerator:
             )
 
         for vf in value_filters or []:
-            # Only on a table this query already joins; generate() lists the rest as not in the reference SQL.
             table = (vf["target"] or ".").split(".")[0]
-            # FROM entries can be "V500.ENCOUNTER CWC_ENCOUNTER LEFT OUTER JOIN V500.DIAGNOSIS CWC_DIAGNOSIS ON …"
             if vf["target"] and any(re.search(rf"(?<!\S)V500\.{table} CWC_{table}(?!\S)", f) for f in from_clauses):
                 where_clauses.append(self._sql_in_list(vf))
 
@@ -2992,15 +3543,39 @@ class DA2ReportGenerator:
             "    </parameters>"
         )
 
+        bound_col_names: list[str] = []
+        for elem in table_elements:
+            rn = elem["da2_field_name"]
+            if elem.get("inline_query_name"):
+                bound_col_names.append(html.escape(rn))
+            else:
+                lm = LIVE_CWC_ELEMENT_MAP.get(rn)
+                bound_col_names.append(html.escape(lm[0] if lm else rn))
+        bound_col_set = set(bound_col_names)
+        desired_grp_col = "CE Performed Prsnl Name" if is_provider_clinical_notes else "Enc Loc Nurse Unit"
+        grp_col_name = (
+            desired_grp_col
+            if desired_grp_col in bound_col_set
+            else next(
+                (c for c in ("Enc Loc Facility", "Person Name Full Format", "Person Full Name", "Enc FIN", "Enc Financial Num", "Enc Id") if c in bound_col_set),
+                bound_col_names[0] if bound_col_names else "calc_clinical_category",
+            )
+        )
+        sort_secondary_col = next(
+            (c for c in ("Person Name Full Format", "Person Full Name", "Enc FIN", "Enc Financial Num", "Enc Id") if c in bound_col_set),
+            grp_col_name,
+        )
+        unit_flt_col = "Enc Loc Nurse Unit" if "Enc Loc Nurse Unit" in bound_col_set else grp_col_name
+
         has_ce_result_val = any(e["da2_field_name"] == "CE Result Value" for e in table_elements)
         if is_cssrs:
-            filter_js_expr = '(params["p_NurseUnit"].value == null || params["p_NurseUnit"].value == "" || params["p_NurseUnit"].value == "ALL" || row["Enc Loc Nurse Unit"] == params["p_NurseUnit"].value) &amp;&amp; (params["p_RiskFilter"].value == null || params["p_RiskFilter"].value == "ALL" || (params["p_RiskFilter"].value == "HIGH" &amp;&amp; /high risk/i.test((row["LevelRisk:CE Result Value"] || row["CE Result Value"] || "") + "")) || (params["p_RiskFilter"].value == "POSITIVE_ONLY" &amp;&amp; /high risk|moderate risk|positive endorsement|^yes$/i.test((row["CSSRS Risk and Endorsement Flag"] || row["CE Result Value"] || "") + "")))'
+            filter_js_expr = f'(params["p_NurseUnit"].value == null || params["p_NurseUnit"].value == "" || params["p_NurseUnit"].value == "ALL" || row["{unit_flt_col}"] == params["p_NurseUnit"].value) &amp;&amp; (params["p_RiskFilter"].value == null || params["p_RiskFilter"].value == "ALL" || (params["p_RiskFilter"].value == "HIGH" &amp;&amp; /high risk/i.test((row["LevelRisk:CE Result Value"] || row["CE Result Value"] || "") + "")) || (params["p_RiskFilter"].value == "POSITIVE_ONLY" &amp;&amp; /high risk|moderate risk|positive endorsement|^yes$/i.test((row["CSSRS Risk and Endorsement Flag"] || row["CE Result Value"] || "") + "")))'
             sort_js_expr = 'var r = (row["LevelRisk:CE Result Value"] || row["CSSRS Risk and Endorsement Flag"] || row["CE Result Value"] || "") + ""; var num = row["calc_numeric_metric"] || 0; (/high risk/i.test(r) || num &gt;= 45) ? 1 : ((/moderate risk|catheter|wound/i.test(r) || num &gt;= 25) ? 2 : (/positive endorsement|^yes$/i.test(r) ? 3 : (/low risk/i.test(r) ? 4 : 5)))'
         elif is_provider_clinical_notes or not has_ce_result_val:
-            filter_js_expr = 'params["p_NurseUnit"].value == null || params["p_NurseUnit"].value == "" || params["p_NurseUnit"].value == "ALL" || row["Enc Loc Nurse Unit"] == params["p_NurseUnit"].value'
+            filter_js_expr = f'params["p_NurseUnit"].value == null || params["p_NurseUnit"].value == "" || params["p_NurseUnit"].value == "ALL" || row["{unit_flt_col}"] == params["p_NurseUnit"].value'
             sort_js_expr = 'row["calc_clinical_category"] == "Initial Consult Note" ? 1 : (row["calc_clinical_category"] == "Progress Note" ? 2 : 3)'
         else:
-            filter_js_expr = '(params["p_NurseUnit"].value == null || params["p_NurseUnit"].value == "" || params["p_NurseUnit"].value == "ALL" || row["Enc Loc Nurse Unit"] == params["p_NurseUnit"].value) &amp;&amp; (params["p_RiskFilter"].value == null || params["p_RiskFilter"].value == "ALL" || (params["p_RiskFilter"].value == "HIGH" &amp;&amp; /high risk/i.test((row["CE Result Value"] || "") + "")) || (params["p_RiskFilter"].value == "POSITIVE_ONLY" &amp;&amp; /high risk|moderate risk|positive endorsement|^yes$/i.test((row["CE Result Value"] || "") + "")))'
+            filter_js_expr = f'(params["p_NurseUnit"].value == null || params["p_NurseUnit"].value == "" || params["p_NurseUnit"].value == "ALL" || row["{unit_flt_col}"] == params["p_NurseUnit"].value) &amp;&amp; (params["p_RiskFilter"].value == null || params["p_RiskFilter"].value == "ALL" || (params["p_RiskFilter"].value == "HIGH" &amp;&amp; /high risk/i.test((row["CE Result Value"] || "") + "")) || (params["p_RiskFilter"].value == "POSITIVE_ONLY" &amp;&amp; /high risk|moderate risk|positive endorsement|^yes$/i.test((row["CE Result Value"] || "") + "")))'
             sort_js_expr = 'var r = (row["CE Result Value"] || "") + ""; var num = row["calc_numeric_metric"] || 0; (/high risk/i.test(r) || num &gt;= 45) ? 1 : ((/moderate risk|catheter|wound/i.test(r) || num &gt;= 25) ? 2 : (/positive endorsement|^yes$/i.test(r) ? 3 : (/low risk/i.test(r) ? 4 : 5)))'
 
         table_filter_block = (
@@ -3021,7 +3596,7 @@ class DA2ReportGenerator:
             '                    <property name="strength">-1</property>\n'
             "                </structure>\n"
             "                <structure>\n"
-            '                    <expression name="key" type="javascript">row["Person Name Full Format"]</expression>\n'
+            f'                    <expression name="key" type="javascript">row["{sort_secondary_col}"]</expression>\n'
             '                    <property name="direction">asc</property>\n'
             '                    <property name="strength">-1</property>\n'
             "                </structure>\n"
@@ -3033,9 +3608,9 @@ class DA2ReportGenerator:
             '                <property name="groupName">grp_NurseUnit</property>\n'
             '                <property name="interval">none</property>\n'
             '                <property name="sortDirection">asc</property>\n'
-            f'                <expression name="keyExpr" type="javascript">row[{"\"CE Performed Prsnl Name\"" if is_provider_clinical_notes else "\"Enc Loc Nurse Unit\""}]</expression>\n'
+            f'                <expression name="keyExpr" type="javascript">row["{grp_col_name}"]</expression>\n'
             '                <structure name="toc">\n'
-            f'                    <expression name="expressionValue" type="javascript">row[{"\"CE Performed Prsnl Name\"" if is_provider_clinical_notes else "\"Enc Loc Nurse Unit\""}]</expression>\n'
+            f'                    <expression name="expressionValue" type="javascript">row["{grp_col_name}"]</expression>\n'
             "                </structure>\n"
             '                <property name="repeatHeader">true</property>\n'
             '                <property name="hideDetail">false</property>\n'
@@ -3053,7 +3628,7 @@ class DA2ReportGenerator:
             f'                        <cell id="{grp_cell_1_id}">\n'
             f'                            <data id="{grp_data_1_id}">\n'
             '                                <property name="fontWeight">bold</property>\n'
-            f'                                <property name="resultSetColumn">{"CE Performed Prsnl Name" if is_provider_clinical_notes else "Enc Loc Nurse Unit"}</property>\n'
+            f'                                <property name="resultSetColumn">{grp_col_name}</property>\n'
             "                            </data>\n"
             "                        </cell>\n"
             f'                        <cell id="{grp_cell_2_id}">\n'
@@ -3316,10 +3891,15 @@ class DA2ReportGenerator:
         queries: list[DA2QuerySpec],
         interp: InterpretationResult,
         is_active_census: bool,
+        ce_status_excluded: bool = False,
+        strict_ir_errors: list[str] | None = None,
     ) -> VerificationReport:
         checked = []
-        errors = []
+        errors = list(strict_ir_errors or [])
         warnings = []
+        for q in queries:
+            if not q.selected_elements:
+                errors.append(f"Query {q.query_name} has zero selected_elements.")
 
         # 1. XML well-formedness & BIRT 3.2.23 root check
         try:
@@ -3361,8 +3941,8 @@ class DA2ReportGenerator:
             has_ce = any(e["da2_field_name"].startswith("CE ") for e in q.selected_elements)
             if has_ce:
                 flt_blob = " ".join(q.filters)
-                if "12/31/2100" in flt_blob and "Auth (Verified)" in flt_blob:
-                    checked.append(f"CE_VERSION_AND_AUTH_FILTER ({q.query_name}): Enforces Valid Until >= 12/31/2100 and Auth (Verified)")
+                if "12/31/2100" in flt_blob and (ce_status_excluded or "Auth (Verified)" in flt_blob or "ce result status in (" in flt_blob.lower()):
+                    checked.append(f"CE_VERSION_AND_AUTH_FILTER ({q.query_name}): Enforces Valid Until >= 12/31/2100 and configured CE Result Status guard")
                 else:
                     errors.append(f"Query {q.query_name} selects CE fields without Valid Until >= 12/31/2100 and Auth (Verified) filters.")
 
@@ -3519,7 +4099,10 @@ class DA2ReportGenerator:
 
     @staticmethod
     def _derive_report_name(request_text: str) -> str:
-        low = request_text.lower()
+        sanitized_req = sanitize_text_for_report_naming(request_text)
+        if not sanitized_req:
+            return "Clinical_Encounter_Summary_Report"
+        low = sanitized_req.lower()
         if ("appointment" in low or "appt" in low) and "patient" in low and ("day" in low or "daily" in low) and "unit" in low:
             return "Daily_Unit_Patient_Appointment_Summary"
         if "slot" in low and "utilization" in low:
@@ -3613,41 +4196,45 @@ class DA2ReportGenerator:
             return "Provider_Note_Timeliness_Audit"
         if "resuscitation" in low or "code status" in low:
             return "Inpatient_Code_Status_Census"
-        if ("him" in low or "coding" in low or "drg" in low or "poa" in low) and ("diagnosis" in low or "diagnoses" in low or "icd" in low):
+        if is_him_coding_request(sanitized_req) and any_word_phrase(low, ("diagnosis", "diagnoses", "icd", "icd-10", "icd10", "drg")):
             return "HIM_Diagnosis_Extract_Report"
-        if any(w in low for w in ("health plan", "health plans", "insurance plan", "primary and secondary insurance", "payer")) and not any(w in low for w in ("charge", "payment", "adjustment", "revenue", "benefit order")):
+        if any_word_phrase(low, ("health plan", "health plans", "insurance plan", "primary and secondary insurance", "payer")) and not (
+            is_financial_charge_or_revenue_request(sanitized_req)
+            or is_financial_payment_request(sanitized_req)
+            or is_financial_adjustment_request(sanitized_req)
+        ):
             return "Encounter_Health_Plans_Report"
         if (
-            ("active" in low and "census" in low)
-            or "midnight census" in low
+            (has_word_phrase(low, "active") and has_word_phrase(low, "census"))
+            or has_word_phrase(low, "midnight census")
             or (
-                any(w in low for w in ("active inpatient", "current inpatient"))
-                and not any(
-                    w in low
-                    for w in (
+                any_word_phrase(low, ("active inpatient", "current inpatient"))
+                and not any_word_phrase(
+                    low,
+                    (
                         "order", "orders", "culture", "diagnosis", "diagnoses", "icd",
                         "medication", "mar", "vitals", "allergy", "allergies", "note", "notes",
                         "charge", "charges", "surgery", "surgical",
-                    )
+                    ),
                 )
             )
         ):
             return "Active_Inpatient_Encounter_Census"
-        if "discharge disposition" in low:
+        if has_word_phrase(low, "discharge disposition"):
             return "Discharge_Disposition_Summary"
-        if "readmission" in low:
+        if has_word_phrase(low, "readmission") or has_word_phrase(low, "readmissions"):
             return "Inpatient_Readmission_Audit"
-        if "duplicate charge" in low or ("charge" in low and "ndc" in low):
+        if has_word_phrase(low, "duplicate charge") or (is_financial_charge_or_revenue_request(sanitized_req) and has_word_phrase(low, "ndc")):
             return "Encounter_Charge_NDC_Audit"
-        if "cwf gs revenue" in low or ("revenue" in low and "transaction" in low):
+        if has_word_phrase(low, "cwf gs revenue") or (is_financial_charge_or_revenue_request(sanitized_req) and has_word_phrase(low, "revenue") and has_word_phrase(low, "transaction")):
             return "Revenue_Transaction_Detail_Extract"
-        if "cwf gs payments" in low or ("payment" in low and "transaction" in low):
+        if has_word_phrase(low, "cwf gs payments") or (is_financial_payment_request(sanitized_req) and has_word_phrase(low, "transaction")):
             return "Payment_Transaction_Detail_Extract"
-        if "cwf gs adjustments" in low or ("adjustment" in low and "transaction" in low):
+        if has_word_phrase(low, "cwf gs adjustments") or (is_financial_adjustment_request(sanitized_req) and has_word_phrase(low, "transaction")):
             return "Adjustment_Transaction_Detail_Extract"
 
         # Strip relative lookback windows (e.g. "last 7 days", "past 30 days", "within 24 hours") before tokenizing
-        cleaned = re.sub(r"\b(?:in\s+the\s+)?(?:last|past|prior|previous|within|next)\s+\d+\s+(?:hour|hours|day|days|week|weeks|month|months|year|years)\b", " ", request_text, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\b(?:in\s+the\s+)?(?:last|past|prior|previous|within|next)\s+\d+\s+(?:hour|hours|day|days|week|weeks|month|months|year|years)\b", " ", sanitized_req, flags=re.IGNORECASE)
         stop = {
             "a", "about", "above", "across", "after", "again", "against", "all", "also", "am", "an", "and",
             "any", "are", "aren", "around", "as", "ask", "at", "be", "because", "been", "before", "being",
@@ -3678,6 +4265,8 @@ class DA2ReportGenerator:
             "we", "well", "were", "what", "when", "where", "whether", "which", "while", "who", "whom",
             "whose", "why", "will", "with", "within", "without", "work", "would", "write", "writing", "you",
             "your", "yours", "yourself", "yourselves",
+            "hey", "hi", "hello", "team", "folks", "thanks", "thank", "appreciate", "kindly", "quick",
+            "tweak", "change", "remove", "drop", "omit", "exclude", "keep", "preserve", "preserving",
         }
         norm_map = {
             "patients": "Patient", "patient": "Patient", "pt": "Patient", "pts": "Patient",
