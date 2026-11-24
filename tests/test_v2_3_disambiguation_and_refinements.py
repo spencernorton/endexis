@@ -34,7 +34,7 @@ from discern_intelligence.sql_execution_harness import execute_and_verify_ejs_sq
 
 
 def test_version_and_pipeline_constants() -> None:
-    assert __version__ == "2.3.0"
+    assert __version__ == "2.4.0"
     assert PIPELINE_VERSION == "endexis-v2.3-clean-r1"
 
 
