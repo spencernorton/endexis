@@ -27,6 +27,7 @@ from .interpreter import MillenniumInterpreter
 from .forms_mapper import FormsAndOutputResolver
 from .ccl_compiler import CCLCompiler
 from .da2_generator import DA2ReportGenerator, LIKE_TEXT_FIELDS, like_pattern
+from .da2_files import DA2FileError, DA2Files, read_da2_file
 from .neural_compiler import ApolloNeuralCompiler, LocalNeuralCompiler
 from .eval_harness import (
     evaluate_adversarial_v2_benchmark,
@@ -50,9 +51,12 @@ from .knowledge import (
     resolve_da2_view_or_alias,
 )
 
-__version__ = "2.3.0"
+__version__ = "2.4.0"
 PIPELINE_VERSION = "endexis-v2.3-clean-r1"
 __all__ = [
+    "DA2FileError",
+    "DA2Files",
+    "read_da2_file",
     "DEFAULT_OWNER_GROUP_DISPLAY",
     "PIPELINE_VERSION",
     "RefinementSpec",

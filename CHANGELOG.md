@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.4.0 — 2026-11-23
+
+### Added
+- **Read and change existing DA2 files (`discern_intelligence.da2_files`)**: `read_da2_file(data, filename)` reads a `.dareport` (its `.rpt`, `.rptdesign` and `.daquery` members) or a bare `.daquery` into `DA2Files`, which lists each query's domain, columns and filters (`queries()`, `summary()`) and changes them in place:
+  - `add_column`, `remove_column`, `only_values` (an IN list of known code values), `text_match` (DA2 Is Like), `remove_filter` and `set_owner_group`;
+  - every other node, layout and script stays as it was; a plain one-table layout gains or loses the column too, and a removal that a group, script, highlight, sort or computed column depends on is refused;
+  - `files()` writes the changed files with new report and query ids (the same changes always give the same ids and the same bytes), so DA2 imports them as a new report.
+- Refused with a reason: data exports and other file types, a lone `.rpt` or `.rptdesign`, files over 1 MB or unpacking past 2 MB, unsafe or unknown zip members, DOCTYPEs, text that isn't UTF-8, XML nested more than 200 levels, and filters whose values pick out a patient (the reason names the fields, never their values):
+  - every filter in every query and inline sub-query, each value's text and attributes, judged by the element's own name and by the catalog's name for its DA2 id;
+  - FIN, MRN and other aliases, encounter, preadmit, account and member numbers, SSN, phone, e-mail, street and birth date; a patient's name unless it is a pattern without a whole "Last, First" name, or a range such as DA2's test-patient rule (`Person Name Last < 'ZZ'`);
+  - codes stay allowed: an alias's type or pool, a financial class.
+- `text_match` refuses those fields too, so a change can't add what an upload would be refused for.
+- `element_names()`, `known_element()` and `element_for()` look up the DA2 elements Endexis can add, by domain, refusing synthetic and unverified ids.
+- `shown()` writes a DA2 name or value as one inert markdown code span. `summary()` and every change message use it, so text from an uploaded file can't add a link, an image or HTML to a reply. It writes `<` and `>` as `‹` and `›`, since Open WebUI ends a `<details>` block at the first `</details>`, even in a code span.
+
 ## 2.3.0 — 2026-11-12
 
 ### Added

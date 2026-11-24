@@ -815,6 +815,12 @@ LIKE_TEXT_FIELDS: frozenset[str] = frozenset({
 LIKE_KEY_FIELDS: frozenset[str] = frozenset({"Person Name Last"})
 
 
+def daquery_element_type(name: str, ccl_data_type: str) -> str:
+    """The `type` a .daquery gives a catalog element: 2 date/time, 1 number or indicator, 3 anything else."""
+    ct = ccl_data_type.lower()
+    return "2" if ("datetime" in ct or "dq8" in ct or "Dt" in name) else ("1" if ("i4" in ct or "f8" in ct or "Ind" in name) else "3")
+
+
 def like_pattern(name: str, pattern: str) -> str:
     """The Is Like pattern generate(like_filters=...) writes for this field. ValueError if the field or pattern won't do."""
     if name not in LIKE_TEXT_FIELDS:
@@ -2346,8 +2352,8 @@ class DA2ReportGenerator:
             else:
                 ename = raw_name
                 euuid = el["element_uuid"]
-                ct = (el.get("ccl_data_type") or "").lower()
-                etype = "2" if ("datetime" in ct or "dq8" in ct or "Dt" in ename) else ("1" if ("i4" in ct or "f8" in ct or "Ind" in ename) else "3")
+                ct = el.get("ccl_data_type") or ""
+                etype = daquery_element_type(ename, ct)
             try:
                 if uuid.UUID(euuid).version == 5:
                     continue
