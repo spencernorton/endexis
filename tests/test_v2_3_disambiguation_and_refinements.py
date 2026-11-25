@@ -34,7 +34,7 @@ from discern_intelligence.sql_execution_harness import execute_and_verify_ejs_sq
 
 
 def test_version_and_pipeline_constants() -> None:
-    assert __version__ == "2.4.1"
+    assert __version__ == "2.5.2"
     assert PIPELINE_VERSION == "endexis-v2.3-clean-r1"
 
 
@@ -543,3 +543,29 @@ def test_adversarial_codex_round2_ccl_ce_status_and_tuple_guards() -> None:
     assert p_ce_ov.verification.is_valid
     assert 'trim(uar_get_code_display(ce.result_status_cd), 3) IN ("Modified")' in p_ce_ov.source_code
     assert "c_auth_cd, c_modified_cd, c_altered_cd" not in p_ce_ov.source_code
+
+
+def test_filler_adverb_before_an_override_value_resolves_like_the_bare_value() -> None:
+    import pytest
+
+    from discern_intelligence.da2_generator import _resolve_override_filter_values
+
+    nu = "Enc Loc Nurse Unit"
+    assert _resolve_override_filter_values(nu, ["ICU", "cleanly stepdown"]) == _resolve_override_filter_values(
+        nu, ["ICU", "stepdown"]
+    )
+    with pytest.raises(ValueError, match="Negated"):
+        _resolve_override_filter_values(nu, ["explicitly not ICU"])
+    with pytest.raises(ValueError, match="Unknown"):
+        _resolve_override_filter_values(nu, ["cleanly nowhere"])
+
+    # Every multiturn dev item's ground truth, given as the completion, passes the strict compiler (0/36 before).
+    oof = json.loads((Path(__file__).resolve().parent.parent / "data/oof_eval_v2_3.json").read_text(encoding="utf-8"))
+    mt = [x for x in oof["items"] if x["slice"] == "multiturn_refinement"]
+    assert len(mt) == 36
+    comp = LocalNeuralCompiler()
+    for it in mt:
+        res = comp.compile_track_a_raw_ir(
+            it["prompt"], completion_text="<output>\n" + json.dumps(it["ground_truth_ir"]) + "\n</output>"
+        )
+        assert res["all_verifiers_passed"], (it["oof_id"], res["violations"])

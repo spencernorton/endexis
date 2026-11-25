@@ -124,6 +124,12 @@ _OVERRIDE_FILTER_SPECS: dict[str, tuple[str, list[tuple[tuple[str, ...], str, st
     ),
 }
 
+# The v2.3 corpus's firewall rewording put one of these before some override values ("cleanly stepdown"), in the
+# prompts and the training targets alike, so the model writes them too. No catalog value starts with one.
+_FILLER_ADVERBS_RE = re.compile(
+    r"^(?:(?:explicitly|specifically|directly|verifiably|accurately|cleanly|reliably|precisely)\s+)+"
+)
+
 
 def _resolve_override_filter_values(
     flt_key: str,
@@ -167,6 +173,8 @@ def _resolve_override_filter_values(
     seen_codes: set[str] = set()
     for rv in cleaned:
         rv_low = re.sub(r"\s+", " ", rv.lower()).strip()
+        if rv_low not in tenant_map and rv_low not in cat_map:
+            rv_low = _FILLER_ADVERBS_RE.sub("", rv_low)
         if re.match(r"^(?:not|no|non|except|without|exclude|excluding|other\s+than)\b", rv_low):
             raise ValueError(f"Negated override filter value is unsupported for IN-list override {flt_key!r}: {rv!r}")
         rv_stripped = re.sub(r"\s+(?:encounters?|patients?|visits?|orders?|status)$", "", rv_low).strip()

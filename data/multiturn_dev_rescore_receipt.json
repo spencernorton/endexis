@@ -1,0 +1,203 @@
+{
+  "schema": "endexis.multiturn_dev_rescore.v1",
+  "scored_at": "2026-11-25T18:18:23Z",
+  "host": "one RTX 4070 Ti SUPER (10.9 GB free and 10% busy at start, unattended)",
+  "script": "scripts/compare_dev_same_code.py (greedy, max_new_tokens 384, batch 1, merged BF16 on cuda:0)",
+  "dev_set": {
+    "file": "data/oof_eval_v2_3.json",
+    "n": 132,
+    "sha256": "0b1638a5185cbe60627e04925d952034234e9444e9f6ad051db16b462a08f3bf",
+    "changed": false
+  },
+  "code": {
+    "fix": "_resolve_override_filter_values strips a leading filler adverb (_FILLER_ADVERBS_RE) unless a tenant or catalog value is spelled that way",
+    "da2_generator_py_sha256": "b0f1ff9dd12494c4312e7116b6998122abdc62d0a7be03d1d28a2162d28a3f3a"
+  },
+  "why_not_clean_the_ground_truth": "Pass@1 compiles the prompt (its own refinement parse) and the model's IR, never the ground-truth IR; both carry the filler, as the 36 training rows with a nurse-unit override do. With the ground truth cleaned and the old code, 0/36 ground-truth-as-completion items pass; with this code, 36/36 pass whether or not either is cleaned.",
+  "sealed_holdouts": "eval_postfreeze_v3.jsonl and eval_upload_edits_v1.jsonl were not copied to the scoring workspace and not opened",
+  "weights_promoted": false,
+  "published_v2_3_0_on_2026_11_11": {
+    "count": 132,
+    "parsed_valid_ir_rate": 1.0,
+    "verifier_compile_rate": 0.9697,
+    "domain_accuracy": 1.0,
+    "mean_element_f1": 0.9682,
+    "contamination_free_rate": 0.9697,
+    "clinical_to_billing_leak_rate": 0.0,
+    "track_a_strict_pass_at_1": 0.9697,
+    "by_slice": {
+      "canonical_36_template": {
+        "count": 72,
+        "track_a_strict_pass_rate": 1.0,
+        "mean_element_f1": 0.957,
+        "contamination_free_rate": 1.0
+      },
+      "concept_collision_guard": {
+        "count": 24,
+        "track_a_strict_pass_rate": 1.0,
+        "mean_element_f1": 0.9624,
+        "contamination_free_rate": 1.0
+      },
+      "multiturn_refinement": {
+        "count": 36,
+        "track_a_strict_pass_rate": 0.8889,
+        "mean_element_f1": 0.9946,
+        "contamination_free_rate": 0.8889
+      }
+    }
+  },
+  "models": {
+    "v2_3_0": {
+      "model_dir": "endexis-qwen3-0.6b-dpo-v2_3-merged",
+      "model_safetensors_sha256": "b660c486cc736edb5f1018b99c3a588b59a577d07cd21c3d6945eae73ab6d738",
+      "before_fix_same_code": {
+        "count": 132,
+        "parsed_valid_ir_rate": 1.0,
+        "verifier_compile_rate": 0.7273,
+        "domain_accuracy": 0.7273,
+        "mean_element_f1": 0.697,
+        "contamination_free_rate": 0.7273,
+        "clinical_to_billing_leak_rate": 0.0,
+        "track_a_strict_pass_at_1": 0.7273,
+        "by_slice": {
+          "canonical_36_template": {
+            "count": 72,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.957,
+            "contamination_free_rate": 1.0
+          },
+          "concept_collision_guard": {
+            "count": 24,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.9624,
+            "contamination_free_rate": 1.0
+          },
+          "multiturn_refinement": {
+            "count": 36,
+            "track_a_strict_pass_rate": 0.0,
+            "mean_element_f1": 0.0,
+            "contamination_free_rate": 0.0
+          }
+        }
+      },
+      "after_fix": {
+        "count": 132,
+        "parsed_valid_ir_rate": 1.0,
+        "verifier_compile_rate": 0.9697,
+        "domain_accuracy": 1.0,
+        "mean_element_f1": 0.9682,
+        "contamination_free_rate": 0.9697,
+        "clinical_to_billing_leak_rate": 0.0,
+        "track_a_strict_pass_at_1": 0.9697,
+        "by_slice": {
+          "canonical_36_template": {
+            "count": 72,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.957,
+            "contamination_free_rate": 1.0
+          },
+          "concept_collision_guard": {
+            "count": 24,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.9624,
+            "contamination_free_rate": 1.0
+          },
+          "multiturn_refinement": {
+            "count": 36,
+            "track_a_strict_pass_rate": 0.8889,
+            "mean_element_f1": 0.9946,
+            "contamination_free_rate": 0.8889
+          }
+        }
+      },
+      "multiturn_ir_vs_ground_truth": {
+        "n": 36,
+        "parsed": 1.0,
+        "domain": 1.0,
+        "element_f1": 0.9888,
+        "override_exact": 1.0,
+        "exclude_exact": 0.0,
+        "exclude_jaccard": 0.0903
+      }
+    },
+    "v2_5_0": {
+      "model_dir": "endexis-qwen3-0.6b-dpo-v2_5-merged",
+      "model_safetensors_sha256": "3af74aa637dc054f4e3ee85003e8358e65a5e742a130c8cc071c4e60e7807d72",
+      "before_fix_same_code": {
+        "count": 132,
+        "parsed_valid_ir_rate": 1.0,
+        "verifier_compile_rate": 0.7273,
+        "domain_accuracy": 0.7273,
+        "mean_element_f1": 0.697,
+        "contamination_free_rate": 0.7273,
+        "clinical_to_billing_leak_rate": 0.0,
+        "track_a_strict_pass_at_1": 0.7273,
+        "by_slice": {
+          "canonical_36_template": {
+            "count": 72,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.957,
+            "contamination_free_rate": 1.0
+          },
+          "concept_collision_guard": {
+            "count": 24,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.9624,
+            "contamination_free_rate": 1.0
+          },
+          "multiturn_refinement": {
+            "count": 36,
+            "track_a_strict_pass_rate": 0.0,
+            "mean_element_f1": 0.0,
+            "contamination_free_rate": 0.0
+          }
+        }
+      },
+      "after_fix": {
+        "count": 132,
+        "parsed_valid_ir_rate": 1.0,
+        "verifier_compile_rate": 0.9924,
+        "domain_accuracy": 1.0,
+        "mean_element_f1": 0.959,
+        "contamination_free_rate": 0.9924,
+        "clinical_to_billing_leak_rate": 0.0,
+        "track_a_strict_pass_at_1": 0.9924,
+        "by_slice": {
+          "canonical_36_template": {
+            "count": 72,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.957,
+            "contamination_free_rate": 1.0
+          },
+          "concept_collision_guard": {
+            "count": 24,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.9624,
+            "contamination_free_rate": 1.0
+          },
+          "multiturn_refinement": {
+            "count": 36,
+            "track_a_strict_pass_rate": 0.9722,
+            "mean_element_f1": 0.9607,
+            "contamination_free_rate": 0.9722
+          }
+        }
+      },
+      "multiturn_ir_vs_ground_truth": {
+        "n": 36,
+        "parsed": 1.0,
+        "domain": 1.0,
+        "element_f1": 0.9901,
+        "override_exact": 1.0,
+        "exclude_exact": 0.0,
+        "exclude_jaccard": 0.1107
+      },
+      "candidate": "stage-1 SFT, not promoted"
+    }
+  },
+  "verdict": "With the fix v2.3.0 scores exactly its published Pass@1 0.9697 (multiturn 32/36). The v2.5.0 candidate scores 0.9924 (multiturn 35/36, canonical and collision slices 1.0 as v2.3), so it does not regress on multi-turn refinement. Its multiturn mean element F1 under the compiled bundle is 0.9607 against 0.9946.",
+  "known_gaps": [
+    "exclude_exact is 0.0 for both models (Jaccard 0.09 and 0.11): the ground truth lists the four expanded attending-physician columns and neither model's exclude_columns equals that set; Pass@1 judges excluded columns through the compiler's own checks, not this comparison",
+    "the multiturn slice has one action and one override value (ICU and stepdown) across 36 templates, so it measures little variety"
+  ]
+}

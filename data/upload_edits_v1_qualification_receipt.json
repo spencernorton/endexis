@@ -1,0 +1,370 @@
+{
+  "schema": "endexis-upload-edits-qualification/v1",
+  "holdout": {
+    "file": "eval_upload_edits_v1.jsonl",
+    "items": 724,
+    "chat_commit": "b1e8fae31ebdc1a5a02cf484d6746854243fe581",
+    "chat_uncommitted_changes": false,
+    "sha256": "3fa011b6c0f5b59ccc16c2c7c6461f4d461aa1f7d038a9f3939373f94f9d9775"
+  },
+  "candidate": {
+    "version": "2.5.0 (candidate, not promoted)",
+    "stage": "stage1_sft",
+    "why_stage1": "the DPO stage failed the v2.3 gate (val SFT loss 0.118 > 0.1162 after SFT); chosen before any holdout was scored",
+    "gates": {
+      "val_sft_loss_not_worse_after_dpo": true,
+      "dpo_preference_accuracy_ge_0_99": true
+    },
+    "dpo_stage_gates": {
+      "val_sft_loss_not_worse_after_dpo": false,
+      "dpo_preference_accuracy_ge_0_99": true
+    },
+    "training": {
+      "train_sft_sequences": 7375,
+      "truncated_sequences": 5,
+      "train_dpo_pairs": 1298,
+      "post_stage1_sft": {
+        "val_sft_loss": 0.1162,
+        "val_perplexity": 1.1232,
+        "dpo_preference_accuracy": 1.0,
+        "dpo_mean_logprob_margin": 2.3052
+      },
+      "post_stage2_rpo_dpo": {
+        "val_sft_loss": 0.118,
+        "val_perplexity": 1.1252,
+        "dpo_preference_accuracy": 1.0,
+        "dpo_mean_logprob_margin": 2.5654
+      }
+    },
+    "training_wall_seconds": 2956.4,
+    "peak_pytorch_vram_mb": 4473.2,
+    "corpus": {
+      "sft_rows": 7877,
+      "dpo_pairs": 1298,
+      "upload_edit_sft_rows": 2600
+    },
+    "merged_bf16_sha256": "3af74aa637dc054f4e3ee85003e8358e65a5e742a130c8cc071c4e60e7807d72",
+    "gguf_sha256": {
+      "q8_0": "036880b68fe180189688aec967e2ed51fa78124a4754eaa3db8230342c4d3f4c",
+      "q4_k_m": "fc3b57d79a0f10c5c7b19d10519d502c59375bfd27c179e841e6ebe3732120c6"
+    },
+    "q8_0_recipe": "llama-quantize Q8_0 with ffn_down and attn_output kept bf16, as v2.3's served Q8_0"
+  },
+  "served_as": "llama-server with CPU-only flags: -dev none -ngl 0 -t 8 -c 8192 -np 1; the chat's request: temperature 0.0, top_p 0.9, max_tokens 384, CANONICAL_SYSTEM_PROMPT",
+  "baseline": "v2.3.0 Q8_0 (the served model), same server flags",
+  "with_no_change_guard": {
+    "chat_commit": "b1e8fae31ebdc1a5a02cf484d6746854243fe581",
+    "note": "EDIT_NO_CHANGE_RE was written after the unguarded score showed the don't-message failures, knowing the holdout's phrasings, so its held_none numbers are optimistic",
+    "rules_only": {
+      "by_slice": {
+        "held_meant": {
+          "n": 460,
+          "asked_rate": 0.0,
+          "parse_rate": null,
+          "shown_rate": 0.0,
+          "exact_match": 0.0,
+          "wrong_suggestion_rate": 0.0,
+          "bag": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "held_none": {
+          "n": 186,
+          "asked_rate": 0.0,
+          "parse_rate": null,
+          "shown_rate": 0.0,
+          "false_suggestion_rate": 0.0,
+          "false_suggestion_rate_on_dont": {
+            "n": 52,
+            "rate": 0.0
+          }
+        },
+        "accepted": {
+          "n": 78,
+          "asked_rate": 0.0,
+          "parse_rate": null,
+          "shown_rate": 0.0,
+          "exact_match": 1.0
+        }
+      },
+      "held_messages": {
+        "n": 646,
+        "right_suggestion": 0.0,
+        "unwanted_suggestion": 0.0
+      }
+    },
+    "v2_3_0_q8_0_cpu": {
+      "by_slice": {
+        "held_meant": {
+          "n": 460,
+          "asked_rate": 0.9826,
+          "parse_rate": 0.0,
+          "shown_rate": 0.0,
+          "exact_match": 0.0,
+          "wrong_suggestion_rate": 0.0,
+          "bag": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "held_none": {
+          "n": 186,
+          "asked_rate": 0.672,
+          "parse_rate": 0.0,
+          "shown_rate": 0.0,
+          "false_suggestion_rate": 0.0,
+          "false_suggestion_rate_on_dont": {
+            "n": 52,
+            "rate": 0.0
+          }
+        },
+        "accepted": {
+          "n": 78,
+          "asked_rate": 0.0,
+          "parse_rate": null,
+          "shown_rate": 0.0,
+          "exact_match": 1.0
+        }
+      },
+      "held_messages": {
+        "n": 646,
+        "right_suggestion": 0.0,
+        "unwanted_suggestion": 0.0
+      },
+      "latency_ms": {
+        "p50": 3747.7,
+        "p95": 5021.4
+      }
+    },
+    "v2_5_0_q8_0_cpu": {
+      "by_slice": {
+        "held_meant": {
+          "n": 460,
+          "asked_rate": 0.9826,
+          "parse_rate": 1.0,
+          "shown_rate": 0.8109,
+          "exact_match": 0.7783,
+          "wrong_suggestion_rate": 0.0326,
+          "bag": {
+            "precision": 0.99,
+            "recall": 0.7956,
+            "f1": 0.8822
+          }
+        },
+        "held_none": {
+          "n": 186,
+          "asked_rate": 0.672,
+          "parse_rate": 1.0,
+          "shown_rate": 0.0,
+          "false_suggestion_rate": 0.0,
+          "false_suggestion_rate_on_dont": {
+            "n": 52,
+            "rate": 0.0
+          }
+        },
+        "accepted": {
+          "n": 78,
+          "asked_rate": 0.0,
+          "parse_rate": null,
+          "shown_rate": 0.0,
+          "exact_match": 1.0
+        }
+      },
+      "held_messages": {
+        "n": 646,
+        "right_suggestion": 0.5542,
+        "unwanted_suggestion": 0.0232
+      },
+      "latency_ms": {
+        "p50": 730.4,
+        "p95": 983.8
+      }
+    },
+    "v2_5_0_q4_k_m_cpu": {
+      "by_slice": {
+        "held_meant": {
+          "n": 460,
+          "asked_rate": 0.9826,
+          "parse_rate": 1.0,
+          "shown_rate": 0.7957,
+          "exact_match": 0.7609,
+          "wrong_suggestion_rate": 0.0348,
+          "bag": {
+            "precision": 0.987,
+            "recall": 0.7635,
+            "f1": 0.861
+          }
+        },
+        "held_none": {
+          "n": 186,
+          "asked_rate": 0.672,
+          "parse_rate": 1.0,
+          "shown_rate": 0.0,
+          "false_suggestion_rate": 0.0,
+          "false_suggestion_rate_on_dont": {
+            "n": 52,
+            "rate": 0.0
+          }
+        },
+        "accepted": {
+          "n": 78,
+          "asked_rate": 0.0,
+          "parse_rate": null,
+          "shown_rate": 0.0,
+          "exact_match": 1.0
+        }
+      },
+      "held_messages": {
+        "n": 646,
+        "right_suggestion": 0.5418,
+        "unwanted_suggestion": 0.0248
+      },
+      "latency_ms": {
+        "p50": 522.0,
+        "p95": 688.8
+      }
+    }
+  },
+  "without_guard": {
+    "chat_commit": "bd90c2cbb26964e8f549d9980a035cc1bb1d8b55",
+    "v2_5_0_q8_0_cpu": {
+      "by_slice": {
+        "held_meant": {
+          "n": 460,
+          "parse_rate": 1.0,
+          "shown_rate": 0.8109,
+          "exact_match": 0.7783,
+          "wrong_suggestion_rate": 0.0326,
+          "bag": {
+            "precision": 0.99,
+            "recall": 0.7956,
+            "f1": 0.8822
+          }
+        },
+        "held_none": {
+          "n": 186,
+          "parse_rate": 1.0,
+          "shown_rate": 0.1022,
+          "false_suggestion_rate": 0.1022,
+          "false_suggestion_rate_on_dont": {
+            "n": 52,
+            "rate": 0.3654
+          }
+        },
+        "accepted": {
+          "n": 78,
+          "parse_rate": 1.0,
+          "shown_rate": 0.0,
+          "exact_match": 1.0
+        }
+      },
+      "held_messages": {
+        "n": 646,
+        "right_suggestion": 0.5542,
+        "unwanted_suggestion": 0.0526
+      },
+      "latency_ms": {
+        "p50": 730.4,
+        "p95": 983.8
+      }
+    }
+  },
+  "right_suggestion_ceiling": {
+    "value": 0.7121,
+    "why": "460 of 646 held messages meant a change; an oracle scores this"
+  },
+  "dev_oof_eval_v2_3_same_code": {
+    "v2_3_0": {
+      "model_dir": "endexis-qwen3-0.6b-dpo-v2_3-merged",
+      "dev_same_code": {
+        "count": 132,
+        "parsed_valid_ir_rate": 1.0,
+        "verifier_compile_rate": 0.7273,
+        "domain_accuracy": 0.7273,
+        "mean_element_f1": 0.697,
+        "contamination_free_rate": 0.7273,
+        "clinical_to_billing_leak_rate": 0.0,
+        "track_a_strict_pass_at_1": 0.7273,
+        "by_slice": {
+          "canonical_36_template": {
+            "count": 72,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.957,
+            "contamination_free_rate": 1.0
+          },
+          "concept_collision_guard": {
+            "count": 24,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.9624,
+            "contamination_free_rate": 1.0
+          },
+          "multiturn_refinement": {
+            "count": 36,
+            "track_a_strict_pass_rate": 0.0,
+            "mean_element_f1": 0.0,
+            "contamination_free_rate": 0.0
+          }
+        }
+      },
+      "multiturn_ir_vs_ground_truth": {
+        "n": 36,
+        "parsed": 1.0,
+        "domain": 1.0,
+        "element_f1": 0.9888,
+        "override_exact": 1.0,
+        "exclude_exact": 0.0,
+        "exclude_jaccard": 0.0903
+      }
+    },
+    "v2_5_0_stage1": {
+      "model_dir": "endexis-qwen3-0.6b-dpo-v2_5-merged",
+      "dev_same_code": {
+        "count": 132,
+        "parsed_valid_ir_rate": 1.0,
+        "verifier_compile_rate": 0.7273,
+        "domain_accuracy": 0.7273,
+        "mean_element_f1": 0.697,
+        "contamination_free_rate": 0.7273,
+        "clinical_to_billing_leak_rate": 0.0,
+        "track_a_strict_pass_at_1": 0.7273,
+        "by_slice": {
+          "canonical_36_template": {
+            "count": 72,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.957,
+            "contamination_free_rate": 1.0
+          },
+          "concept_collision_guard": {
+            "count": 24,
+            "track_a_strict_pass_rate": 1.0,
+            "mean_element_f1": 0.9624,
+            "contamination_free_rate": 1.0
+          },
+          "multiturn_refinement": {
+            "count": 36,
+            "track_a_strict_pass_rate": 0.0,
+            "mean_element_f1": 0.0,
+            "contamination_free_rate": 0.0
+          }
+        }
+      },
+      "multiturn_ir_vs_ground_truth": {
+        "n": 36,
+        "parsed": 1.0,
+        "domain": 1.0,
+        "element_f1": 0.9901,
+        "override_exact": 1.0,
+        "exclude_exact": 0.0,
+        "exclude_jaccard": 0.1107
+      }
+    }
+  },
+  "known_gaps": [
+    "oof_eval_v2_3's multiturn ground truth carries override values like 'cleanly stepdown' that the strict compiler rejects since the 2026-11-12 code, so no model passes those 36 items now (v2.3's 0.9697 was scored before)",
+    "the DPO negatives are weak: after SFT alone the preference accuracy on the DPO val pairs is already 1.0 (and val_dpo is a subset of train_dpo, as in v2.3)",
+    "latency was measured on a shared CPU with other work running; a GPU is faster"
+  ]
+}

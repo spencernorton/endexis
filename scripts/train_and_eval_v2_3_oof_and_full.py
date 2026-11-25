@@ -545,7 +545,7 @@ def build_training_splits(
         # on OOF folds for speed, and use 100% (all 4,509 legacy rows!) on full-corpus training!
         rem = items_c[vt:]
         cap_n = 450 if heldout_fold is not None else 750
-        if len(rem) > cap_n:
+        if len(rem) > cap_n and tname != "rewrite_upload_edit":  # the upload-edit rows (v2.5) are all used
             rem = rem[:cap_n]
         train_legacy.extend(rem)
 
@@ -684,7 +684,7 @@ def train_sft_and_rpo_dpo_model(
     sft_state_backup = extract_lora_state_dict(model)
 
     # Select active DPO batch (200 shuffled pairs on OOF folds, all 648 on full_v2_3) with lr=4e-6 to prevent margin explosion
-    active_dpo_enc = train_dpo_enc if tag == "full_v2_3" else train_dpo_enc[:200]
+    active_dpo_enc = train_dpo_enc if tag.startswith("full") else train_dpo_enc[:200]
     model.eval()
     ref_lps: list[tuple[float, float]] = []
     with torch.no_grad():
