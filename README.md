@@ -30,9 +30,10 @@
    - Populates `<property name="com.cerner.discern.da2.display.names.set">1</property>`, `<structure name="cachedMetaData">`, `<list-property name="resultSet">` with exact `DA_ELEMENT.ELEMENT_UUID` mappings, `<xml-property name="queryText">`, and `<ex-property><name>defaultRuntimePrompts</name>` XML.
    - Supports both single-domain ODA reports and multi-domain `<joint-data-set>` reports joined on `Enc Id` (`ENCNTR_ID`), with `try { ... } catch (e) {}` guards around `reportContext` calls inside `beforeOpen` and `onFetch` so DA2's design-time `__bm_beforeOpen()` validator accepts the upload without errors.
 
-## What's New in `v2.4.0`
+## What's New in `v2.4.1`
 
 - **Change a report you already have**: `read_da2_file` reads an exported `.dareport` or `.daquery`, and `DA2Files` adds or removes columns, sets IN-list and Is Like filters, removes filters and sets the owner group in place. Everything else in the files stays as it was, and a change the layout depends on is refused rather than half-made. The same changes always give the same files, with new ids so DA2 imports them as a new report. It refuses anything that isn't a DA2 definition, and any file or change with a filter whose values pick out a patient (a FIN, MRN, phone number, name and so on), naming the field but never the value.
+- **2.4.1**: reading a file stays fast on crafted layouts (each data set's items found in one pass, at most 20 rows read per table, 20 query data sets per file, 20,000 XML elements per member), and a whole patient name is refused however it's spelled, in one filter value (`DOE%JANE%`, `LEE__LEE%`) or across filters (a last-name pattern and a first-name one). Runtime-prompt defaults and the layout's own filter rules are judged too, and more catalog id, address and name fields count as patient identifiers.
 
 ```python
 from discern_intelligence import read_da2_file
