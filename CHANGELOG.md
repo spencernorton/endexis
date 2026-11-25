@@ -1,5 +1,79 @@
 # Changelog
 
+## 2.5.2 — 2026-11-25 — the v2.5.0 model, published
+
+### Model
+- The v2.5.0 weights (the stage-1 SFT model in 2.5.0 below) replace v2.3.0 on Hugging Face
+  `NorviTech/endexis-qwen3-0.6b-dpo-merged` (tag `v2.5.0`) under the same file names; `MODEL_CARD.md` is its card.
+  `data/phase3_v2_5_training_receipt.json`'s `merge_manifest` block is v2.3.0's, copied by the export step; the
+  published `merge_manifest.json` is written from the v2.5.0 files.
+
+### Changed
+- The package says 2.5.2 (2.5.0 and 2.5.1 were tagged while it said 2.4.1).
+- `scripts/compare_dev_same_code.py` reads its label and model pairs with a plain loop: a privacy scanner read its
+  old extended slice as an IPv6 address.
+
+## 2.5.1 — 2026-11-25 — multiturn dev scoring (the package still says 2.4.1)
+
+### Fixed
+- An override value with a filler adverb before it (*cleanly stepdown*, *directly stepdown*; `explicitly`,
+  `specifically`, `directly`, `verifiably`, `accurately`, `cleanly`, `reliably`, `precisely`) resolves like the bare
+  value, unless a tenant or catalog value is spelled that way (none is). The v2.3 corpus's firewall rewording put these
+  words into the multiturn prompts, and its parser carried them into the override values of the training targets and
+  `oof_eval_v2_3`'s ground truth alike, so the models write them too. Since the 2026-11-12 strict compiler they were
+  refused, from the model's IR and from the prompt's own parse, so every model failed all 36 multiturn dev items.
+  Cleaning the ground truth alone would have changed no score: Pass@1 compiles the prompt and the model's IR, not the
+  ground truth.
+- Rescored under this code (`data/multiturn_dev_rescore_receipt.json`, one RTX 4070 Ti SUPER, merged BF16, the dev set
+  unchanged): v2.3.0 Pass@1 0.9697 (multiturn 32/36), exactly its published 2026-11-11 score, from 0.7273 under the
+  2026-11-12 code; the v2.5.0 candidate 0.9924 (multiturn 35/36), from 0.7273. Canonical and collision slices are 1.0
+  for both. So v2.5.0 does not regress on multi-turn refinement.
+
+## 2.5.0 — 2026-11-24 — upload-edit cases (the v2.5.0 model's data and scripts; the package still says 2.4.1)
+
+### Added
+- `rewrite_upload_edit`: made-up change requests on uploaded DA2 files, for endexis-chat's checked suggestions
+  (`ENDEXIS_UPLOAD_SUGGEST`). Each case is a synthetic `.dareport` or `.daquery` (written by `DA2ReportGenerator`),
+  up to three earlier messages, and the latest one; the target is the plain ask the latest meant (*remove Enc Loc
+  Room* for *lose the room column*), or `null` when it asks for no change (a question, *don't add the MRN*, an
+  unsure ask, a stand-in owner group). endexis-chat's own rules label every case: the target, sent to them on the
+  same file and history, makes exactly the intended changes, and the expected changes are the rules' own output.
+  - `scripts/build_upload_edit_cases.py` builds them, prompting with endexis-chat's `edit_prompt` (`--chat-app`), so
+    the model trains on the prompt the chat sends. Rerunnable: it replaces its own rows.
+  - `data/sft_train_v1.jsonl`: 2,600 rows (547 the rules already make, 1,486 they hold or miss that meant a change,
+    567 that meant none). `data/dpo_contrastive_v1.jsonl`: 650 pairs (refusing a meant change, the opposite change,
+    the wrong column, a proposal where none was meant, a stand-in owner).
+  - `data/eval_upload_edits_v1.jsonl`: the sealed holdout, 724 cases on other reports and other phrasings (78 / 460 /
+    186), with 36 dropped for overlapping training (exact, token bag or 5-gram skeleton of the message, exact or bag
+    of the prompt). Firewall hashes and the build receipt sit beside it. The new training rows have no exact, bag or
+    skeleton overlap with `eval_postfreeze_v3`'s hashes (the file itself is never opened).
+  - `scripts/qualify_upload_edits.py`: `generate` asks a served model for each holdout prompt; `score` runs each reply
+    through endexis-chat's own `suggestion()`, so a rewording counts only if the chat would show it.
+  - `scripts/train_upload_edits_v2_5.py`: the v2.3 recipe's full-corpus stage on the new corpus (refuses to start if
+    either sealed holdout is in the workspace).
+  - `scripts/compare_dev_same_code.py`: scores models on `oof_eval_v2_3` under the same code, and compares the
+    multiturn IR with the ground truth field by field.
+- The v2.5.0 model (`data/upload_edits_v1_qualification_receipt.json`): the stage-1 SFT model, as
+  the DPO stage failed the v2.3 gate (val SFT loss 0.118 after DPO, 0.1162 before). On the sealed holdout, served as
+  `Q8_0` with endexis-chat's request and the no-change guard: of the 460 held messages that meant a change, 77.8%
+  get the right rewording and 3.3% a wrong one (bag F1 0.88, precision 0.99); none of the 186 that meant no change
+  gets one (10.2% before the guard, all on *don't …* messages); 55.4% of all held messages get the right one (an
+  oracle scores 71.2%), 2.3% a wrong one. p50 730 ms on a shared 8-thread CPU. `Q4_K_M`: 76.1%, 3.5%, bag F1 0.86, p50
+  522 ms. v2.3.0, the served model, never rewords (0%).
+  On `oof_eval_v2_3` under the same code it matches v2.3.0 (Pass@1 0.7273, element F1 0.697; multiturn IR domain
+  1.0, element F1 0.990 vs 0.989, override filters 1.0 for both).
+- Known gaps: training and holdout share the plain words for a column (`ALIASES`), so the holdout tests new
+  phrasings, files and histories, not new words. The rules misread 18 generated asks as other changes (*can we drop
+  the event name?* removed `CE Performed Prsnl Name`; *also the event name* after a removal added `CE Lbl Name`);
+  they are left out and listed in the receipt. `oof_eval_v2_3`'s multiturn ground truth carries override values
+  like *cleanly stepdown* that the strict compiler rejects since the 2026-11-12 code, so no model passes those 36
+  items (v2.3.0's 0.9697 was scored on 2026-11-11, before that). The DPO pairs are weak negatives: the SFT model
+  already prefers every chosen reply on the DPO val pairs.
+
+### Changed
+- `train_and_eval_v2_3_oof_and_full.py`: a full run (`tag` starting `full`) uses all DPO pairs, and the
+  `rewrite_upload_edit` rows are not capped at 750 like a legacy task. v2.3's own run is unchanged.
+
 ## 2.4.1 — 2026-11-23
 
 ### Fixed

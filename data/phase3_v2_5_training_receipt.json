@@ -1,0 +1,255 @@
+{
+  "schema": "endexis-phase3-training-receipt/v2.5",
+  "recipe": "train_and_eval_v2_3_oof_and_full.py (full-corpus stage only)",
+  "corpus": {
+    "sft_rows": 7877,
+    "dpo_pairs": 1298,
+    "upload_edit_sft_rows": 2600
+  },
+  "training": {
+    "train_sft_sequences": 7375,
+    "truncated_sequences": 5,
+    "train_dpo_pairs": 1298,
+    "sft_optimizer_steps": 922,
+    "sft_loss_curve": [
+      {
+        "step": 50,
+        "train_loss": 1.1507
+      },
+      {
+        "step": 100,
+        "train_loss": 0.2944
+      },
+      {
+        "step": 150,
+        "train_loss": 0.217
+      },
+      {
+        "step": 200,
+        "train_loss": 0.1601
+      },
+      {
+        "step": 250,
+        "train_loss": 0.1464
+      },
+      {
+        "step": 300,
+        "train_loss": 0.1399
+      },
+      {
+        "step": 350,
+        "train_loss": 0.1086
+      },
+      {
+        "step": 400,
+        "train_loss": 0.1286
+      },
+      {
+        "step": 450,
+        "train_loss": 0.1088
+      },
+      {
+        "step": 500,
+        "train_loss": 0.0982
+      },
+      {
+        "step": 550,
+        "train_loss": 0.0812
+      },
+      {
+        "step": 600,
+        "train_loss": 0.0814
+      },
+      {
+        "step": 650,
+        "train_loss": 0.0749
+      },
+      {
+        "step": 700,
+        "train_loss": 0.0833
+      },
+      {
+        "step": 750,
+        "train_loss": 0.0787
+      },
+      {
+        "step": 800,
+        "train_loss": 0.08
+      },
+      {
+        "step": 850,
+        "train_loss": 0.0775
+      },
+      {
+        "step": 900,
+        "train_loss": 0.0733
+      },
+      {
+        "step": 922,
+        "train_loss": 0.0846
+      }
+    ],
+    "dpo_loss_curve": [
+      {
+        "epoch": 1,
+        "dpo_loss": 0.5924
+      }
+    ],
+    "post_stage1_sft": {
+      "val_sft_loss": 0.1162,
+      "val_perplexity": 1.1232,
+      "dpo_preference_accuracy": 1.0,
+      "dpo_mean_logprob_margin": 2.3052
+    },
+    "post_stage2_rpo_dpo": {
+      "val_sft_loss": 0.118,
+      "val_perplexity": 1.1252,
+      "dpo_preference_accuracy": 1.0,
+      "dpo_mean_logprob_margin": 2.5654
+    }
+  },
+  "candidate": "stage1_sft",
+  "gates": {
+    "val_sft_loss_not_worse_after_dpo": true,
+    "dpo_preference_accuracy_ge_0_99": true
+  },
+  "dpo_stage_gates": {
+    "val_sft_loss_not_worse_after_dpo": false,
+    "dpo_preference_accuracy_ge_0_99": true
+  },
+  "adapter": {
+    "saved_tensors": 392,
+    "mean_tensor_l2_norm": 11.0845,
+    "adapter_path": "checkpoints/stage2_dpo/adapters.safetensors"
+  },
+  "merge_manifest": {
+    "model_id": "NorviTech/endexis-qwen3-0.6b-dpo-merged",
+    "version": "2.3.0",
+    "pipeline_version": "endexis-v2.3-clean-r1",
+    "base_model": "Qwen/Qwen3-0.6B",
+    "merged_linear_projections": 196,
+    "nan_or_inf_tensors": 0,
+    "total_safetensors_keys": 310,
+    "max_lora_delta_frobenius_norm": 11.7344,
+    "per_layer_frobenius_delta_sum": {
+      "layer_00": 44.9043,
+      "layer_01": 42.6552,
+      "layer_02": 40.4352,
+      "layer_03": 43.1457,
+      "layer_04": 43.8696,
+      "layer_05": 45.1441,
+      "layer_06": 44.6867,
+      "layer_07": 44.6988,
+      "layer_08": 43.5459,
+      "layer_09": 43.1344,
+      "layer_10": 45.4407,
+      "layer_11": 46.6255,
+      "layer_12": 46.8884,
+      "layer_13": 47.5975,
+      "layer_14": 47.5753,
+      "layer_15": 49.1718,
+      "layer_16": 49.3352,
+      "layer_17": 50.581,
+      "layer_18": 51.3298,
+      "layer_19": 51.9576,
+      "layer_20": 54.4975,
+      "layer_21": 54.792,
+      "layer_22": 56.845,
+      "layer_23": 57.8889,
+      "layer_24": 57.0114,
+      "layer_25": 57.3237,
+      "layer_26": 55.1704,
+      "layer_27": 51.6994
+    },
+    "chat_template_non_thinking_chatml": true,
+    "safetensors_size_mb": 1136.91,
+    "export_wall_time_seconds": 4.57
+  },
+  "merged_bf16_oof_eval_v2_3": {
+    "count": 132,
+    "parsed_valid_ir_rate": 1.0,
+    "verifier_compile_rate": 0.7273,
+    "domain_accuracy": 0.7273,
+    "mean_element_f1": 0.697,
+    "contamination_free_rate": 0.7273,
+    "clinical_to_billing_leak_rate": 0.0,
+    "track_a_strict_pass_at_1": 0.7273,
+    "by_slice": {
+      "canonical_36_template": {
+        "count": 72,
+        "track_a_strict_pass_rate": 1.0,
+        "mean_element_f1": 0.957,
+        "contamination_free_rate": 1.0
+      },
+      "concept_collision_guard": {
+        "count": 24,
+        "track_a_strict_pass_rate": 1.0,
+        "mean_element_f1": 0.9624,
+        "contamination_free_rate": 1.0
+      },
+      "multiturn_refinement": {
+        "count": 36,
+        "track_a_strict_pass_rate": 0.0,
+        "mean_element_f1": 0.0,
+        "contamination_free_rate": 0.0
+      }
+    }
+  },
+  "dpo_stage_oof_eval_v2_3": {
+    "count": 132,
+    "parsed_valid_ir_rate": 1.0,
+    "verifier_compile_rate": 0.7273,
+    "domain_accuracy": 0.7273,
+    "mean_element_f1": 0.697,
+    "contamination_free_rate": 0.7273,
+    "clinical_to_billing_leak_rate": 0.0,
+    "track_a_strict_pass_at_1": 0.7273,
+    "by_slice": {
+      "canonical_36_template": {
+        "count": 72,
+        "track_a_strict_pass_rate": 1.0,
+        "mean_element_f1": 0.957,
+        "contamination_free_rate": 1.0
+      },
+      "concept_collision_guard": {
+        "count": 24,
+        "track_a_strict_pass_rate": 1.0,
+        "mean_element_f1": 0.9624,
+        "contamination_free_rate": 1.0
+      },
+      "multiturn_refinement": {
+        "count": 36,
+        "track_a_strict_pass_rate": 0.0,
+        "mean_element_f1": 0.0,
+        "contamination_free_rate": 0.0
+      }
+    }
+  },
+  "gpu": {
+    "memory_fraction_cap": 0.45,
+    "peak_pytorch_vram_mb": 1230.8,
+    "watcher_before": {
+      "idx": 0,
+      "mem_used_mb": 2550,
+      "mem_free_mb": 13393,
+      "mem_total_mb": 16376,
+      "mem_pct": 15.6,
+      "util_gpu_pct": 17,
+      "util_mem_pct": 5,
+      "temp_c": 55,
+      "power_w": 58.09
+    },
+    "watcher_after": {
+      "idx": 0,
+      "mem_used_mb": 4323,
+      "mem_free_mb": 11620,
+      "mem_total_mb": 16376,
+      "mem_pct": 26.4,
+      "util_gpu_pct": 13,
+      "util_mem_pct": 4,
+      "temp_c": 59,
+      "power_w": 96.89
+    }
+  },
+  "wall_time_seconds": 576.0
+}

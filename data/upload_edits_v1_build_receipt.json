@@ -1,0 +1,505 @@
+{
+  "schema": "endexis-upload-edit-cases/v1",
+  "labelled_by": {
+    "repo": "endexis-chat",
+    "commit": "bd90c2cbb26964e8f549d9980a035cc1bb1d8b55",
+    "uncommitted_changes": false,
+    "functions": [
+      "replay",
+      "apply_message",
+      "edit_prompt"
+    ]
+  },
+  "seed": 1664,
+  "files": {
+    "train_requests": [
+      "Active inpatient census with attending physician and nurse unit, prompt on admit date",
+      "Rehab therapy productivity report",
+      "lab results for inpatients",
+      "daily appointments by unit with appointment state",
+      "medication administration record for the unit",
+      "charges posted yesterday by revenue code",
+      "emergency department arrivals today",
+      "length of stay by nurse unit",
+      "Braden scores for inpatients",
+      "orders placed by physician with order status",
+      "admissions by admit source",
+      "vital signs for inpatients"
+    ],
+    "holdout_requests": [
+      "discharges last month with discharge disposition and payer",
+      "fall risk assessments on the unit",
+      "diagnosis list for current inpatients",
+      "patients by payer and financial class",
+      "observation patients by unit",
+      "physical therapy minutes this week"
+    ],
+    "kinds": [
+      ".dareport",
+      ".daquery"
+    ]
+  },
+  "phrasings": {
+    "train": 82,
+    "holdout": 62
+  },
+  "train": {
+    "sft_rows": 2600,
+    "dpo_pairs": 650,
+    "by_slice": {
+      "accepted": 547,
+      "held_meant": 1486,
+      "held_none": 567
+    },
+    "by_style": {
+      "add": 613,
+      "add_add": 32,
+      "add_remove": 53,
+      "and_too": 77,
+      "dont_add": 61,
+      "dont_remove": 70,
+      "if_absent_add": 65,
+      "if_present_remove": 57,
+      "only": 199,
+      "owner": 184,
+      "owner_none": 69,
+      "put_back": 26,
+      "question": 189,
+      "remove": 427,
+      "remove_filter": 142,
+      "remove_remove": 19,
+      "take_out_again": 32,
+      "undo": 172,
+      "unsure": 113
+    },
+    "dpo_failure_modes": {
+      "refused_a_meant_change": 229,
+      "proposed_when_none_meant": 144,
+      "wrong_column": 102,
+      "stand_in_owner": 23,
+      "opposite_change": 152
+    }
+  },
+  "holdout": {
+    "items": 724,
+    "sha256": "3fa011b6c0f5b59ccc16c2c7c6461f4d461aa1f7d038a9f3939373f94f9d9775",
+    "by_slice": {
+      "accepted": 78,
+      "held_meant": 460,
+      "held_none": 186
+    },
+    "by_style": {
+      "add": 128,
+      "add_add": 22,
+      "add_remove": 11,
+      "and_too": 22,
+      "dont_add": 22,
+      "dont_remove": 30,
+      "if_absent_add": 14,
+      "if_present_remove": 10,
+      "only": 51,
+      "owner": 49,
+      "owner_none": 24,
+      "put_back": 11,
+      "question": 58,
+      "remove": 134,
+      "remove_filter": 37,
+      "remove_remove": 6,
+      "take_out_again": 4,
+      "undo": 47,
+      "unsure": 44
+    },
+    "dropped_for_overlap": {
+      "message_skeleton": 32,
+      "message_bag": 4
+    }
+  },
+  "known_gaps": [
+    "training and holdout share the plain-word table for column names (ALIASES): the holdout tests new phrasings, files and histories, not new words for a column"
+  ],
+  "misread_by_rules": {
+    "train_phrasings": {
+      "add": 11,
+      "add_remove": 1,
+      "add_add": 4
+    },
+    "holdout_phrasings": {
+      "remove": 1,
+      "and_too": 1
+    },
+    "examples": [
+      {
+        "history": [
+          "This is the daily report. Remove Person Name Full Format"
+        ],
+        "message": "add a bed column",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Enc Loc Bed"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Bed Loc"
+          }
+        ]
+      },
+      {
+        "history": [],
+        "message": "Add the registration date",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Enc Registration Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Enc Registration Dt"
+          }
+        ]
+      },
+      {
+        "history": [
+          "This is the daily report. Only Enc Admit Type in (Trauma, Emergency)",
+          "add Enc Admit Type",
+          "add Enc Attending Phys"
+        ],
+        "message": "add the provider name",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Prsnl Name Full Format"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Order Last Updt Provider Name"
+          }
+        ]
+      },
+      {
+        "history": [],
+        "message": "add the order name and drop the FIN",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Order Catalog"
+          },
+          {
+            "op": "remove_column",
+            "target": "Enc Financial Num"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Order Update Prsnl Name"
+          },
+          {
+            "op": "remove_column",
+            "target": "Enc Financial Num"
+          }
+        ]
+      },
+      {
+        "history": [
+          "remove Enc Status",
+          "add Enc Financial Class"
+        ],
+        "message": "add the relationship type and the appointment time",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Enc Pl Relationship Type"
+          },
+          {
+            "op": "add_column",
+            "target": "Sch App Beg Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Enc Pl Relationship Type"
+          },
+          {
+            "op": "add_column",
+            "target": "Sch App Time Flag"
+          }
+        ]
+      },
+      {
+        "history": [
+          "only Enc Discharge Disp in (Against Medical Advice, Expired)",
+          "add Sch Ev App Type"
+        ],
+        "message": "add a bed column",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Enc Loc Bed"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Bed Loc"
+          }
+        ]
+      },
+      {
+        "history": [],
+        "message": "Add the appointment state and the inpatient admit date",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Sch App State"
+          },
+          {
+            "op": "add_column",
+            "target": "Enc Inpatient Admit Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Sch App State"
+          },
+          {
+            "op": "add_column",
+            "target": "Enc Inpatient Admit Dt"
+          }
+        ]
+      },
+      {
+        "history": [
+          "This is the daily report. Add CE Result Units"
+        ],
+        "message": "Could you add the order name?",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Order Catalog"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Order Update Prsnl Name"
+          }
+        ]
+      },
+      {
+        "history": [],
+        "message": "Add the event name and the city",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "CE Event"
+          },
+          {
+            "op": "add_column",
+            "target": "Per Addr City"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "CE Lbl Name"
+          },
+          {
+            "op": "add_column",
+            "target": "Per Addr City"
+          }
+        ]
+      },
+      {
+        "history": [
+          "Here's our report. Add Enc Arrive Dt/Tm",
+          "add Enc Admit Type",
+          "add Enc Medical Service"
+        ],
+        "message": "add a event name column",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "CE Event"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "CE Lbl Name"
+          }
+        ]
+      },
+      {
+        "history": [
+          "This is the daily report. Remove Enc Active Ind"
+        ],
+        "message": "add the appointment time",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Sch App Beg Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Sch App Time Flag"
+          }
+        ]
+      },
+      {
+        "history": [],
+        "message": "include the provider name column",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Prsnl Name Full Format"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Order Last Updt Provider Name"
+          }
+        ]
+      },
+      {
+        "history": [],
+        "message": "include the service date column",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Chg Service Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Chg Service Dt"
+          }
+        ]
+      },
+      {
+        "history": [
+          "add Enc Loc Facility",
+          "add Enc Attending Phys",
+          "only Enc Admit Type in (Emergency, Trauma)"
+        ],
+        "message": "add a service date column",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Chg Service Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Chg Service Dt"
+          }
+        ]
+      },
+      {
+        "history": [
+          "add Enc Admitting Phys"
+        ],
+        "message": "Could you add the appointment time?",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Sch App Beg Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Sch App Time Flag"
+          }
+        ]
+      },
+      {
+        "history": [
+          "add Enc Medical Service"
+        ],
+        "message": "add the appointment type and the appointment time",
+        "meant": [
+          {
+            "op": "add_column",
+            "target": "Sch Ev App Type"
+          },
+          {
+            "op": "add_column",
+            "target": "Sch App Beg Dt/Tm"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "Sch Ev App Type"
+          },
+          {
+            "op": "add_column",
+            "target": "Sch App Time Flag"
+          }
+        ]
+      },
+      {
+        "history": [
+          "Here is my census. Remove Person MRN"
+        ],
+        "message": "Can we drop the event name?",
+        "meant": [
+          {
+            "op": "remove_column",
+            "target": "CE Event"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "remove_column",
+            "target": "CE Performed Prsnl Name"
+          }
+        ]
+      },
+      {
+        "history": [
+          "add Enc Reason for Visit",
+          "remove CE Result Units"
+        ],
+        "message": "also the event name",
+        "meant": [
+          {
+            "op": "remove_column",
+            "target": "CE Event"
+          }
+        ],
+        "rules_made": [
+          {
+            "op": "add_column",
+            "target": "CE Lbl Name"
+          }
+        ]
+      }
+    ],
+    "note": "messages the rules read as some other change; left out of both sets"
+  },
+  "overlap_new_rows_vs_postfreeze_v3": {
+    "exact_hit": 0,
+    "token_bag_hit": 0,
+    "skeleton_5gram_hits": 0,
+    "raw_5gram_hits": 24061
+  },
+  "corpus_totals": {
+    "sft_train_v1": 7877,
+    "dpo_contrastive_v1": 1298
+  }
+}
