@@ -815,7 +815,7 @@ def test_display_expressions_are_kept_and_held_values_are_judged():
                    lambda r: bound(r, wide)):
         data, start = _rptdesign_with(change), time.process_time()
         read_da2_file(data, "r.dareport")
-        assert time.process_time() - start < 0.5
+        assert time.process_time() - start < 1.5  # the wide case: 0.26 s on a Mac, 0.6 s on a GitHub runner
 
 
 def test_values_spelled_in_classes_receivers_sums_and_truth_tests_are_judged():
