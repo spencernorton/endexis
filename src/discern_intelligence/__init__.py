@@ -51,7 +51,7 @@ from .knowledge import (
     resolve_da2_view_or_alias,
 )
 
-__version__ = "2.4.0"
+__version__ = "2.4.1"
 PIPELINE_VERSION = "endexis-v2.3-clean-r1"
 __all__ = [
     "DA2FileError",
